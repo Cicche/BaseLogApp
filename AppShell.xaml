@@ -1,14 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<Shell
-    x:Class="BaseLogApp.AppShell"
-    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:BaseLogApp"
-    Title="BaseLogApp">
-
-    <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
-
+<Shell xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+       x:Class="BaseLogApp.AppShell"
+       xmlns:views="clr-namespace:BaseLogApp.Views">
+    <ShellContent Title="Salti" ContentTemplate="{DataTemplate views:JumpsPage}" Route="jumps" />
 </Shell>

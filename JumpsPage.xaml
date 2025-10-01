@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BaseLogApp.Views.JumpsPage"
+             Title="Salti">
+    <ContentPage.Resources>
+        <Style TargetType="Label">
+            <Setter Property="LineBreakMode" Value="TailTruncation" />
+        </Style>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*" Padding="12">
+        <HorizontalStackLayout Spacing="12">
+            <Label Text="Storico salti" FontSize="20" />
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" />
+            <Button Text="Aggiorna" Clicked="OnRefreshClicked" />
+        </HorizontalStackLayout>
+        <CollectionView Grid.Row="1"
+                ItemsSource="{Binding Items}"
+                SelectionMode="None">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Grid Padding="8,10" ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
+                        <Label Text="{Binding Data}" FontAttributes="Bold" />
+                        <Label Grid.Column="1" Text="{Binding NumeroSalto}" FontAttributes="Bold" />
+                        <HorizontalStackLayout Grid.Row="1" Grid.ColumnSpan="2" Spacing="8">
+                            <Label Text="{Binding Oggetto}" FontSize="12" TextColor="{DynamicResource SecondaryTextColor}" />
+                            <Label Text="- " FontSize="12" TextColor="{DynamicResource SecondaryTextColor}" />
+                            <Label Text="{Binding TipoSalto}" FontSize="12" TextColor="{DynamicResource SecondaryTextColor}" />
+                            <Label Text="{Binding Note}" FontSize="12" TextColor="{DynamicResource SecondaryTextColor}" />
+                        </HorizontalStackLayout>
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>

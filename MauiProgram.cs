@@ -1,4 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
+using BaseLogApp.Core.Data;
+using BaseLogApp.Core.ViewModels;
+using BaseLogApp.Views;
+
+
 
 namespace BaseLogApp
 {
@@ -14,9 +19,11 @@ namespace BaseLogApp
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
-
+            builder.Services.AddSingleton<IJumpsReader, JumpsReader>();
+            builder.Services.AddTransient<JumpsViewModel>();
+            builder.Services.AddTransient<JumpsPage>();
 #if DEBUG
-    		builder.Logging.AddDebug();
+            builder.Logging.AddDebug();
 #endif
 
             return builder.Build();
