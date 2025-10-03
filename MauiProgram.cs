@@ -1,9 +1,7 @@
-﻿using BaseLogApp.Core.Data;
-using BaseLogApp.Core.ViewModels;
-using BaseLogApp.Views;
-using Microsoft.Extensions.Logging;
-
-namespace BaseLogApp;
+﻿using CommunityToolkit.Maui;
+using BaseLog.Data;
+using BaseLog.ViewModels;
+using BaseLog.Views;
 
 public static class MauiProgram
 {
@@ -11,18 +9,20 @@ public static class MauiProgram
     {
         var builder = MauiApp.CreateBuilder();
         builder
-        .UseMauiApp<App>()
-        .ConfigureFonts(fonts =>
-        {
-            fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-            fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-        });
-        builder.Services.AddSingleton<IJumpsReader, JumpsReader>();
-        builder.Services.AddTransient<JumpsViewModel>();
+            .UseMauiApp<App>()
+            .UseMauiCommunityToolkit()
+            .ConfigureFonts(fonts =>
+            {
+                fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
+                fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+            });
+
+        var dbPath = Path.Combine(FileSystem.AppDataDirectory, "baselog.db3");
+
+        builder.Services.AddSingleton<IJumpsRepository>(_ => new JumpsRepository(dbPath));
+        builder.Services.AddTransient<JumpsPageViewModel>();
         builder.Services.AddTransient<JumpsPage>();
-#if DEBUG
-        builder.Logging.AddDebug();
-#endif
+
         return builder.Build();
     }
 }
