@@ -1,7 +1,8 @@
-﻿using SQLite;
+﻿using BaseLogApp.Core.Models;
+using SQLite;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using BaseLogApp.Core.Models;
 
 namespace BaseLogApp.Core.Data
 {
@@ -23,18 +24,22 @@ namespace BaseLogApp.Core.Data
             var db = new SQLiteAsyncConnection(conn);
 
             const string sql = @"
-SELECT
-l.Z_PK AS Id,
-l.ZJUMPNUMBER AS NumeroSalto,
-CAST(l.ZDATE AS TEXT) AS ZDATE_TEXT,
-o.ZNAME AS Oggetto,
-jt.ZNAME AS TipoSalto,
-l.ZNOTES AS Note
-FROM ZLOGENTRY l
-LEFT JOIN ZOBJECT o ON l.ZOBJECT = o.Z_PK
-LEFT JOIN ZJUMPTYPE jt ON l.ZJUMPTYPE = jt.Z_PK
-ORDER BY l.ZDATE DESC;";
+                                SELECT
+                                l.Z_PK AS Id,
+                                l.ZJUMPNUMBER AS NumeroSalto,
+                                CAST(l.ZDATE AS TEXT) AS ZDATE_TEXT,
+                                o.ZNAME AS Oggetto,
+                                jt.ZNAME AS TipoSalto,
+                                l.ZNOTES AS Note
+                                FROM ZLOGENTRY l
+                                LEFT JOIN ZOBJECT o ON l.ZOBJECT = o.Z_PK
+                                LEFT JOIN ZJUMPTYPE jt ON l.ZJUMPTYPE = jt.Z_PK
+                                ORDER BY l.ZDATE DESC;";
             var rows = await db.QueryAsync<RawRow>(sql);
+
+            Debug.WriteLine($"DB Exists={File.Exists(dbPath)}"); Debug.WriteLine($"Rows={rows.Count}");
+
+
             return rows.Select(r => new JumpListItem
             {
                 Id = r.Id,
@@ -44,6 +49,8 @@ ORDER BY l.ZDATE DESC;";
                 TipoSalto = r.TipoSalto,
                 Note = r.Note
             }).ToList();
+
+            
         }
 
         private string ResolveDbPath()
@@ -71,7 +78,7 @@ return _dbPathWindows;
                 return "";
             var appleEpoch = new DateTime(2001, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             var dt = appleEpoch.AddSeconds(seconds).ToLocalTime();
-            return dt.ToString("dd/MM/yyyy HH:mm");
+            return dt.ToString("dd/MM/yyyy");
         }
     }
 }

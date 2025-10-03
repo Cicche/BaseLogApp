@@ -1,32 +1,28 @@
-﻿using Microsoft.Extensions.Logging;
-using BaseLogApp.Core.Data;
+﻿using BaseLogApp.Core.Data;
 using BaseLogApp.Core.ViewModels;
 using BaseLogApp.Views;
+using Microsoft.Extensions.Logging;
 
+namespace BaseLogApp;
 
-
-namespace BaseLogApp
+public static class MauiProgram
 {
-    public static class MauiProgram
+    public static MauiApp CreateMauiApp()
     {
-        public static MauiApp CreateMauiApp()
+        var builder = MauiApp.CreateBuilder();
+        builder
+        .UseMauiApp<App>()
+        .ConfigureFonts(fonts =>
         {
-            var builder = MauiApp.CreateBuilder();
-            builder
-                .UseMauiApp<App>()
-                .ConfigureFonts(fonts =>
-                {
-                    fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-                    fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-                });
-            builder.Services.AddSingleton<IJumpsReader, JumpsReader>();
-            builder.Services.AddTransient<JumpsViewModel>();
-            builder.Services.AddTransient<JumpsPage>();
+            fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
+            fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+        });
+        builder.Services.AddSingleton<IJumpsReader, JumpsReader>();
+        builder.Services.AddTransient<JumpsViewModel>();
+        builder.Services.AddTransient<JumpsPage>();
 #if DEBUG
-            builder.Logging.AddDebug();
+        builder.Logging.AddDebug();
 #endif
-
-            return builder.Build();
-        }
+        return builder.Build();
     }
 }
