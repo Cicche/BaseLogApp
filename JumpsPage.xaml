@@ -5,7 +5,6 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:converters="clr-namespace:BaseLogApp.Converters"
-    xmlns:maps="clr-namespace:Microsoft.Maui.Controls.Maps;assembly=Microsoft.Maui.Controls.Maps"
     Title="Salti"
     BackgroundColor="{AppThemeBinding Light=#FAFAFA, Dark=#111111}">
 
@@ -25,38 +24,87 @@
 
         <CollectionView.ItemTemplate>
             <DataTemplate>
-                <ContentView BackgroundColor="{AppThemeBinding Light=#FAFAFA, Dark=#111}">
-                    <Grid Padding="12"
-            BackgroundColor="{AppThemeBinding Light=White, Dark=#1C1C1C}">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
+                <ContentView BackgroundColor="{AppThemeBinding Light=#FAFAFA, Dark=#111111}">
+                    <toolkit:Expander IsExpanded="{Binding IsExpanded}">
+                        <!-- HEADER: è il layout “che si vede” -->
+                        <toolkit:Expander.Header>
+                            <Grid Padding="12"
+                    BackgroundColor="{AppThemeBinding Light=White, Dark=#1C1C1C}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
 
-                        <VerticalStackLayout Spacing="2">
-                            <Label Text="{Binding ExitName}"
-                 FontAttributes="Bold"
-                 TextColor="{AppThemeBinding Light=Black, Dark=White}" />
-                            <Label Text="{Binding JumpDateUtc}"
-                 TextColor="{AppThemeBinding Light=#222, Dark=#DDD}" />
-                            <Label Text="{Binding LocationName}"
-                 IsVisible="{Binding LocationName, Converter={StaticResource HasText}}"
-                 TextColor="{AppThemeBinding Light=#222, Dark=#DDD}" />
-                        </VerticalStackLayout>
+                                <!-- Titolo -->
+                                <Label Grid.Row="0" Grid.Column="0"
+                       Text="{Binding ExitName}"
+                       FontAttributes="Bold"
+                       LineBreakMode="TailTruncation"
+                       TextColor="{AppThemeBinding Light=Black, Dark=White}" />
 
-                        <Grid Grid.Column="1"
-              BackgroundColor="{AppThemeBinding Light=#EEE, Dark=#2A2A2A}">
-                            <Image WidthRequest="64" HeightRequest="64"
-                 Aspect="AspectFill"
-                 Source="{Binding Thumbnail}" />
-                            <Label Text="No Img" HorizontalOptions="Center" VerticalOptions="Center"
-                 IsVisible="{Binding Thumbnail, Converter={StaticResource HasText}, ConverterParameter=Invert}"
-                 TextColor="{AppThemeBinding Light=#555, Dark=#BBB}" />
-                        </Grid>
-                    </Grid>
+                                <!-- Riga info -->
+                                <HorizontalStackLayout Grid.Row="1" Grid.Column="0" Spacing="10">
+                                    <Label Text="{Binding JumpDateUtc, Converter={StaticResource DateToLocal}}"
+                         Opacity="0.85"
+                         TextColor="{AppThemeBinding Light=#222, Dark=#DDD}" />
+                                    <Label Text="{Binding LocationName}"
+                         IsVisible="{Binding LocationName, Converter={StaticResource HasText}}"
+                         Opacity="0.85"
+                         TextColor="{AppThemeBinding Light=#222, Dark=#DDD}" />
+                                </HorizontalStackLayout>
+
+                                <!-- Miniatura a destra: host rimosso del tutto se null -->
+                                <ContentView Grid.RowSpan="2" Grid.Column="1"
+                             x:Name="ThumbHost"
+                             BackgroundColor="{AppThemeBinding Light=#EEE, Dark=#2A2A2A}">
+                                    <Image WidthRequest="64" HeightRequest="64"
+                         Aspect="AspectFill"
+                         Source="{Binding Thumbnail}" />
+                                </ContentView>
+
+                                <!-- Trigger per nascondere davvero l'host quando Thumbnail è null -->
+                                <Grid.Triggers>
+                                    <DataTrigger TargetType="Grid"
+                               Binding="{Binding Thumbnail}"
+                               Value="{x:Null}">
+                                        <Setter TargetName="ThumbHost" Property="IsVisible" Value="False" />
+                                        <Setter TargetName="ThumbHost" Property="HeightRequest" Value="0" />
+                                        <Setter TargetName="ThumbHost" Property="WidthRequest" Value="0" />
+                                    </DataTrigger>
+                                </Grid.Triggers>
+                            </Grid>
+                        </toolkit:Expander.Header>
+
+                        <!-- CONTENUTO ESPANSO -->
+                        <toolkit:Expander.Content>
+                            <Grid Padding="12"
+                    BackgroundColor="{AppThemeBinding Light=White, Dark=#1C1C1C}">
+                                <VerticalStackLayout Spacing="10">
+                                    <Label Text="{Binding Notes}"
+                         IsVisible="{Binding Notes, Converter={StaticResource HasText}}"
+                         TextColor="{AppThemeBinding Light=#222, Dark=#DDD}" />
+                                    <HorizontalStackLayout Spacing="12">
+                                        <Button Text="Modifica"
+                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.EditCommand}"
+                            CommandParameter="{Binding .}" />
+                                        <Button Text="Mappa"
+                            IsEnabled="{Binding HasCoordinates}"
+                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ShowMapCommand}"
+                            CommandParameter="{Binding .}" />
+                                        <Button Text="Elimina"
+                            Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DeleteCommand}"
+                            CommandParameter="{Binding .}" />
+                                    </HorizontalStackLayout>
+                                </VerticalStackLayout>
+                            </Grid>
+                        </toolkit:Expander.Content>
+                    </toolkit:Expander>
                 </ContentView>
             </DataTemplate>
         </CollectionView.ItemTemplate>
-
     </CollectionView>
 </ContentPage>
