@@ -2,6 +2,6 @@
 <Shell xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
        x:Class="BaseLogApp.AppShell"
-       xmlns:views="clr-namespace:BaseLogApp.Views">
+       xmlns:views="clr-namespace:BaseLogApp">
     <ShellContent Title="Salti" ContentTemplate="{DataTemplate views:JumpsPage}" Route="jumps" />
 </Shell>

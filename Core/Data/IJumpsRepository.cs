@@ -1,6 +1,6 @@
-﻿using BaseLog.Models;
+﻿using BaseLogApp.Models;
 
-namespace BaseLog.Data;
+namespace BaseLogApp.Data;
 
 public interface IJumpsRepository
 {

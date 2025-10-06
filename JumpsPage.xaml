@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage
-    x:Class="BaseLog.Views.JumpsPage"
+    x:Class="BaseLogApp.JumpsPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
-    xmlns:converters="clr-namespace:BaseLog.Converters"
+    xmlns:converters="clr-namespace:BaseLogApp.Converters"
     xmlns:maps="clr-namespace:Microsoft.Maui.Controls.Maps;assembly=Microsoft.Maui.Controls.Maps"
     Title="Salti">
 
@@ -25,10 +25,9 @@
 
         <CollectionView.ItemTemplate>
             <DataTemplate>
-                <Frame Margin="12,6" Padding="12" HasShadow="True" CornerRadius="14">
+                <Border Margin="12,6" Padding="12"  StrokeShape ="14">
                     <toolkit:Expander IsExpanded="{Binding IsExpanded}"
-                            ExpandAnimationEasing="SinOut"
-                            CollapseAnimationEasing="SinIn">
+                       >
                         <toolkit:Expander.Header>
                             <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto">
                                 <VerticalStackLayout Grid.Column="0" Spacing="2">
@@ -86,7 +85,7 @@
                             </VerticalStackLayout>
                         </toolkit:Expander.Content>
                     </toolkit:Expander>
-                </Frame>
+                </Border>
             </DataTemplate>
         </CollectionView.ItemTemplate>
     </CollectionView>

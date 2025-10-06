@@ -1,8 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using BaseLog.Models;
+using BaseLogApp.Models;
 using Microsoft.Maui.Devices.Sensors;
 
-namespace BaseLog.ViewModels;
+namespace BaseLogApp.ViewModels;
 
 public partial class JumpItemViewModel : ObservableObject
 {

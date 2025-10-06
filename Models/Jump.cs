@@ -1,6 +1,6 @@
 ﻿using SQLite;
 
-namespace BaseLog.Models;
+namespace BaseLogApp.Models;
 
 public class Jump
 {

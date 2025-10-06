@@ -1,8 +1,10 @@
 ﻿using CommunityToolkit.Maui;
-using BaseLog.Data;
-using BaseLog.ViewModels;
-using BaseLog.Views;
+using BaseLogApp.Data;
+using BaseLogApp.ViewModels;
+//using BaseLogApp.Views;
+using BaseLogApp;
 
+namespace BaseLogApp;
 public static class MauiProgram
 {
     public static MauiApp CreateMauiApp()

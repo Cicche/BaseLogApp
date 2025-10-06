@@ -1,7 +1,7 @@
 ﻿using SQLite;
-using BaseLog.Models;
+using BaseLogApp.Models;
 
-namespace BaseLog.Data;
+namespace BaseLogApp.Data;
 
 public class JumpsRepository : IJumpsRepository
 {

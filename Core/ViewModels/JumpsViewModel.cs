@@ -1,12 +1,12 @@
-﻿using BaseLog.Data;
-using BaseLog.Models;
+﻿using BaseLogApp.Data;
+using BaseLogApp.ViewModels;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Maui.Dispatching;
 using System.Collections.ObjectModel;
 using System.Xml.Linq;
 
-namespace BaseLog.ViewModels;
+namespace BaseLogApp.ViewModels;
 
 public partial class JumpsPageViewModel : ObservableObject
 {
