@@ -32,7 +32,7 @@ public static class MauiProgram
         
 
 
-        builder.Services.AddSingleton<IJumpsRepository>(_ => new JumpsRepository(dbPath));
+       
         builder.Services.AddSingleton<IJumpsRepository>(_ => new JumpsRepository(dbPath));
         builder.Services.AddTransient<JumpsPageViewModel>();
         builder.Services.AddTransient<JumpsPage>();

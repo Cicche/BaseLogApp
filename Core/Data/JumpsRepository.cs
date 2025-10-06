@@ -13,13 +13,15 @@ public class JumpsRepository : IJumpsRepository
         // non creare tabelle sul DB legacy
     }
 
+
     public async Task<IList<Jump>> GetAllAsync()
     {
         var list = await _db.Table<Jump>()
-            .OrderByDescending(j => j.JumpDateUtc)
+            .OrderByDescending(j => j.JumpNumber) // usa la proprietà mappata a ZJUMPNUMBER
             .ToListAsync();
         return list;
     }
+
 
     public Task<Jump?> GetByIdAsync(int id) =>
         _db.FindAsync<Jump>(id);

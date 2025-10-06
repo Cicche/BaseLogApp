@@ -21,7 +21,8 @@ public partial class JumpItemViewModel : ObservableObject
     // Dati base dal log (ZLOGENTRY)
     public int Id => Model.Id;
     public int? JumpNumber => Model.JumpNumber;
-    public DateTime? JumpDateUtc => Model.JumpDateUtc;
+
+    
     public string? Notes => Model.Notes;
 
     // Dati dell’oggetto/exit (ZOBJECT) caricati dopo
@@ -35,21 +36,48 @@ public partial class JumpItemViewModel : ObservableObject
 
     public ImageSource? Thumbnail { get; private set; }
 
+    public DateTime? JumpDateUtc
+    {
+        get
+        {
+            if (Model.JumpDateRaw is null) return null;
+
+            var t = Model.JumpDateRaw.Value;
+
+            // Heuristica: se è “Apple epoch” (secondi dal 2001-01-01)
+            // Apple epoch base
+            var appleEpoch = new DateTime(2001, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+            // Se t è nell’ordine dei secondi (es. 760000000) usa direttamente
+            if (t > 100000 && t < 5000000000)
+                return appleEpoch.AddSeconds(t);
+
+            // Se è millisecondi
+            if (t >= 5000000000)
+                return appleEpoch.AddMilliseconds(t);
+
+            // Fallback: prova Unix epoch secondi
+            if (t > 0)
+                return DateTimeOffset.FromUnixTimeSeconds(t).UtcDateTime;
+
+            return null;
+        }
+    }
+
+
     public async Task HydrateAsync(IJumpsRepository repo)
     {
-        if (repo is null) return;
-
-        if (Model.ObjectId is int oid)
+        Exit = null;
+        if (Model.ObjectId is int oid && oid > 0)
             Exit = await repo.GetObjectAsync(oid);
 
         byte[]? bytes = null;
-        if (Model.ObjectId is int objectId)
-            bytes = await repo.GetObjectThumbnailAsync(objectId);
+        if (Exit is not null)
+            bytes = await repo.GetObjectThumbnailAsync(Exit.Id);
 
-        if (bytes is not null && bytes.Length > 0)
-            Thumbnail = ImageSource.FromStream(() => new MemoryStream(bytes));
-        else
-            Thumbnail = null;
+        Thumbnail = (bytes is { Length: > 0 })
+            ? ImageSource.FromStream(() => new MemoryStream(bytes))
+            : null;
 
         OnPropertyChanged(nameof(Exit));
         OnPropertyChanged(nameof(ExitName));
@@ -59,4 +87,5 @@ public partial class JumpItemViewModel : ObservableObject
         OnPropertyChanged(nameof(HasCoordinates));
         OnPropertyChanged(nameof(Thumbnail));
     }
+
 }

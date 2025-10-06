@@ -20,23 +20,29 @@ public partial class JumpsPageViewModel : ObservableObject
     [RelayCommand]
     public async Task LoadAsync()
     {
+        // 1) Carica i record dal repository
         var items = await _repo.GetAllAsync().ConfigureAwait(false);
-        MainThread.BeginInvokeOnMainThread(() =>
+
+        // 2) Popola la Collection sul thread UI
+        await MainThread.InvokeOnMainThreadAsync(() =>
         {
             Jumps.Clear();
             foreach (var j in items)
                 Jumps.Add(new JumpItemViewModel(j));
         });
 
-        // Hydration asincrona di Exit e Thumbnail
+        // 3) Hydrate in background (Exit, Thumbnail) per tutti gli item
+        //    HydrateAsync internamente gestisce ObjectId null
+        var snapshot = Jumps.ToList(); // cattura una foto stabile
         _ = Task.Run(async () =>
         {
-            var tasks = Jumps
-                .Where(vm => vm.Model.ObjectId.HasValue)
-                .Select(vm => vm.HydrateAsync(_repo));
+            var tasks = snapshot.Select(vm => vm.HydrateAsync(_repo));
             await Task.WhenAll(tasks);
         });
     }
+
+
+
 
     [RelayCommand]
     public void ToggleExpand(JumpItemViewModel? item)
@@ -44,4 +50,7 @@ public partial class JumpsPageViewModel : ObservableObject
         if (item is null) return;
         item.IsExpanded = !item.IsExpanded;
     }
+   
+    
+
 }
