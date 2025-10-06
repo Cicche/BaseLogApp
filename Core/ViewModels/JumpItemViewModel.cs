@@ -1,66 +1,62 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using BaseLogApp.Models;
-using Microsoft.Maui.Devices.Sensors;
+using BaseLogApp.Data;
+using Microsoft.Maui.Controls; // per ImageSource
+using System.IO;
 
 namespace BaseLogApp.ViewModels;
 
 public partial class JumpItemViewModel : ObservableObject
 {
-    private readonly Jump _model;
-
     public JumpItemViewModel(Jump model)
     {
-        _model = model;
-        MapLocation = (_model.Latitude.HasValue && _model.Longitude.HasValue)
-            ? new Location(_model.Latitude!.Value, _model.Longitude!.Value)
-            : null;
+        Model = model ?? throw new ArgumentNullException(nameof(model));
     }
 
-    [ObservableProperty] private bool isExpanded;
-    [ObservableProperty] private bool showInlineMap;
+    public Jump Model { get; }
 
-    public int Id => _model.Id;
-    public string ExitName => _model.ExitName ?? string.Empty;
-    public string ObjectName => _model.ObjectName ?? string.Empty;
-    public DateTime? JumpDateUtc => _model.JumpDateUtc;
-    public string LocationName => _model.LocationName ?? string.Empty;
+    [ObservableProperty]
+    private bool isExpanded;
 
-    public string? PhotoPath => _model.PhotoPath;
-    public bool HasPhoto => !string.IsNullOrWhiteSpace(_model.PhotoPath);
+    // Dati base dal log (ZLOGENTRY)
+    public int Id => Model.Id;
+    public int? JumpNumber => Model.JumpNumber;
+    public DateTime? JumpDateUtc => Model.JumpDateUtc;
+    public string? Notes => Model.Notes;
 
-    public string? Notes => _model.Notes;
-    public string? GearSetup => _model.GearSetup;
+    // Dati dell’oggetto/exit (ZOBJECT) caricati dopo
+    public ExitObject? Exit { get; private set; }
 
-    // Se nello schema reali sono int?, tipizzare int? nel model e nel binding usare StringFormat
-    public string? ExitHeight => _model.ExitHeight;
-    public string? DelaySeconds => _model.DelaySeconds;
+    public string ExitName => Exit?.Name ?? string.Empty;
+    public string LocationName => Exit?.Region ?? string.Empty;
+    public double? Latitude => Exit?.Latitude;
+    public double? Longitude => Exit?.Longitude;
+    public bool HasCoordinates => Latitude.HasValue && Longitude.HasValue;
 
-    public double? Latitude => _model.Latitude;
-    public double? Longitude => _model.Longitude;
-    public bool HasCoordinates => _model.Latitude.HasValue && _model.Longitude.HasValue;
-    public Location? MapLocation { get; }
+    public ImageSource? Thumbnail { get; private set; }
 
-    public void RefreshFrom(Jump updated)
+    public async Task HydrateAsync(IJumpsRepository repo)
     {
-        _model.ExitName = updated.ExitName;
-        _model.ObjectName = updated.ObjectName;
-        _model.JumpDateUtc = updated.JumpDateUtc;
-        _model.LocationName = updated.LocationName;
-        _model.PhotoPath = updated.PhotoPath;
-        _model.Notes = updated.Notes;
-        _model.GearSetup = updated.GearSetup;
-        _model.ExitHeight = updated.ExitHeight;
-        _model.DelaySeconds = updated.DelaySeconds;
+        if (repo is null) return;
 
+        if (Model.ObjectId is int oid)
+            Exit = await repo.GetObjectAsync(oid);
+
+        byte[]? bytes = null;
+        if (Model.ObjectId is int objectId)
+            bytes = await repo.GetObjectThumbnailAsync(objectId);
+
+        if (bytes is not null && bytes.Length > 0)
+            Thumbnail = ImageSource.FromStream(() => new MemoryStream(bytes));
+        else
+            Thumbnail = null;
+
+        OnPropertyChanged(nameof(Exit));
         OnPropertyChanged(nameof(ExitName));
-        OnPropertyChanged(nameof(ObjectName));
-        OnPropertyChanged(nameof(JumpDateUtc));
         OnPropertyChanged(nameof(LocationName));
-        OnPropertyChanged(nameof(PhotoPath));
-        OnPropertyChanged(nameof(HasPhoto));
-        OnPropertyChanged(nameof(Notes));
-        OnPropertyChanged(nameof(GearSetup));
-        OnPropertyChanged(nameof(ExitHeight));
-        OnPropertyChanged(nameof(DelaySeconds));
+        OnPropertyChanged(nameof(Latitude));
+        OnPropertyChanged(nameof(Longitude));
+        OnPropertyChanged(nameof(HasCoordinates));
+        OnPropertyChanged(nameof(Thumbnail));
     }
 }

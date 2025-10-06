@@ -19,8 +19,20 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             });
 
-        var dbPath = Path.Combine(FileSystem.AppDataDirectory, "baselog.db3");
+        //var dbPath = Path.Combine(FileSystem.AppDataDirectory, "baselog.db3");
 
+
+        var dbPath =
+            #if WINDOWS
+                  @"C:\temp\BASELogbook.sqlite";
+            #else
+                Path.Combine(FileSystem.AppDataDirectory, "BASELogbook.sqlite");
+            #endif
+
+        
+
+
+        builder.Services.AddSingleton<IJumpsRepository>(_ => new JumpsRepository(dbPath));
         builder.Services.AddSingleton<IJumpsRepository>(_ => new JumpsRepository(dbPath));
         builder.Services.AddTransient<JumpsPageViewModel>();
         builder.Services.AddTransient<JumpsPage>();

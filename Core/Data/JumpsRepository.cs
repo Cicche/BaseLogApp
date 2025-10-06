@@ -10,7 +10,7 @@ public class JumpsRepository : IJumpsRepository
     public JumpsRepository(string dbPath)
     {
         _db = new SQLiteAsyncConnection(dbPath);
-        _ = _db.CreateTableAsync<Jump>();
+        // non creare tabelle sul DB legacy
     }
 
     public async Task<IList<Jump>> GetAllAsync()
@@ -21,10 +21,16 @@ public class JumpsRepository : IJumpsRepository
         return list;
     }
 
-    public Task<Jump?> GetByIdAsync(int id) => _db.FindAsync<Jump>(id);
+    public Task<Jump?> GetByIdAsync(int id) =>
+        _db.FindAsync<Jump>(id);
 
-    public Task<int> UpsertAsync(Jump jump)
-        => jump.Id == 0 ? _db.InsertAsync(jump) : _db.UpdateAsync(jump);
+    public Task<ExitObject?> GetObjectAsync(int id) =>
+        _db.FindAsync<ExitObject>(id);
 
-    public Task<int> DeleteAsync(int id) => _db.DeleteAsync<Jump>(id);
+    public async Task<byte[]?> GetObjectThumbnailAsync(int objectId)
+    {
+        const string sql = "SELECT ZIMAGE FROM ZOBJECTIMAGE WHERE ZOBJECT = ? LIMIT 1";
+        var rows = await _db.QueryScalarsAsync<byte[]>(sql, objectId);
+        return rows.FirstOrDefault();
+    }
 }
