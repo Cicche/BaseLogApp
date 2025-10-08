@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="BaseLogApp.Views.JumpsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    xmlns:converters="clr-namespace:BaseLogApp.Converters"
+    Title="{Binding PageTitle}"
+    BackgroundColor="{AppThemeBinding Light=#FAFAFA, Dark=#111111}">
+
+  <ContentPage.Resources>
+    <converters:DateToLocalStringConverter x:Key="DateToLocal" Format="dd MMM yyyy" />
+    <converters:NullOrEmptyToBoolConverter x:Key="HasText" />
+  </ContentPage.Resources>
+
+  <Grid Padding="16,12,16,0" RowSpacing="12">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+    </Grid.RowDefinitions>
+
+    <HorizontalStackLayout Grid.Row="0"
+                           Spacing="8"
+                           VerticalOptions="Center">
+      <Label Text="Salti"
+             FontSize="28"
+             FontAttributes="Bold"
+             TextColor="{AppThemeBinding Light=Black, Dark=White}" />
+      <Frame Padding="10,4"
+             Margin="0"
+             BackgroundColor="{AppThemeBinding Light=#E3F2FD, Dark=#1F2A40}"
+             CornerRadius="16"
+             HasShadow="False"
+             VerticalOptions="Center">
+        <Label Text="{Binding CountSummary}"
+               FontAttributes="Bold"
+               TextColor="{AppThemeBinding Light=#1A73E8, Dark=#8AB4F8}" />
+      </Frame>
+    </HorizontalStackLayout>
+
+    <SearchBar Grid.Row="1"
+               Placeholder="Filtra salti..."
+               Text="{Binding SearchText}"
+               BackgroundColor="{AppThemeBinding Light=White, Dark=#1C1C1C}"
+               TextColor="{AppThemeBinding Light=Black, Dark=White}" />
+
+    <CollectionView Grid.Row="2"
+        ItemsSource="{Binding Jumps}"
+        SelectionMode="None"
+        ItemSizingStrategy="MeasureAllItems"
+        EmptyView="Nessun salto registrato.">
+      <CollectionView.ItemsLayout>
+        <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+      </CollectionView.ItemsLayout>
+
+      <CollectionView.ItemTemplate>
+        <DataTemplate>
+          <ContentView BackgroundColor="{AppThemeBinding Light=#FAFAFA, Dark=#111111}">
+            <toolkit:Expander IsExpanded="{Binding IsExpanded}">
+              <!-- HEADER -->
+              <toolkit:Expander.Header>
+                <Grid Padding="12"
+                      BackgroundColor="{AppThemeBinding Light=White, Dark=#1C1C1C}">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                  </Grid.ColumnDefinitions>
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                  </Grid.RowDefinitions>
+
+                  <Label Grid.RowSpan="2" Grid.Column="0"
+                         Text="{Binding JumpNumber}"
+                         FontSize="28"
+                         FontAttributes="Bold"
+                         Margin="0,0,12,0"
+                         TextColor="{AppThemeBinding Light=#1A73E8, Dark=#8AB4F8}" />
+
+                  <Label Grid.Row="0" Grid.Column="1"
+                         Text="{Binding ExitName}"
+                         FontAttributes="Bold"
+                         LineBreakMode="TailTruncation"
+                         TextColor="{AppThemeBinding Light=Black, Dark=White}" />
+
+                  <HorizontalStackLayout Grid.Row="1" Grid.Column="1" Spacing="10">
+                    <Label Text="{Binding JumpDateUtc, Converter={StaticResource DateToLocal}}"
+                           Opacity="0.85"
+                           TextColor="{AppThemeBinding Light=#222, Dark=#DDD}" />
+                    <Label Text="{Binding LocationName}"
+                           IsVisible="{Binding LocationName, Converter={StaticResource HasText}}"
+                           Opacity="0.85"
+                           TextColor="{AppThemeBinding Light=#222, Dark=#DDD}" />
+                  </HorizontalStackLayout>
+
+                  <ContentView Grid.RowSpan="2" Grid.Column="2"
+                               x:Name="ThumbHost"
+                               BackgroundColor="{AppThemeBinding Light=#EEE, Dark=#2A2A2A}">
+                    <Image WidthRequest="64" HeightRequest="64"
+                           Aspect="AspectFill"
+                           Source="{Binding Thumbnail}" />
+                  </ContentView>
+
+                  <Grid.Triggers>
+                    <DataTrigger TargetType="Grid" Binding="{Binding Thumbnail}" Value="{x:Null}">
+                      <Setter TargetName="ThumbHost" Property="IsVisible" Value="False" />
+                      <Setter TargetName="ThumbHost" Property="HeightRequest" Value="0" />
+                      <Setter TargetName="ThumbHost" Property="WidthRequest" Value="0" />
+                    </DataTrigger>
+                  </Grid.Triggers>
+                </Grid>
+              </toolkit:Expander.Header>
+
+              <!-- CONTENUTO ESPANSO -->
+              <toolkit:Expander.Content>
+                <Grid Padding="12"
+                      BackgroundColor="{AppThemeBinding Light=White, Dark=#1C1C1C}">
+                  <VerticalStackLayout Spacing="10">
+                    <Label Text="{Binding Notes}"
+                           IsVisible="{Binding Notes, Converter={StaticResource HasText}}"
+                           TextColor="{AppThemeBinding Light=#222, Dark=#DDD}" />
+                    <HorizontalStackLayout Spacing="12">
+                      <Button Text="Modifica"
+                              Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.EditCommand}"
+                              CommandParameter="{Binding .}" />
+                      <Button Text="Mappa"
+                              IsEnabled="{Binding HasCoordinates}"
+                              Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ShowMapCommand}"
+                              CommandParameter="{Binding .}" />
+                      <Button Text="Elimina"
+                              Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DeleteCommand}"
+                              CommandParameter="{Binding .}" />
+                    </HorizontalStackLayout>
+                  </VerticalStackLayout>
+                </Grid>
+              </toolkit:Expander.Content>
+            </toolkit:Expander>
+          </ContentView>
+        </DataTemplate>
+      </CollectionView.ItemTemplate>
+    </CollectionView>
+  </Grid>
+</ContentPage>

@@ -1,4 +1,4 @@
-﻿using BaseLogApp.Models;
+using BaseLogApp.Models;
 
 namespace BaseLogApp.Data;
 

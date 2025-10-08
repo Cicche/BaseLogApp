@@ -1,5 +1,5 @@
-﻿using SQLite;
 using BaseLogApp.Models;
+using SQLite;
 
 namespace BaseLogApp.Data;
 
@@ -13,15 +13,13 @@ public class JumpsRepository : IJumpsRepository
         // non creare tabelle sul DB legacy
     }
 
-
     public async Task<IList<Jump>> GetAllAsync()
     {
         var list = await _db.Table<Jump>()
-            .OrderByDescending(j => j.JumpNumber) // usa la proprietà mappata a ZJUMPNUMBER
+            .OrderByDescending(j => j.JumpNumber) // usa la proprieta mappata a ZJUMPNUMBER
             .ToListAsync();
         return list;
     }
-
 
     public Task<Jump?> GetByIdAsync(int id) =>
         _db.FindAsync<Jump>(id);

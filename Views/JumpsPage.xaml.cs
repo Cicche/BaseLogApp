@@ -1,6 +1,6 @@
 using BaseLogApp.ViewModels;
 
-namespace BaseLogApp;
+namespace BaseLogApp.Views;
 
 public partial class JumpsPage : ContentPage
 {

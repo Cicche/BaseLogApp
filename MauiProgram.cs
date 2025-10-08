@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Maui;
 using BaseLogApp.Data;
 using BaseLogApp.ViewModels;
-//using BaseLogApp.Views;
+using BaseLogApp.Views;
 using BaseLogApp;
 
 namespace BaseLogApp;

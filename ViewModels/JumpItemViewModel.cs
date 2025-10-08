@@ -1,7 +1,8 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using BaseLogApp.Models;
 using BaseLogApp.Data;
-using Microsoft.Maui.Controls; // per ImageSource
+using BaseLogApp.Models;
+using CommunityToolkit.Mvvm.ComponentModel;
+using Microsoft.Maui.Controls;
+using System.Globalization;
 using System.IO;
 
 namespace BaseLogApp.ViewModels;
@@ -22,10 +23,9 @@ public partial class JumpItemViewModel : ObservableObject
     public int Id => Model.Id;
     public int? JumpNumber => Model.JumpNumber;
 
-    
     public string? Notes => Model.Notes;
 
-    // Dati dell’oggetto/exit (ZOBJECT) caricati dopo
+    // Dati dell'oggetto/exit (ZOBJECT) caricati dopo
     public ExitObject? Exit { get; private set; }
 
     public string ExitName => Exit?.Name ?? string.Empty;
@@ -44,15 +44,14 @@ public partial class JumpItemViewModel : ObservableObject
 
             var t = Model.JumpDateRaw.Value;
 
-            // Heuristica: se è “Apple epoch” (secondi dal 2001-01-01)
-            // Apple epoch base
+            // Heuristica: se e "Apple epoch" (secondi dal 2001-01-01)
             var appleEpoch = new DateTime(2001, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
-            // Se t è nell’ordine dei secondi (es. 760000000) usa direttamente
+            // Se t e nell'ordine dei secondi (es. 760000000) usa direttamente
             if (t > 100000 && t < 5000000000)
                 return appleEpoch.AddSeconds(t);
 
-            // Se è millisecondi
+            // Se sono millisecondi
             if (t >= 5000000000)
                 return appleEpoch.AddMilliseconds(t);
 
@@ -63,7 +62,6 @@ public partial class JumpItemViewModel : ObservableObject
             return null;
         }
     }
-
 
     public async Task HydrateAsync(IJumpsRepository repo)
     {
@@ -88,4 +86,36 @@ public partial class JumpItemViewModel : ObservableObject
         OnPropertyChanged(nameof(Thumbnail));
     }
 
+    public bool Matches(string query)
+    {
+        if (string.IsNullOrWhiteSpace(query))
+            return true;
+
+        var comparison = StringComparison.CurrentCultureIgnoreCase;
+
+        if (JumpNumber is int number &&
+            number.ToString(CultureInfo.CurrentCulture).Contains(query, comparison))
+        {
+            return true;
+        }
+
+        if (!string.IsNullOrWhiteSpace(ExitName) && ExitName.Contains(query, comparison))
+            return true;
+
+        if (!string.IsNullOrWhiteSpace(LocationName) && LocationName.Contains(query, comparison))
+            return true;
+
+        if (!string.IsNullOrWhiteSpace(Notes) && Notes.Contains(query, comparison))
+            return true;
+
+        if (JumpDateUtc is DateTime date)
+        {
+            var culture = CultureInfo.CurrentCulture;
+            var dateText = date.ToLocalTime().ToString("d", culture);
+            if (dateText.Contains(query, comparison))
+                return true;
+        }
+
+        return false;
+    }
 }
