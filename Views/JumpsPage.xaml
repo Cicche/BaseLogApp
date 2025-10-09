@@ -16,52 +16,33 @@
   <Grid Padding="16,12,16,0" RowSpacing="12">
     <Grid.RowDefinitions>
       <RowDefinition Height="Auto" />
-      <RowDefinition Height="Auto" />
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
 
-    <HorizontalStackLayout Grid.Row="0"
-                           Spacing="8"
-                           VerticalOptions="Center">
-      <Label Text="Salti"
-             FontSize="28"
-             FontAttributes="Bold"
-             TextColor="{AppThemeBinding Light=Black, Dark=White}" />
-      <Frame Padding="10,4"
-             Margin="0"
-             BackgroundColor="{AppThemeBinding Light=#E3F2FD, Dark=#1F2A40}"
-             CornerRadius="16"
-             HasShadow="False"
-             VerticalOptions="Center">
-        <Label Text="{Binding CountSummary}"
-               FontAttributes="Bold"
-               TextColor="{AppThemeBinding Light=#1A73E8, Dark=#8AB4F8}" />
-      </Frame>
-    </HorizontalStackLayout>
-
-    <SearchBar Grid.Row="1"
+    <Frame Grid.Row="0" Padding="0" CornerRadius="8" BorderColor="{AppThemeBinding Light=#DDD, Dark=#444}" BackgroundColor="{AppThemeBinding Light=White, Dark=#1C1C1C}">
+        <SearchBar 
                Placeholder="Filtra salti..."
                Text="{Binding SearchText}"
-               BackgroundColor="{AppThemeBinding Light=White, Dark=#1C1C1C}"
+               BackgroundColor="Transparent"
                TextColor="{AppThemeBinding Light=Black, Dark=White}" />
+    </Frame>
 
-    <CollectionView Grid.Row="2"
+    <CollectionView Grid.Row="1"
         ItemsSource="{Binding Jumps}"
         SelectionMode="None"
         ItemSizingStrategy="MeasureAllItems"
         EmptyView="Nessun salto registrato.">
       <CollectionView.ItemsLayout>
-        <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+        <LinearItemsLayout Orientation="Vertical" ItemSpacing="12" />
       </CollectionView.ItemsLayout>
 
       <CollectionView.ItemTemplate>
         <DataTemplate>
-          <ContentView BackgroundColor="{AppThemeBinding Light=#FAFAFA, Dark=#111111}">
+          <Frame Padding="0" Margin="0,0,0,0" CornerRadius="12" HasShadow="False" BackgroundColor="{AppThemeBinding Light=White, Dark=#1C1C1C}">
             <toolkit:Expander IsExpanded="{Binding IsExpanded}">
               <!-- HEADER -->
               <toolkit:Expander.Header>
-                <Grid Padding="12"
-                      BackgroundColor="{AppThemeBinding Light=White, Dark=#1C1C1C}">
+                <Grid Padding="16">
                   <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
@@ -74,40 +55,49 @@
 
                   <Label Grid.RowSpan="2" Grid.Column="0"
                          Text="{Binding JumpNumber}"
-                         FontSize="28"
+                         FontSize="32"
                          FontAttributes="Bold"
-                         Margin="0,0,12,0"
+                         Margin="0,0,16,0"
+                         VerticalTextAlignment="Center"
                          TextColor="{AppThemeBinding Light=#1A73E8, Dark=#8AB4F8}" />
 
-                  <Label Grid.Row="0" Grid.Column="1"
-                         Text="{Binding ExitName}"
-                         FontAttributes="Bold"
-                         LineBreakMode="TailTruncation"
-                         TextColor="{AppThemeBinding Light=Black, Dark=White}" />
+                  <HorizontalStackLayout Grid.Row="0" Grid.Column="1" Spacing="8">
+                    <Label Text="{Binding ExitName}"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           LineBreakMode="TailTruncation"
+                           TextColor="{AppThemeBinding Light=Black, Dark=White}" />
+                    <Label Text="{Binding JumpTypeName}"
+                           IsVisible="{Binding HasJumpType}"
+                           FontSize="18"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light=#888, Dark=#AAA}" />
+                  </HorizontalStackLayout>
 
                   <HorizontalStackLayout Grid.Row="1" Grid.Column="1" Spacing="10">
                     <Label Text="{Binding JumpDateUtc, Converter={StaticResource DateToLocal}}"
                            Opacity="0.85"
-                           TextColor="{AppThemeBinding Light=#222, Dark=#DDD}" />
+                           TextColor="{AppThemeBinding Light=#444, Dark=#BBB}" />
                     <Label Text="{Binding LocationName}"
                            IsVisible="{Binding LocationName, Converter={StaticResource HasText}}"
                            Opacity="0.85"
-                           TextColor="{AppThemeBinding Light=#222, Dark=#DDD}" />
+                           TextColor="{AppThemeBinding Light=#444, Dark=#BBB}" />
                   </HorizontalStackLayout>
 
-                  <ContentView Grid.RowSpan="2" Grid.Column="2"
+                  <Frame Grid.RowSpan="2" Grid.Column="2"
+                               Padding="0"
+                               CornerRadius="8"
+                               IsClippedToBounds="True"
                                x:Name="ThumbHost"
                                BackgroundColor="{AppThemeBinding Light=#EEE, Dark=#2A2A2A}">
                     <Image WidthRequest="64" HeightRequest="64"
                            Aspect="AspectFill"
                            Source="{Binding Thumbnail}" />
-                  </ContentView>
+                  </Frame>
 
                   <Grid.Triggers>
                     <DataTrigger TargetType="Grid" Binding="{Binding Thumbnail}" Value="{x:Null}">
                       <Setter TargetName="ThumbHost" Property="IsVisible" Value="False" />
-                      <Setter TargetName="ThumbHost" Property="HeightRequest" Value="0" />
-                      <Setter TargetName="ThumbHost" Property="WidthRequest" Value="0" />
                     </DataTrigger>
                   </Grid.Triggers>
                 </Grid>
@@ -115,21 +105,27 @@
 
               <!-- CONTENUTO ESPANSO -->
               <toolkit:Expander.Content>
-                <Grid Padding="12"
-                      BackgroundColor="{AppThemeBinding Light=White, Dark=#1C1C1C}">
-                  <VerticalStackLayout Spacing="10">
+                <Grid Padding="16" BackgroundColor="{AppThemeBinding Light=#F7F7F7, Dark=#222222}">
+                  <VerticalStackLayout Spacing="12">
                     <Label Text="{Binding Notes}"
                            IsVisible="{Binding Notes, Converter={StaticResource HasText}}"
                            TextColor="{AppThemeBinding Light=#222, Dark=#DDD}" />
-                    <HorizontalStackLayout Spacing="12">
+                    
+                    <BoxView HeightRequest="1" Color="{AppThemeBinding Light=#EEE, Dark=#333}" Margin="0,4" />
+
+                    <HorizontalStackLayout Spacing="8" HorizontalOptions="End">
                       <Button Text="Modifica"
+                              Style="{StaticResource TextButton}"
                               Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.EditCommand}"
                               CommandParameter="{Binding .}" />
                       <Button Text="Mappa"
+                              Style="{StaticResource TextButton}"
                               IsEnabled="{Binding HasCoordinates}"
                               Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ShowMapCommand}"
                               CommandParameter="{Binding .}" />
                       <Button Text="Elimina"
+                              Style="{StaticResource TextButton}"
+                              TextColor="{AppThemeBinding Light=#C00, Dark=#F88}"
                               Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.DeleteCommand}"
                               CommandParameter="{Binding .}" />
                     </HorizontalStackLayout>
@@ -137,7 +133,7 @@
                 </Grid>
               </toolkit:Expander.Content>
             </toolkit:Expander>
-          </ContentView>
+          </Frame>
         </DataTemplate>
       </CollectionView.ItemTemplate>
     </CollectionView>
