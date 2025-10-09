@@ -33,4 +33,7 @@ public class JumpsRepository : IJumpsRepository
         var rows = await _db.QueryScalarsAsync<byte[]>(sql, objectId);
         return rows.FirstOrDefault();
     }
+
+    public Task<JumpType?> GetJumpTypeAsync(int id) =>
+        _db.FindAsync<JumpType>(id);
 }

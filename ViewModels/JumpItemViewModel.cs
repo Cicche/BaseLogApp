@@ -27,12 +27,15 @@ public partial class JumpItemViewModel : ObservableObject
 
     // Dati dell'oggetto/exit (ZOBJECT) caricati dopo
     public ExitObject? Exit { get; private set; }
+    public JumpType? JumpType { get; private set; }
 
     public string ExitName => Exit?.Name ?? string.Empty;
+    public string JumpTypeName => JumpType?.Name ?? string.Empty;
     public string LocationName => Exit?.Region ?? string.Empty;
     public double? Latitude => Exit?.Latitude;
     public double? Longitude => Exit?.Longitude;
     public bool HasCoordinates => Latitude.HasValue && Longitude.HasValue;
+    public bool HasJumpType => !string.IsNullOrWhiteSpace(JumpTypeName);
 
     public ImageSource? Thumbnail { get; private set; }
 
@@ -66,8 +69,13 @@ public partial class JumpItemViewModel : ObservableObject
     public async Task HydrateAsync(IJumpsRepository repo)
     {
         Exit = null;
+        JumpType = null;
+
         if (Model.ObjectId is int oid && oid > 0)
             Exit = await repo.GetObjectAsync(oid);
+
+        if (Model.JumpTypeId is int jtid && jtid > 0)
+            JumpType = await repo.GetJumpTypeAsync(jtid);
 
         byte[]? bytes = null;
         if (Exit is not null)
@@ -79,6 +87,9 @@ public partial class JumpItemViewModel : ObservableObject
 
         OnPropertyChanged(nameof(Exit));
         OnPropertyChanged(nameof(ExitName));
+        OnPropertyChanged(nameof(JumpType));
+        OnPropertyChanged(nameof(JumpTypeName));
+        OnPropertyChanged(nameof(HasJumpType));
         OnPropertyChanged(nameof(LocationName));
         OnPropertyChanged(nameof(Latitude));
         OnPropertyChanged(nameof(Longitude));
@@ -103,6 +114,9 @@ public partial class JumpItemViewModel : ObservableObject
             return true;
 
         if (!string.IsNullOrWhiteSpace(LocationName) && LocationName.Contains(query, comparison))
+            return true;
+
+        if (!string.IsNullOrWhiteSpace(JumpTypeName) && JumpTypeName.Contains(query, comparison))
             return true;
 
         if (!string.IsNullOrWhiteSpace(Notes) && Notes.Contains(query, comparison))

@@ -12,6 +12,7 @@ public partial class JumpsPageViewModel : ObservableObject
 {
     private readonly IJumpsRepository _repo;
     private readonly List<JumpItemViewModel> _allJumps = new();
+    private JumpItemViewModel? _expandedItem;
 
     public ObservableCollection<JumpItemViewModel> Jumps { get; } = new();
 
@@ -65,7 +66,35 @@ public partial class JumpsPageViewModel : ObservableObject
     public void ToggleExpand(JumpItemViewModel? item)
     {
         if (item is null) return;
-        item.IsExpanded = !item.IsExpanded;
+
+        void Update()
+        {
+            var shouldExpand = !item.IsExpanded;
+
+            if (shouldExpand)
+            {
+                if (_expandedItem is not null && _expandedItem != item)
+                    _expandedItem.IsExpanded = false;
+
+                item.IsExpanded = true;
+                _expandedItem = item;
+            }
+            else
+            {
+                item.IsExpanded = false;
+                if (_expandedItem == item)
+                    _expandedItem = null;
+            }
+        }
+
+        if (MainThread.IsMainThread)
+        {
+            Update();
+        }
+        else
+        {
+            MainThread.BeginInvokeOnMainThread(Update);
+        }
     }
 
     partial void OnSearchTextChanged(string? value) => ApplyFilter();
@@ -82,6 +111,9 @@ public partial class JumpsPageViewModel : ObservableObject
 
             FilteredCount = Jumps.Count;
             PageTitle = $"Salti ({CountSummary})";
+
+            if (_expandedItem is not null && !filteredItems.Contains(_expandedItem))
+                _expandedItem = null;
         }
 
         if (MainThread.IsMainThread)

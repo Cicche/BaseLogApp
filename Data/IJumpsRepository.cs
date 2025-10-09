@@ -10,4 +10,5 @@ public interface IJumpsRepository
     // lookup oggetto collegato
     Task<ExitObject?> GetObjectAsync(int id);
     Task<byte[]?> GetObjectThumbnailAsync(int objectId);
+    Task<JumpType?> GetJumpTypeAsync(int id);
 }
