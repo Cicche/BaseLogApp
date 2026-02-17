@@ -1,4 +1,4 @@
-﻿using BaseLogApp.Core.Data;
+using BaseLogApp.Core.Data;
 using BaseLogApp.Core.ViewModels;
 using BaseLogApp.Views;
 using Microsoft.Extensions.Logging;
@@ -17,9 +17,12 @@ public static class MauiProgram
             fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
             fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
         });
+
         builder.Services.AddSingleton<IJumpsReader, JumpsReader>();
-        builder.Services.AddTransient<JumpsViewModel>();
+        builder.Services.AddSingleton<JumpsViewModel>();
         builder.Services.AddTransient<JumpsPage>();
+        builder.Services.AddTransient<SummaryPage>();
+
 #if DEBUG
         builder.Logging.AddDebug();
 #endif
