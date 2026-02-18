@@ -48,6 +48,19 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
 
+            <Label Text="Top 3 Years" TextColor="White" FontSize="18" FontAttributes="Bold" Margin="2,8,0,0"/>
+            <CollectionView ItemsSource="{Binding TopYearStats}" SelectionMode="None">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="core:StatBarItem">
+                        <Grid ColumnDefinitions="80,*,Auto" Margin="0,0,0,10">
+                            <Label Text="{Binding Label}" TextColor="#8E99B8" VerticalOptions="Center" />
+                            <ProgressBar Grid.Column="1" Progress="{Binding Ratio}" HeightRequest="8" ProgressColor="#FFB454" BackgroundColor="#27314E" VerticalOptions="Center"/>
+                            <Label Grid.Column="2" Text="{Binding Value}" TextColor="White" VerticalOptions="Center" Margin="10,0,0,0" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
             <Label Text="Monthly Trend" TextColor="White" FontSize="18" FontAttributes="Bold" Margin="2,8,0,0"/>
             <CollectionView ItemsSource="{Binding MonthlyStats}" SelectionMode="None">
                 <CollectionView.ItemTemplate>

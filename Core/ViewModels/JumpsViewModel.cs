@@ -29,6 +29,18 @@ namespace BaseLogApp.Core.ViewModels
             }
         }
 
+        private int _nextJumpNumber = 1;
+        public int NextJumpNumber
+        {
+            get => _nextJumpNumber;
+            private set
+            {
+                if (_nextJumpNumber == value) return;
+                _nextJumpNumber = value;
+                OnPropertyChanged();
+            }
+        }
+
         private int _totalJumps;
         public int TotalJumps
         {
@@ -68,6 +80,7 @@ namespace BaseLogApp.Core.ViewModels
         public ObservableCollection<JumpListItem> Items { get; } = new();
         public ObservableCollection<JumpListItem> FilteredItems { get; } = new();
         public ObservableCollection<StatBarItem> ObjectStats { get; } = new();
+        public ObservableCollection<StatBarItem> TopYearStats { get; } = new();
         public ObservableCollection<StatBarItem> MonthlyStats { get; } = new();
 
         private bool _isBusy;
@@ -105,14 +118,10 @@ namespace BaseLogApp.Core.ViewModels
                 FilteredItems.Clear();
 
                 var rows = await _reader.GetJumpsAsync();
-
-                foreach (var it in rows)
-                {
+                foreach (var it in rows.OrderByDescending(x => x.NumeroSalto))
                     Items.Add(it);
-                    FilteredItems.Add(it);
-                }
 
-                Count = FilteredItems.Count;
+                ApplyFilter(Query);
                 RecalculateStats();
             }
             finally
@@ -123,7 +132,9 @@ namespace BaseLogApp.Core.ViewModels
 
         public void AddJump(JumpListItem newJump)
         {
-            Items.Insert(0, newJump);
+            var insertIndex = Items.TakeWhile(x => x.NumeroSalto > newJump.NumeroSalto).Count();
+            Items.Insert(insertIndex, newJump);
+
             ApplyFilter(Query);
             RecalculateStats();
         }
@@ -132,31 +143,29 @@ namespace BaseLogApp.Core.ViewModels
         {
             var q = (text ?? string.Empty).Trim();
 
-            if (q.Length == 0)
+            IEnumerable<JumpListItem> filtered = Items;
+            if (q.Length > 0)
             {
-                FilteredItems.Clear();
-                foreach (var it in Items)
-                    FilteredItems.Add(it);
-                Count = FilteredItems.Count;
-                return;
+                filtered = Items.Where(it =>
+                       it.NumeroSalto.ToString().Contains(q, StringComparison.OrdinalIgnoreCase)
+                    || (!string.IsNullOrEmpty(it.Data) && it.Data.Contains(q, StringComparison.OrdinalIgnoreCase))
+                    || (!string.IsNullOrEmpty(it.Oggetto) && it.Oggetto.Contains(q, StringComparison.OrdinalIgnoreCase))
+                    || (!string.IsNullOrEmpty(it.TipoSalto) && it.TipoSalto.Contains(q, StringComparison.OrdinalIgnoreCase))
+                    || (!string.IsNullOrEmpty(it.Note) && it.Note.Contains(q, StringComparison.OrdinalIgnoreCase)));
             }
 
-            IEnumerable<JumpListItem> filtered = Items.Where(it =>
-                   it.NumeroSalto.ToString().Contains(q, StringComparison.OrdinalIgnoreCase)
-                || (!string.IsNullOrEmpty(it.Data) && it.Data.Contains(q, StringComparison.OrdinalIgnoreCase))
-                || (!string.IsNullOrEmpty(it.Oggetto) && it.Oggetto.Contains(q, StringComparison.OrdinalIgnoreCase))
-                || (!string.IsNullOrEmpty(it.TipoSalto) && it.TipoSalto.Contains(q, StringComparison.OrdinalIgnoreCase))
-                || (!string.IsNullOrEmpty(it.Note) && it.Note.Contains(q, StringComparison.OrdinalIgnoreCase)));
-
             FilteredItems.Clear();
-            foreach (var it in filtered)
+            foreach (var it in filtered.OrderByDescending(x => x.NumeroSalto))
                 FilteredItems.Add(it);
+
             Count = FilteredItems.Count;
         }
 
         private void RecalculateStats()
         {
             TotalJumps = Items.Count;
+            NextJumpNumber = Items.Count == 0 ? 1 : Items.Max(x => x.NumeroSalto) + 1;
+
             UniqueObjects = Items.Select(x => x.Oggetto)
                 .Where(x => !string.IsNullOrWhiteSpace(x))
                 .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -191,6 +200,26 @@ namespace BaseLogApp.Core.ViewModels
                     Label = g.Label,
                     Value = g.Value,
                     Ratio = (double)g.Value / maxObject
+                });
+            }
+
+
+            TopYearStats.Clear();
+            var byYear = dated
+                .GroupBy(x => x.Date.Year)
+                .Select(g => new { Label = g.Key.ToString(), Value = g.Count() })
+                .OrderByDescending(g => g.Value)
+                .ThenByDescending(g => g.Label)
+                .Take(3)
+                .ToList();
+            var maxYear = Math.Max(1, byYear.Select(x => x.Value).DefaultIfEmpty(1).Max());
+            foreach (var y in byYear)
+            {
+                TopYearStats.Add(new StatBarItem
+                {
+                    Label = y.Label,
+                    Value = y.Value,
+                    Ratio = (double)y.Value / maxYear
                 });
             }
 

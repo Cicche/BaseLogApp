@@ -16,46 +16,83 @@
         <CollectionView Grid.Row="1"
                         ItemsSource="{Binding FilteredItems}"
                         SelectionMode="None"
-                        Margin="0,12,0,0">
+                        Margin="0,14,0,0">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="12" />
+            </CollectionView.ItemsLayout>
+
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="core:JumpListItem">
                     <Border StrokeThickness="0"
                             BackgroundColor="#151B2E"
                             StrokeShape="RoundRectangle 16"
-                            Margin="0,0,0,10"
-                            Padding="12">
-                        <Grid ColumnDefinitions="64,*,Auto" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="2">
-                            <Label Grid.RowSpan="3"
-                                   Text="{Binding NumeroSalto}"
-                                   FontSize="34"
-                                   FontAttributes="Bold"
-                                   TextColor="White"
-                                   VerticalTextAlignment="Start" />
+                            Padding="0"
+                            Margin="0,0,0,2">
+                        <Expander>
+                            <Expander.Header>
+                                <Grid Padding="12" ColumnDefinitions="64,*,Auto" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="2">
+                                    <Label Grid.RowSpan="3"
+                                           Text="{Binding NumeroSalto}"
+                                           FontSize="34"
+                                           FontAttributes="Bold"
+                                           TextColor="White"
+                                           VerticalTextAlignment="Start" />
 
-                            <Label Grid.Column="1"
-                                   Text="{Binding Oggetto}"
-                                   FontSize="21"
-                                   FontAttributes="Bold"
-                                   TextColor="White"
-                                   LineBreakMode="TailTruncation" />
-                            <Label Grid.Column="2"
-                                   Text="{Binding Data}"
-                                   FontSize="14"
-                                   TextColor="#8E99B8"
-                                   HorizontalTextAlignment="End" />
+                                    <Label Grid.Column="1"
+                                           Text="{Binding Oggetto}"
+                                           FontSize="21"
+                                           FontAttributes="Bold"
+                                           TextColor="White"
+                                           LineBreakMode="TailTruncation" />
+                                    <Label Grid.Column="2"
+                                           Text="{Binding Data}"
+                                           FontSize="14"
+                                           TextColor="#8E99B8"
+                                           HorizontalTextAlignment="End" />
 
-                            <Label Grid.Row="1" Grid.Column="1"
-                                   Text="{Binding TipoSalto}"
-                                   FontSize="16"
-                                   TextColor="#D8DEEF" />
+                                    <Label Grid.Row="1" Grid.Column="1"
+                                           Text="{Binding TipoSalto}"
+                                           FontSize="16"
+                                           TextColor="#D8DEEF" />
 
-                            <Label Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
-                                   Text="{Binding Note}"
-                                   FontSize="14"
-                                   MaxLines="1"
-                                   LineBreakMode="TailTruncation"
-                                   TextColor="#8E99B8" />
-                        </Grid>
+                                    <Label Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
+                                           Text="{Binding Note}"
+                                           FontSize="14"
+                                           MaxLines="1"
+                                           LineBreakMode="TailTruncation"
+                                           TextColor="#8E99B8" />
+                                </Grid>
+                            </Expander.Header>
+
+                            <VerticalStackLayout Padding="12,0,12,12" Spacing="10">
+                                <BoxView HeightRequest="1" BackgroundColor="#27314E" />
+
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                    <Label Text="Numero" TextColor="#8E99B8" />
+                                    <Label Grid.Column="1" Text="{Binding NumeroSalto}" TextColor="White" FontAttributes="Bold" />
+                                </Grid>
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                    <Label Text="Oggetto" TextColor="#8E99B8" />
+                                    <Label Grid.Column="1" Text="{Binding Oggetto}" TextColor="White" />
+                                </Grid>
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                    <Label Text="Tipo" TextColor="#8E99B8" />
+                                    <Label Grid.Column="1" Text="{Binding TipoSalto}" TextColor="White" />
+                                </Grid>
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                    <Label Text="Data" TextColor="#8E99B8" />
+                                    <Label Grid.Column="1" Text="{Binding Data}" TextColor="White" />
+                                </Grid>
+
+                                <Label Text="Foto / preview" TextColor="#8E99B8" FontSize="12" />
+                                <Image Source="dotnet_bot.png"
+                                       HeightRequest="120"
+                                       Aspect="AspectFill" />
+
+                                <Label Text="Note complete" TextColor="#8E99B8" FontSize="12" />
+                                <Label Text="{Binding Note}" TextColor="#D8DEEF" />
+                            </VerticalStackLayout>
+                        </Expander>
                     </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>

@@ -6,10 +6,12 @@ public partial class NewJumpPage : ContentPage
 {
     public event EventHandler<JumpListItem>? JumpSaved;
 
-    public NewJumpPage()
+    public NewJumpPage(int suggestedJumpNumber)
     {
         InitializeComponent();
+
         DatePicker.Date = DateTime.Today;
+        NumberEntry.Text = suggestedJumpNumber.ToString();
     }
 
     private async void OnCancelClicked(object sender, EventArgs e)
