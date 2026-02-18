@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BaseLogApp.Views.NewJumpPage"
+             Title="Nuovo salto"
+             BackgroundColor="#0A0F1E">
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="12">
+            <Label Text="Aggiungi nuovo salto" FontAttributes="Bold" FontSize="22" TextColor="White"/>
+            <Entry x:Name="NumberEntry" Placeholder="Numero salto" Keyboard="Numeric" />
+            <DatePicker x:Name="DatePicker" />
+            <Entry x:Name="ObjectEntry" Placeholder="Oggetto" />
+            <Entry x:Name="TypeEntry" Placeholder="Tipo salto" />
+            <Editor x:Name="NotesEditor" Placeholder="Note" AutoSize="TextChanges" HeightRequest="100" />
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12" Margin="0,12,0,0">
+                <Button Grid.Column="0" Text="Annulla" Clicked="OnCancelClicked" BackgroundColor="#27314E" TextColor="White"/>
+                <Button Grid.Column="1" Text="Salva" Clicked="OnSaveClicked" BackgroundColor="#2D8CFF" TextColor="White"/>
+            </Grid>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

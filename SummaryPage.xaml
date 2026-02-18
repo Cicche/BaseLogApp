@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:core="clr-namespace:BaseLogApp.Core.Models"
+             x:Class="BaseLogApp.Views.SummaryPage"
+             Title="Summary"
+             BackgroundColor="#0A0F1E">
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="14">
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <Border BackgroundColor="#151B2E" StrokeThickness="0" StrokeShape="RoundRectangle 16" Padding="12">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Total Jumps" TextColor="#8E99B8" FontSize="12" />
+                        <Label Text="{Binding TotalJumps}" TextColor="White" FontSize="28" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+                </Border>
+                <Border Grid.Column="1" BackgroundColor="#151B2E" StrokeThickness="0" StrokeShape="RoundRectangle 16" Padding="12">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Objects" TextColor="#8E99B8" FontSize="12" />
+                        <Label Text="{Binding UniqueObjects}" TextColor="White" FontSize="28" FontAttributes="Bold" />
+                    </VerticalStackLayout>
+                </Border>
+            </Grid>
+
+            <Border BackgroundColor="#151B2E" StrokeThickness="0" StrokeShape="RoundRectangle 16" Padding="14">
+                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
+                    <Label Text="Last jump" TextColor="#8E99B8" />
+                    <Label Grid.Column="1" Text="{Binding LastJumpDate}" TextColor="White" FontAttributes="Bold" />
+                    <Label Grid.Row="1" Text="Last 30 days" TextColor="#8E99B8" />
+                    <Label Grid.Row="1" Grid.Column="1" Text="{Binding Last30Days}" TextColor="White" FontAttributes="Bold" />
+                    <Label Grid.Row="2" Text="Last 365 days" TextColor="#8E99B8" />
+                    <Label Grid.Row="2" Grid.Column="1" Text="{Binding Last365Days}" TextColor="White" FontAttributes="Bold" />
+                </Grid>
+            </Border>
+
+            <Label Text="Top Objects" TextColor="White" FontSize="18" FontAttributes="Bold" Margin="2,8,0,0"/>
+            <CollectionView ItemsSource="{Binding ObjectStats}" SelectionMode="None">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="core:StatBarItem">
+                        <VerticalStackLayout Spacing="4" Margin="0,0,0,10">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Text="{Binding Label}" TextColor="White" />
+                                <Label Grid.Column="1" Text="{Binding Value}" TextColor="#8E99B8" />
+                            </Grid>
+                            <ProgressBar Progress="{Binding Ratio}" HeightRequest="8" ProgressColor="#2D8CFF" BackgroundColor="#27314E"/>
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Label Text="Monthly Trend" TextColor="White" FontSize="18" FontAttributes="Bold" Margin="2,8,0,0"/>
+            <CollectionView ItemsSource="{Binding MonthlyStats}" SelectionMode="None">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="core:StatBarItem">
+                        <Grid ColumnDefinitions="70,*,Auto" Margin="0,0,0,10">
+                            <Label Text="{Binding Label}" TextColor="#8E99B8" VerticalOptions="Center" />
+                            <ProgressBar Grid.Column="1" Progress="{Binding Ratio}" HeightRequest="8" ProgressColor="#40C9A2" BackgroundColor="#27314E" VerticalOptions="Center"/>
+                            <Label Grid.Column="2" Text="{Binding Value}" TextColor="White" VerticalOptions="Center" Margin="10,0,0,0" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
