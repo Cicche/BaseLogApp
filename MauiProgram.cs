@@ -24,6 +24,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<JumpsViewModel>();
         builder.Services.AddTransient<JumpsPage>();
         builder.Services.AddTransient<SummaryPage>();
+        builder.Services.AddTransient<SettingsPage>();
 
 #if DEBUG
         builder.Logging.AddDebug();

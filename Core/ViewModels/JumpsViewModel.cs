@@ -130,6 +130,10 @@ namespace BaseLogApp.Core.ViewModels
             }
         }
 
+
+        public async Task<IReadOnlyList<string>> GetObjectNamesAsync()
+            => await _reader.GetObjectNamesAsync();
+
         public void AddJump(JumpListItem newJump)
         {
             var insertIndex = Items.TakeWhile(x => x.NumeroSalto > newJump.NumeroSalto).Count();

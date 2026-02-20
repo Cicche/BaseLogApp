@@ -9,7 +9,22 @@
             <Label Text="Aggiungi nuovo salto" FontAttributes="Bold" FontSize="22" TextColor="White"/>
             <Entry x:Name="NumberEntry" Placeholder="Numero salto" Keyboard="Numeric" />
             <DatePicker x:Name="DatePicker" />
-            <Entry x:Name="ObjectEntry" Placeholder="Oggetto" />
+
+            <Label Text="Object" TextColor="#8E99B8" />
+            <Entry x:Name="ObjectEntry" Placeholder="Oggetto" TextChanged="OnObjectTextChanged" />
+            <CollectionView x:Name="ObjectSuggestionsView"
+                            IsVisible="False"
+                            SelectionMode="Single"
+                            SelectionChanged="OnObjectSuggestionSelected"
+                            HeightRequest="140"
+                            BackgroundColor="#151B2E">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Label Text="{Binding .}" TextColor="White" Padding="10,8"/>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
             <Entry x:Name="TypeEntry" Placeholder="Tipo salto" />
             <Editor x:Name="NotesEditor" Placeholder="Note" AutoSize="TextChanges" HeightRequest="100" />
 

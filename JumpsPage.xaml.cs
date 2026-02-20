@@ -31,7 +31,8 @@ public partial class JumpsPage : ContentPage
 
     private async Task OpenNewJumpPage()
     {
-        var page = new NewJumpPage(_vm.NextJumpNumber);
+        var knownObjects = await _vm.GetObjectNamesAsync();
+        var page = new NewJumpPage(_vm.NextJumpNumber, knownObjects);
         page.JumpSaved += OnJumpSaved;
         await Navigation.PushModalAsync(new NavigationPage(page));
     }

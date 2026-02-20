@@ -86,7 +86,7 @@
                                 </Grid>
 
                                 <Label Text="Foto / preview" TextColor="#8E99B8" FontSize="12" />
-                                <Image Source="dotnet_bot.png"
+                                <Image Source="{Binding ObjectPhotoSource}"
                                        HeightRequest="120"
                                        Aspect="AspectFill" />
 

@@ -15,5 +15,6 @@
     <TabBar>
         <ShellContent Title="Logbook" ContentTemplate="{DataTemplate views:JumpsPage}" Route="jumps" />
         <ShellContent Title="Summary" ContentTemplate="{DataTemplate views:SummaryPage}" Route="summary" />
+            <ShellContent Title="Settings" ContentTemplate="{DataTemplate views:SettingsPage}" Route="settings" />
     </TabBar>
 </Shell>

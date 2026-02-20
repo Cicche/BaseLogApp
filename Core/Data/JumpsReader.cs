@@ -8,6 +8,7 @@ namespace BaseLogApp.Core.Data
     public interface IJumpsReader
     {
         Task<IReadOnlyList<JumpListItem>> GetJumpsAsync();
+        Task<IReadOnlyList<string>> GetObjectNamesAsync();
     }
 
     public class JumpsReader : IJumpsReader
@@ -26,22 +27,22 @@ namespace BaseLogApp.Core.Data
                 var conn = new SQLiteConnectionString(dbPath, false);
                 var db = new SQLiteAsyncConnection(conn);
 
-                const string sql = @"
+                var photoExpr = await ResolveObjectPhotoExpressionAsync(db);
+                var sql = $@"
                                 SELECT
                                 l.Z_PK AS Id,
                                 l.ZJUMPNUMBER AS NumeroSalto,
                                 CAST(l.ZDATE AS TEXT) AS ZDATE_TEXT,
                                 o.ZNAME AS Oggetto,
                                 jt.ZNAME AS TipoSalto,
-                                l.ZNOTES AS Note
+                                l.ZNOTES AS Note,
+                                {photoExpr} AS ObjectPhotoPath
                                 FROM ZLOGENTRY l
                                 LEFT JOIN ZOBJECT o ON l.ZOBJECT = o.Z_PK
                                 LEFT JOIN ZJUMPTYPE jt ON l.ZJUMPTYPE = jt.Z_PK
-                                ORDER BY l.ZDATE DESC;";
-                var rows = await db.QueryAsync<RawRow>(sql);
+                                ORDER BY l.ZJUMPNUMBER DESC;";
 
-                Debug.WriteLine($"DB Exists={File.Exists(dbPath)}");
-                Debug.WriteLine($"Rows={rows.Count}");
+                var rows = await db.QueryAsync<RawRow>(sql);
 
                 return rows.Select(r => new JumpListItem
                 {
@@ -50,7 +51,8 @@ namespace BaseLogApp.Core.Data
                     Data = AppleSecondsToDisplayFromText(r.ZDATE_TEXT),
                     Oggetto = r.Oggetto,
                     TipoSalto = r.TipoSalto,
-                    Note = r.Note
+                    Note = r.Note,
+                    ObjectPhotoPath = NormalizePhotoPath(r.ObjectPhotoPath)
                 }).ToList();
             }
             catch (Exception ex)
@@ -58,6 +60,68 @@ namespace BaseLogApp.Core.Data
                 Debug.WriteLine($"Error reading jumps database at '{dbPath}': {ex.Message}");
                 return Array.Empty<JumpListItem>();
             }
+        }
+
+        public async Task<IReadOnlyList<string>> GetObjectNamesAsync()
+        {
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath))
+                return Array.Empty<string>();
+
+            try
+            {
+                var conn = new SQLiteConnectionString(dbPath, false);
+                var db = new SQLiteAsyncConnection(conn);
+                var rows = await db.QueryAsync<ObjectNameRow>("SELECT ZNAME AS Name FROM ZOBJECT WHERE ZNAME IS NOT NULL AND TRIM(ZNAME) <> '' ORDER BY ZNAME;");
+                return rows.Select(x => x.Name!.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error reading objects from database at '{dbPath}': {ex.Message}");
+                return Array.Empty<string>();
+            }
+        }
+
+        private static async Task<string> ResolveObjectPhotoExpressionAsync(SQLiteAsyncConnection db)
+        {
+            try
+            {
+                var columns = await db.QueryAsync<PragmaColumn>("PRAGMA table_info('ZOBJECT');");
+                var set = columns.Select(c => c.Name ?? string.Empty).ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+                var photoCandidates = new[]
+                {
+                    "ZIMAGEPATH",
+                    "ZIMAGE",
+                    "ZPHOTO",
+                    "ZPHOTOPATH",
+                    "ZTHUMBNAIL",
+                    "ZIMAGEURL"
+                };
+
+                var found = photoCandidates.FirstOrDefault(set.Contains);
+                return found is null ? "NULL" : $"o.{found}";
+            }
+            catch
+            {
+                return "NULL";
+            }
+        }
+
+        private static string? NormalizePhotoPath(string? dbValue)
+        {
+            if (string.IsNullOrWhiteSpace(dbValue))
+                return null;
+
+            var trimmed = dbValue.Trim();
+            if (trimmed.StartsWith("/", StringComparison.Ordinal) ||
+                trimmed.Contains(":\\", StringComparison.OrdinalIgnoreCase) ||
+                trimmed.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+            {
+                return trimmed;
+            }
+
+            return null;
         }
 
         private string ResolveDbPath()
@@ -81,6 +145,17 @@ namespace BaseLogApp.Core.Data
             public string? Oggetto { get; set; }
             public string? TipoSalto { get; set; }
             public string? Note { get; set; }
+            public string? ObjectPhotoPath { get; set; }
+        }
+
+        private sealed class ObjectNameRow
+        {
+            public string? Name { get; set; }
+        }
+
+        private sealed class PragmaColumn
+        {
+            public string? Name { get; set; }
         }
 
         private static string AppleSecondsToDisplayFromText(string? text)
