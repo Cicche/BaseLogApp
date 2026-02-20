@@ -1,3 +1,4 @@
+using CommunityToolkit.Maui;
 using BaseLogApp.Core.Data;
 using BaseLogApp.Core.ViewModels;
 using BaseLogApp.Views;
@@ -12,6 +13,7 @@ public static class MauiProgram
         var builder = MauiApp.CreateBuilder();
         builder
         .UseMauiApp<App>()
+        .UseMauiCommunityToolkit()
         .ConfigureFonts(fonts =>
         {
             fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
