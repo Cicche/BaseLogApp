@@ -1,43 +1,67 @@
+using BaseLogApp.Core.Models;
 using BaseLogApp.Core.ViewModels;
-using Microsoft.Maui.Controls;
-using System.Diagnostics;
 
 namespace BaseLogApp.Views;
 
 public partial class JumpsPage : ContentPage
 {
     private readonly JumpsViewModel _vm;
+    private readonly ToolbarItem _dbSwitchItem;
+
     public JumpsPage(JumpsViewModel vm)
     {
         InitializeComponent();
 
-        Debug.WriteLine($"Has Content: {Content != null}");
-
-        //Debug.WriteLine($"ItemsSource set: {(ListSalti?.ItemsSource != null)}");
-
         _vm = vm;
         BindingContext = _vm;
-        Dispatcher.Dispatch(async () => await _vm.LoadAsync());
-        Debug.WriteLine($"VM type: {vm.GetType().FullName}");
 
-        Debug.WriteLine($"BindingContext type: {BindingContext?.GetType().FullName}");
+        _dbSwitchItem = new ToolbarItem
+        {
+            Text = _vm.CurrentProfileLabel,
+            Priority = 0,
+            Order = ToolbarItemOrder.Primary,
+            Command = new Command(async () => await OnSwitchDbClicked())
+        };
+
+        ToolbarItems.Add(_dbSwitchItem);
+        ToolbarItems.Add(new ToolbarItem
+        {
+            Text = "+",
+            Priority = 1,
+            Order = ToolbarItemOrder.Primary,
+            Command = new Command(async () => await OpenNewJumpPage())
+        });
     }
+
     protected override async void OnAppearing()
     {
         base.OnAppearing();
         await _vm.LoadAsync();
-       // System.Diagnostics.Debug.WriteLine($"ListSalti null? {ListSalti == null}, ItemsSource null? {ListSalti?.ItemsSource == null}");
+        _dbSwitchItem.Text = _vm.CurrentProfileLabel;
     }
 
-    private void OnSearchTextChanged(object sender, TextChangedEventArgs e)
+    private async Task OnSwitchDbClicked()
     {
-        if (BindingContext is BaseLogApp.Core.ViewModels.JumpsViewModel vm)
-            vm.ApplyFilter(e.NewTextValue);
+        await _vm.ToggleDbProfileAsync();
+        _dbSwitchItem.Text = _vm.CurrentProfileLabel;
+        await DisplayAlert("DB attivo", _vm.GetCurrentDbPath(), "OK");
     }
 
-    private async void OnRefreshClicked(object sender, EventArgs e)
+    private async Task OpenNewJumpPage()
     {
-        await _vm.LoadAsync();
-        Debug.WriteLine($"Items bound: {(_vm.Items?.Count ?? -1)}");
+        var knownObjects = await _vm.GetObjectNamesAsync();
+        var page = new NewJumpPage(_vm.NextJumpNumber, knownObjects);
+        page.JumpSaved += OnJumpSaved;
+        await Navigation.PushModalAsync(new NavigationPage(page));
+    }
+
+    private async void OnJumpSaved(object? sender, JumpListItem e)
+    {
+        var saved = await _vm.SaveJumpAsync(e);
+        if (!saved)
+            await DisplayAlert("DB", "Impossibile salvare il salto nel database.", "OK");
+
+        if (sender is NewJumpPage page)
+            page.JumpSaved -= OnJumpSaved;
     }
 }
