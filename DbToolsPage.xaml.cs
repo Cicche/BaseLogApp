@@ -4,6 +4,14 @@ namespace BaseLogApp.Views;
 
 public partial class DbToolsPage : ContentPage
 {
+    private static readonly FilePickerFileType JsonFileType = new(new Dictionary<DevicePlatform, IEnumerable<string>>
+    {
+        { DevicePlatform.WinUI, new[] { ".json" } },
+        { DevicePlatform.iOS, new[] { "public.json" } },
+        { DevicePlatform.Android, new[] { "application/json" } },
+        { DevicePlatform.macOS, new[] { "public.json" } }
+    });
+
     private readonly JumpsViewModel _vm;
 
     public DbToolsPage(JumpsViewModel vm)
@@ -21,7 +29,12 @@ public partial class DbToolsPage : ContentPage
 
     private async void OnImportJsonClicked(object sender, EventArgs e)
     {
-        var picked = await FilePicker.Default.PickAsync(new PickOptions { FileTypes = FilePickerFileType.Json });
+        var picked = await FilePicker.Default.PickAsync(new PickOptions
+        {
+            PickerTitle = "Seleziona file JSON",
+            FileTypes = JsonFileType
+        });
+
         if (picked is null) return;
 
         var ok = await _vm.ImportLightweightJsonAsync(picked.FullPath);
