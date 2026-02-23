@@ -1,10 +1,15 @@
+using BaseLogApp.Core.ViewModels;
+
 namespace BaseLogApp.Views;
 
 public partial class SettingsPage : ContentPage
 {
-    public SettingsPage()
+    private readonly JumpsViewModel _vm;
+
+    public SettingsPage(JumpsViewModel vm)
     {
         InitializeComponent();
+        _vm = vm;
     }
 
     private async void OnAutoPositionClicked(object sender, EventArgs e)
@@ -27,14 +32,43 @@ public partial class SettingsPage : ContentPage
     }
 
     private async void OnAddObjectClicked(object sender, EventArgs e)
-        => await DisplayAlert("Object", "Salvataggio object da collegare al DB da completare nel prossimo step.", "OK");
+    {
+        var saved = await _vm.AddObjectAsync(
+            ObjectNameEntry.Text ?? string.Empty,
+            ObjectDescriptionEntry.Text,
+            ObjectPositionEntry.Text,
+            ObjectHeightEntry.Text);
+
+        if (!saved)
+        {
+            await DisplayAlert("Object", "Impossibile salvare object nel DB.", "OK");
+            return;
+        }
+
+        ObjectNameEntry.Text = string.Empty;
+        ObjectDescriptionEntry.Text = string.Empty;
+        ObjectHeightEntry.Text = string.Empty;
+        ObjectPositionEntry.Text = string.Empty;
+        await DisplayAlert("Object", "Object salvato nel DB.", "OK");
+    }
 
     private async void OnAddRigClicked(object sender, EventArgs e)
-        => await DisplayAlert("Rig", "Salvataggio rig da collegare al DB da completare nel prossimo step.", "OK");
+    {
+        var saved = await _vm.AddRigAsync(RigNameEntry.Text ?? string.Empty, RigDescriptionEntry.Text);
+        if (!saved)
+        {
+            await DisplayAlert("Rig", "Impossibile salvare rig nel DB.", "OK");
+            return;
+        }
+
+        RigNameEntry.Text = string.Empty;
+        RigDescriptionEntry.Text = string.Empty;
+        await DisplayAlert("Rig", "Rig salvato nel DB.", "OK");
+    }
 
     private async void OnImportDbClicked(object sender, EventArgs e)
-        => await DisplayAlert("Import", "Import DB: placeholder pronto, collegamento file-picker nel prossimo step.", "OK");
+        => await DisplayAlert("Import", "Import DB verrà implementato nel prossimo step con file picker.", "OK");
 
     private async void OnExportDbClicked(object sender, EventArgs e)
-        => await DisplayAlert("Export", "Export DB: placeholder pronto, collegamento sharing nel prossimo step.", "OK");
+        => await DisplayAlert("Export", "Export DB verrà implementato nel prossimo step con file sharing.", "OK");
 }

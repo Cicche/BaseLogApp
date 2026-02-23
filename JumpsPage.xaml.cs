@@ -37,9 +37,11 @@ public partial class JumpsPage : ContentPage
         await Navigation.PushModalAsync(new NavigationPage(page));
     }
 
-    private void OnJumpSaved(object? sender, JumpListItem e)
+    private async void OnJumpSaved(object? sender, JumpListItem e)
     {
-        _vm.AddJump(e);
+        var saved = await _vm.SaveJumpAsync(e);
+        if (!saved)
+            await DisplayAlert("DB", "Impossibile salvare il salto nel database.", "OK");
 
         if (sender is NewJumpPage page)
             page.JumpSaved -= OnJumpSaved;

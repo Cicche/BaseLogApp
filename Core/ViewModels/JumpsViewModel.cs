@@ -134,6 +134,21 @@ namespace BaseLogApp.Core.ViewModels
         public async Task<IReadOnlyList<string>> GetObjectNamesAsync()
             => await _reader.GetObjectNamesAsync();
 
+        public async Task<bool> SaveJumpAsync(JumpListItem newJump)
+        {
+            var saved = await _reader.AddJumpAsync(newJump);
+            if (saved)
+                await LoadAsync();
+
+            return saved;
+        }
+
+        public async Task<bool> AddObjectAsync(string name, string? description, string? position, string? heightMeters)
+            => await _reader.AddObjectAsync(name, description, position, heightMeters);
+
+        public async Task<bool> AddRigAsync(string name, string? description)
+            => await _reader.AddRigAsync(name, description);
+
         public void AddJump(JumpListItem newJump)
         {
             var insertIndex = Items.TakeWhile(x => x.NumeroSalto > newJump.NumeroSalto).Count();
