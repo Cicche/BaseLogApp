@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BaseLogApp.Views.AddRigPage"
+             Title="Nuovo Rig"
+             BackgroundColor="#0A0F1E">
+    <VerticalStackLayout Padding="16" Spacing="12">
+        <Entry x:Name="RigNameEntry" Placeholder="Nome rig" />
+        <Editor x:Name="RigDescriptionEntry" Placeholder="Descrizione" HeightRequest="100" />
+        <Button Text="Salva Rig" Clicked="OnSaveClicked" BackgroundColor="#2D8CFF" TextColor="White"/>
+        <Button Text="Chiudi" Clicked="OnCloseClicked" />
+    </VerticalStackLayout>
+</ContentPage>
