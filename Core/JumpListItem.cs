@@ -18,6 +18,19 @@ namespace BaseLogApp.Core.Models
         public string? Latitude { get; set; }
         public string? Longitude { get; set; }
 
+        public bool IsEdit { get; set; }
+        public int OriginalNumeroSalto { get; set; }
+
+        public string TimeDisplay
+        {
+            get
+            {
+                if (DateTime.TryParseExact(Data, new[] { "dd/MM/yyyy HH:mm", "dd/MM/yyyy" }, null, System.Globalization.DateTimeStyles.None, out var dt))
+                    return dt.ToString("HH:mm");
+                return "";
+            }
+        }
+
         public ImageSource ObjectPhotoSource
         {
             get
