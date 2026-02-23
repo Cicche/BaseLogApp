@@ -6,10 +6,22 @@
              BackgroundColor="#0A0F1E">
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="12">
-            <Button Text="Aggiungi Object" Clicked="OnOpenAddObjectClicked" />
-            <Button Text="Aggiungi Rig" Clicked="OnOpenAddRigClicked" />
-            <Button Text="Aggiungi Tipo Salto" Clicked="OnOpenAddJumpTypeClicked" />
-            <Button Text="Import / Export DB" Clicked="OnOpenDbToolsClicked" />
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Text="Object" TextColor="White" VerticalTextAlignment="Center" FontSize="16"/>
+                <Button Grid.Column="1" Text="+" WidthRequest="44" Clicked="OnOpenAddObjectClicked" />
+            </Grid>
+
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Text="Rig" TextColor="White" VerticalTextAlignment="Center" FontSize="16"/>
+                <Button Grid.Column="1" Text="+" WidthRequest="44" Clicked="OnOpenAddRigClicked" />
+            </Grid>
+
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Text="Tipo Salto" TextColor="White" VerticalTextAlignment="Center" FontSize="16"/>
+                <Button Grid.Column="1" Text="+" WidthRequest="44" Clicked="OnOpenAddJumpTypeClicked" />
+            </Grid>
+
+            <Button Text="Import / Export DB" Clicked="OnOpenDbToolsClicked" Margin="0,10,0,0" />
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

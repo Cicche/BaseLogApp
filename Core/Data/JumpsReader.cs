@@ -18,7 +18,10 @@ namespace BaseLogApp.Core.Data
         string GetCurrentDbPath();
         Task<IReadOnlyList<JumpListItem>> GetJumpsAsync();
         Task<IReadOnlyList<string>> GetObjectNamesAsync();
+        Task<IReadOnlyList<string>> GetJumpTypeNamesAsync();
         Task<bool> AddJumpAsync(JumpListItem jump);
+        Task<bool> UpdateJumpAsync(JumpListItem jump);
+        Task<bool> DeleteJumpAsync(JumpListItem jump);
         Task<bool> AddObjectAsync(string name, string? description, string? position, string? heightMeters, byte[]? photoBytes);
         Task<bool> AddRigAsync(string name, string? description);
         Task<bool> AddJumpTypeAsync(string name, string? notes);
@@ -154,6 +157,40 @@ namespace BaseLogApp.Core.Data
             }
         }
 
+        public async Task<IReadOnlyList<string>> GetJumpTypeNamesAsync()
+        {
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath)) return Array.Empty<string>();
+
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                if (await HasTableAsync(db, "ZJUMPTYPE"))
+                {
+                    return (await db.QueryAsync<ObjectNameRow>("SELECT ZNAME AS Name FROM ZJUMPTYPE WHERE ZNAME IS NOT NULL AND TRIM(ZNAME) <> '';"))
+                        .Select(x => x.Name!.Trim())
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .OrderBy(x => x)
+                        .ToList();
+                }
+
+                if (await HasTableAsync(db, "Jump"))
+                {
+                    return (await db.QueryAsync<ObjectNameRow>("SELECT ExitName AS Name FROM Jump WHERE ExitName IS NOT NULL AND TRIM(ExitName) <> '';"))
+                        .Select(x => x.Name!.Trim())
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .OrderBy(x => x)
+                        .ToList();
+                }
+
+                return Array.Empty<string>();
+            }
+            catch
+            {
+                return Array.Empty<string>();
+            }
+        }
+
         public async Task<bool> AddJumpAsync(JumpListItem jump)
         {
             var dbPath = ResolveDbPath();
@@ -206,6 +243,77 @@ namespace BaseLogApp.Core.Data
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error inserting jump: {ex.Message}");
+                return false;
+            }
+        }
+
+        public async Task<bool> UpdateJumpAsync(JumpListItem jump)
+        {
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath)) return false;
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                if (await HasTableAsync(db, "Jump"))
+                {
+                    await db.ExecuteAsync(@"UPDATE Jump
+                                            SET ExitName=?, ObjectName=?, JumpDateUtc=?, Latitude=?, Longitude=?, Notes=?
+                                            WHERE Id=?;",
+                        jump.TipoSalto,
+                        jump.Oggetto,
+                        ToUnixSeconds(jump.Data),
+                        ToNullableDouble(jump.Latitude),
+                        ToNullableDouble(jump.Longitude),
+                        jump.Note,
+                        jump.Id);
+                    return true;
+                }
+
+                if (await HasTableAsync(db, "ZLOGENTRY"))
+                {
+                    await db.ExecuteAsync(@"UPDATE ZLOGENTRY
+                                            SET ZJUMPNUMBER=?, ZDATE=?, ZNOTES=?
+                                            WHERE Z_PK=?;",
+                        jump.NumeroSalto,
+                        ToAppleSeconds(jump.Data),
+                        jump.Note,
+                        jump.Id);
+                    return true;
+                }
+
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> DeleteJumpAsync(JumpListItem jump)
+        {
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath)) return false;
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                if (await HasTableAsync(db, "Jump"))
+                {
+                    await db.ExecuteAsync("DELETE FROM Jump WHERE Id=?;", jump.Id);
+                    return true;
+                }
+
+                if (await HasTableAsync(db, "ZLOGENTRY"))
+                {
+                    await db.ExecuteAsync("DELETE FROM ZLOGENTRYIMAGE WHERE ZLOGENTRY=?;", jump.Id);
+                    await db.ExecuteAsync("DELETE FROM ZLOGENTRY WHERE Z_PK=?;", jump.Id);
+                    await db.ExecuteAsync("UPDATE ZLOGENTRY SET ZJUMPNUMBER = ZJUMPNUMBER - 1 WHERE ZJUMPNUMBER > ?;", jump.NumeroSalto);
+                    return true;
+                }
+
+                return false;
+            }
+            catch
+            {
                 return false;
             }
         }
@@ -373,21 +481,21 @@ namespace BaseLogApp.Core.Data
         {
             if (string.IsNullOrWhiteSpace(text) || !double.TryParse(text.Trim().Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out var seconds)) return "";
             var dt = new DateTime(2001, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(seconds).ToLocalTime();
-            return dt.ToString("dd/MM/yyyy");
+            return dt.ToString("dd/MM/yyyy HH:mm");
         }
 
         private static string UnixSecondsToDisplay(string? text)
-            => string.IsNullOrWhiteSpace(text) || !long.TryParse(text, out var s) ? "" : DateTimeOffset.FromUnixTimeSeconds(s).ToLocalTime().ToString("dd/MM/yyyy");
+            => string.IsNullOrWhiteSpace(text) || !long.TryParse(text, out var s) ? "" : DateTimeOffset.FromUnixTimeSeconds(s).ToLocalTime().ToString("dd/MM/yyyy HH:mm");
 
         private static long ToUnixSeconds(string? displayDate)
-            => DateTime.TryParseExact(displayDate, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed)
-                ? new DateTimeOffset(parsed.Date).ToUnixTimeSeconds()
+            => DateTime.TryParseExact(displayDate, new[] { "dd/MM/yyyy HH:mm", "dd/MM/yyyy" }, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed)
+                ? new DateTimeOffset(parsed).ToUnixTimeSeconds()
                 : DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
         private static double ToAppleSeconds(string? displayDate)
         {
-            if (!DateTime.TryParseExact(displayDate, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed))
-                parsed = DateTime.UtcNow.Date;
+            if (!DateTime.TryParseExact(displayDate, new[] { "dd/MM/yyyy HH:mm", "dd/MM/yyyy" }, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed))
+                parsed = DateTime.UtcNow;
             return (parsed.ToUniversalTime() - new DateTime(2001, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds;
         }
 

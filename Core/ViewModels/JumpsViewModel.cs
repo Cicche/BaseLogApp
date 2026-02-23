@@ -147,6 +147,9 @@ namespace BaseLogApp.Core.ViewModels
         public async Task<IReadOnlyList<string>> GetObjectNamesAsync()
             => await _reader.GetObjectNamesAsync();
 
+        public async Task<IReadOnlyList<string>> GetJumpTypeNamesAsync()
+            => await _reader.GetJumpTypeNamesAsync();
+
 
         public async Task ToggleDbProfileAsync()
         {
@@ -172,7 +175,9 @@ namespace BaseLogApp.Core.ViewModels
 
         public async Task<bool> SaveJumpAsync(JumpListItem newJump)
         {
-            var saved = await _reader.AddJumpAsync(newJump);
+            var saved = newJump.IsEdit
+                ? await _reader.UpdateJumpAsync(newJump)
+                : await _reader.AddJumpAsync(newJump);
             if (saved)
                 await LoadAsync();
 
@@ -198,11 +203,14 @@ namespace BaseLogApp.Core.ViewModels
         }
 
 
-        private async Task EnsureDefaultJumpTypesAsync()
+
+        public async Task<bool> DeleteJumpAsync(JumpListItem jump)
         {
-            await _reader.AddJumpTypeAsync("Low", "default");
-            await _reader.AddJumpTypeAsync("Terminal", "default");
-            await _reader.AddJumpTypeAsync("Subterminal", "default");
+            var deleted = await _reader.DeleteJumpAsync(jump);
+            if (deleted)
+                await LoadAsync();
+
+            return deleted;
         }
 
         public void ApplyFilter(string? text)
@@ -334,7 +342,7 @@ namespace BaseLogApp.Core.ViewModels
             if (string.IsNullOrWhiteSpace(value))
                 return null;
 
-            if (DateTime.TryParseExact(value, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed))
+            if (DateTime.TryParseExact(value, new[] { "dd/MM/yyyy HH:mm", "dd/MM/yyyy" }, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed))
                 return parsed;
 
             if (DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsed))

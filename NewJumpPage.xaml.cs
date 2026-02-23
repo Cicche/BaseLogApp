@@ -9,39 +9,89 @@ public partial class NewJumpPage : ContentPage
     public event EventHandler<JumpListItem>? JumpSaved;
 
     private readonly List<string> _allObjects;
+    private readonly List<string> _allJumpTypes;
     private readonly ObservableCollection<string> _filteredObjects = new();
+    private readonly ObservableCollection<string> _filteredJumpTypes = new();
     private string? _selectedPhotoPath;
+    private readonly JumpListItem? _editing;
 
-    public NewJumpPage(int suggestedJumpNumber, IReadOnlyList<string> knownObjects)
+    public NewJumpPage(int suggestedJumpNumber, IReadOnlyList<string> knownObjects, IReadOnlyList<string> knownJumpTypes, JumpListItem? editing = null)
     {
         InitializeComponent();
 
+        _editing = editing;
         _allObjects = knownObjects
             .Where(x => !string.IsNullOrWhiteSpace(x))
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .OrderBy(x => x)
             .ToList();
 
+        _allJumpTypes = knownJumpTypes
+            .Where(x => !string.IsNullOrWhiteSpace(x))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(x => x)
+            .ToList();
+
         ObjectSuggestionsView.ItemsSource = _filteredObjects;
-        DatePicker.Date = DateTime.Today;
-        NumberEntry.Text = suggestedJumpNumber.ToString();
+        JumpTypeSuggestionsView.ItemsSource = _filteredJumpTypes;
+
+        if (_editing is null)
+        {
+            var now = DateTime.Now;
+            DatePicker.Date = now.Date;
+            TimePicker.Time = now.TimeOfDay;
+            NumberEntry.Text = suggestedJumpNumber.ToString();
+            Title = "Nuovo salto";
+        }
+        else
+        {
+            Title = "Modifica salto";
+            NumberEntry.Text = _editing.NumeroSalto.ToString();
+            ObjectEntry.Text = _editing.Oggetto;
+            TypeEntry.Text = _editing.TipoSalto;
+            NotesEditor.Text = _editing.Note;
+            LatitudeEntry.Text = _editing.Latitude;
+            LongitudeEntry.Text = _editing.Longitude;
+
+            if (DateTime.TryParseExact(_editing.Data, new[] { "dd/MM/yyyy HH:mm", "dd/MM/yyyy" }, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed))
+            {
+                DatePicker.Date = parsed.Date;
+                TimePicker.Time = parsed.TimeOfDay;
+            }
+            else
+            {
+                var now = DateTime.Now;
+                DatePicker.Date = now.Date;
+                TimePicker.Time = now.TimeOfDay;
+            }
+        }
     }
 
     private void OnObjectTextChanged(object? sender, TextChangedEventArgs e)
     {
-        var query = (e.NewTextValue ?? string.Empty).Trim();
-        _filteredObjects.Clear();
+        FilterSuggestions(e.NewTextValue, _allObjects, _filteredObjects, ObjectSuggestionsView);
+    }
 
-        if (query.Length < 1)
+    private void OnJumpTypeTextChanged(object? sender, TextChangedEventArgs e)
+    {
+        FilterSuggestions(e.NewTextValue, _allJumpTypes, _filteredJumpTypes, JumpTypeSuggestionsView);
+    }
+
+    private static void FilterSuggestions(string? query, List<string> source, ObservableCollection<string> target, CollectionView list)
+    {
+        var text = (query ?? string.Empty).Trim();
+        target.Clear();
+
+        if (text.Length < 1)
         {
-            ObjectSuggestionsView.IsVisible = false;
+            list.IsVisible = false;
             return;
         }
 
-        foreach (var item in _allObjects.Where(x => x.Contains(query, StringComparison.OrdinalIgnoreCase)).Take(8))
-            _filteredObjects.Add(item);
+        foreach (var item in source.Where(x => x.Contains(text, StringComparison.OrdinalIgnoreCase)).Take(8))
+            target.Add(item);
 
-        ObjectSuggestionsView.IsVisible = _filteredObjects.Count > 0;
+        list.IsVisible = target.Count > 0;
     }
 
     private void OnObjectSuggestionSelected(object? sender, SelectionChangedEventArgs e)
@@ -51,6 +101,15 @@ public partial class NewJumpPage : ContentPage
 
         ObjectSuggestionsView.SelectedItem = null;
         ObjectSuggestionsView.IsVisible = false;
+    }
+
+    private void OnJumpTypeSuggestionSelected(object? sender, SelectionChangedEventArgs e)
+    {
+        if (e.CurrentSelection.FirstOrDefault() is string selected)
+            TypeEntry.Text = selected;
+
+        JumpTypeSuggestionsView.SelectedItem = null;
+        JumpTypeSuggestionsView.IsVisible = false;
     }
 
     private async void OnAutoGpsClicked(object sender, EventArgs e)
@@ -96,8 +155,6 @@ public partial class NewJumpPage : ContentPage
         }
     }
 
-
-
     private async Task<byte[]?> LoadSelectedPhotoBytesAsync()
     {
         if (string.IsNullOrWhiteSpace(_selectedPhotoPath) || !File.Exists(_selectedPhotoPath))
@@ -119,15 +176,21 @@ public partial class NewJumpPage : ContentPage
             return;
         }
 
+        var composedDate = DatePicker.Date.Date.Add(TimePicker.Time);
+
         var item = new JumpListItem
         {
-            Id = jumpNumber,
+            Id = _editing?.Id ?? jumpNumber,
             NumeroSalto = jumpNumber,
-            Data = DatePicker.Date.ToString("dd/MM/yyyy"),
+            OriginalNumeroSalto = _editing?.NumeroSalto ?? jumpNumber,
+            IsEdit = _editing is not null,
+            Data = composedDate.ToString("dd/MM/yyyy HH:mm"),
             Oggetto = ObjectEntry.Text,
             TipoSalto = TypeEntry.Text,
             Note = NotesEditor.Text,
-            ObjectPhotoPath = _selectedPhotoPath,
+            ObjectPhotoPath = _selectedPhotoPath ?? _editing?.ObjectPhotoPath,
+            ObjectPhotoBlob = _editing?.ObjectPhotoBlob,
+            JumpPhotoBlob = _editing?.JumpPhotoBlob,
             NewPhotoBytes = await LoadSelectedPhotoBytesAsync(),
             Latitude = LatitudeEntry.Text,
             Longitude = LongitudeEntry.Text

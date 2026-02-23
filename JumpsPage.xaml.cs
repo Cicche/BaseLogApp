@@ -47,10 +47,12 @@ public partial class JumpsPage : ContentPage
         await DisplayAlert("DB attivo", _vm.GetCurrentDbPath(), "OK");
     }
 
-    private async Task OpenNewJumpPage()
+    private async Task OpenNewJumpPage(JumpListItem? edit = null)
     {
         var knownObjects = await _vm.GetObjectNamesAsync();
-        var page = new NewJumpPage(_vm.NextJumpNumber, knownObjects);
+        var knownJumpTypes = await _vm.GetJumpTypeNamesAsync();
+        var suggested = edit?.NumeroSalto ?? _vm.NextJumpNumber;
+        var page = new NewJumpPage(suggested, knownObjects, knownJumpTypes, edit);
         page.JumpSaved += OnJumpSaved;
         await Navigation.PushModalAsync(new NavigationPage(page));
     }
@@ -63,5 +65,33 @@ public partial class JumpsPage : ContentPage
 
         if (sender is NewJumpPage page)
             page.JumpSaved -= OnJumpSaved;
+    }
+
+    private async void OnEditJumpInvoked(object? sender, EventArgs e)
+    {
+        if (sender is SwipeItem { CommandParameter: JumpListItem item })
+            await OpenNewJumpPage(item);
+    }
+
+    private async void OnDeleteJumpInvoked(object? sender, EventArgs e)
+    {
+        if (sender is not SwipeItem { CommandParameter: JumpListItem item })
+            return;
+
+        var confirm = await DisplayAlert("Conferma", $"Eliminare il salto #{item.NumeroSalto}?", "Sì", "No");
+        if (!confirm)
+            return;
+
+        var deleted = await _vm.DeleteJumpAsync(item);
+        if (!deleted)
+            await DisplayAlert("DB", "Impossibile eliminare il salto.", "OK");
+    }
+
+    private async void OnPhotoTapped(object? sender, TappedEventArgs e)
+    {
+        if (e.Parameter is not JumpListItem item)
+            return;
+
+        await Navigation.PushModalAsync(new NavigationPage(new PhotoViewerPage(item)));
     }
 }
