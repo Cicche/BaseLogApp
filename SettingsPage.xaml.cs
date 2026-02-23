@@ -18,6 +18,9 @@ public partial class SettingsPage : ContentPage
     private async void OnOpenAddRigClicked(object sender, EventArgs e)
         => await Navigation.PushModalAsync(new NavigationPage(new AddRigPage(_vm)));
 
+    private async void OnOpenAddJumpTypeClicked(object sender, EventArgs e)
+        => await Navigation.PushModalAsync(new NavigationPage(new AddJumpTypePage(_vm)));
+
     private async void OnOpenDbToolsClicked(object sender, EventArgs e)
         => await Navigation.PushModalAsync(new NavigationPage(new DbToolsPage(_vm)));
 }

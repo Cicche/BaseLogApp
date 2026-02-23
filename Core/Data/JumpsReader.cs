@@ -19,8 +19,9 @@ namespace BaseLogApp.Core.Data
         Task<IReadOnlyList<JumpListItem>> GetJumpsAsync();
         Task<IReadOnlyList<string>> GetObjectNamesAsync();
         Task<bool> AddJumpAsync(JumpListItem jump);
-        Task<bool> AddObjectAsync(string name, string? description, string? position, string? heightMeters);
+        Task<bool> AddObjectAsync(string name, string? description, string? position, string? heightMeters, byte[]? photoBytes);
         Task<bool> AddRigAsync(string name, string? description);
+        Task<bool> AddJumpTypeAsync(string name, string? notes);
         Task<bool> ExportLightweightJsonAsync(string filePath);
         Task<bool> ImportLightweightJsonAsync(string filePath);
         Task<bool> ExportFullDbAsync(string destinationPath);
@@ -57,6 +58,8 @@ namespace BaseLogApp.Core.Data
                             ExitName AS TipoSalto,
                             Notes AS Note,
                             PhotoPath AS ObjectPhotoPath,
+                            NULL AS ObjectPhotoBlob,
+                            NULL AS JumpPhotoBlob,
                             CAST(Latitude AS TEXT) AS Latitude,
                             CAST(Longitude AS TEXT) AS Longitude
                         FROM Jump
@@ -65,18 +68,7 @@ namespace BaseLogApp.Core.Data
                     var jumpRows = await db.QueryAsync<JumpRow>(jumpSql);
                     if (jumpRows.Count > 0)
                     {
-                        return jumpRows.Select(r => new JumpListItem
-                        {
-                            Id = r.Id,
-                            NumeroSalto = r.NumeroSalto,
-                            Data = UnixSecondsToDisplay(r.DateText),
-                            Oggetto = r.Oggetto,
-                            TipoSalto = r.TipoSalto,
-                            Note = r.Note,
-                            ObjectPhotoPath = NormalizePhotoPath(r.ObjectPhotoPath),
-                            Latitude = r.Latitude,
-                            Longitude = r.Longitude
-                        }).ToList();
+                        return jumpRows.Select(ToJumpItemModern).ToList();
                     }
                 }
 
@@ -90,6 +82,8 @@ namespace BaseLogApp.Core.Data
                         jt.ZNAME AS TipoSalto,
                         l.ZNOTES AS Note,
                         {photoExpr} AS ObjectPhotoPath,
+                        (SELECT oi.ZIMAGE FROM ZOBJECTIMAGE oi WHERE oi.ZOBJECT = o.Z_PK LIMIT 1) AS ObjectPhotoBlob,
+                        (SELECT li.ZIMAGE FROM ZLOGENTRYIMAGE li WHERE li.ZLOGENTRY = l.Z_PK LIMIT 1) AS JumpPhotoBlob,
                         NULL AS Latitude,
                         NULL AS Longitude
                     FROM ZLOGENTRY l
@@ -98,16 +92,7 @@ namespace BaseLogApp.Core.Data
                     ORDER BY l.ZJUMPNUMBER DESC;";
 
                 var rows = await db.QueryAsync<JumpRow>(sql);
-                return rows.Select(r => new JumpListItem
-                {
-                    Id = r.Id,
-                    NumeroSalto = r.NumeroSalto,
-                    Data = AppleSecondsToDisplayFromText(r.DateText),
-                    Oggetto = r.Oggetto,
-                    TipoSalto = r.TipoSalto,
-                    Note = r.Note,
-                    ObjectPhotoPath = NormalizePhotoPath(r.ObjectPhotoPath)
-                }).ToList();
+                return rows.Select(ToJumpItemLegacy).ToList();
             }
             catch (Exception ex)
             {
@@ -115,6 +100,32 @@ namespace BaseLogApp.Core.Data
                 return Array.Empty<JumpListItem>();
             }
         }
+
+        private static JumpListItem ToJumpItemModern(JumpRow r) => new()
+        {
+            Id = r.Id,
+            NumeroSalto = r.NumeroSalto,
+            Data = UnixSecondsToDisplay(r.DateText),
+            Oggetto = r.Oggetto,
+            TipoSalto = r.TipoSalto,
+            Note = r.Note,
+            ObjectPhotoPath = NormalizePhotoPath(r.ObjectPhotoPath),
+            Latitude = r.Latitude,
+            Longitude = r.Longitude
+        };
+
+        private static JumpListItem ToJumpItemLegacy(JumpRow r) => new()
+        {
+            Id = r.Id,
+            NumeroSalto = r.NumeroSalto,
+            Data = AppleSecondsToDisplayFromText(r.DateText),
+            Oggetto = r.Oggetto,
+            TipoSalto = r.TipoSalto,
+            Note = r.Note,
+            ObjectPhotoPath = NormalizePhotoPath(r.ObjectPhotoPath),
+            ObjectPhotoBlob = r.ObjectPhotoBlob,
+            JumpPhotoBlob = r.JumpPhotoBlob
+        };
 
         public async Task<IReadOnlyList<string>> GetObjectNamesAsync()
         {
@@ -175,6 +186,18 @@ namespace BaseLogApp.Core.Data
                         jump.NumeroSalto,
                         ToAppleSeconds(jump.Data),
                         jump.Note);
+
+                    if (jump.NewPhotoBytes is { Length: > 0 } && await HasTableAsync(db, "ZLOGENTRYIMAGE"))
+                    {
+                        var nextImgPk = await GetNextPrimaryKeyAsync(db, "ZLOGENTRYIMAGE", "Z_PK");
+                        await db.ExecuteAsync(@"
+                            INSERT INTO ZLOGENTRYIMAGE (Z_PK, Z_ENT, Z_OPT, ZLOGENTRY, ZIMAGE)
+                            VALUES (?, 1, 1, ?, ?);",
+                            nextImgPk,
+                            nextPk,
+                            jump.NewPhotoBytes);
+                    }
+
                     return true;
                 }
 
@@ -187,7 +210,7 @@ namespace BaseLogApp.Core.Data
             }
         }
 
-        public async Task<bool> AddObjectAsync(string name, string? description, string? position, string? heightMeters)
+        public async Task<bool> AddObjectAsync(string name, string? description, string? position, string? heightMeters, byte[]? photoBytes)
         {
             var dbPath = ResolveDbPath();
             if (!File.Exists(dbPath) || string.IsNullOrWhiteSpace(name)) return false;
@@ -201,6 +224,13 @@ namespace BaseLogApp.Core.Data
                     .Where(x => !string.IsNullOrWhiteSpace(x)));
 
                 await db.ExecuteAsync("INSERT INTO ZOBJECT (Z_PK, Z_ENT, Z_OPT, ZNAME, ZNOTES) VALUES (?,1,1,?,?);", nextPk, name.Trim(), notes);
+
+                if (photoBytes is { Length: > 0 } && await HasTableAsync(db, "ZOBJECTIMAGE"))
+                {
+                    var nextImgPk = await GetNextPrimaryKeyAsync(db, "ZOBJECTIMAGE", "Z_PK");
+                    await db.ExecuteAsync("INSERT INTO ZOBJECTIMAGE (Z_PK, Z_ENT, Z_OPT, ZOBJECT, ZIMAGE) VALUES (?,1,1,?,?);", nextImgPk, nextPk, photoBytes);
+                }
+
                 return true;
             }
             catch (Exception ex)
@@ -226,6 +256,29 @@ namespace BaseLogApp.Core.Data
             catch (Exception ex)
             {
                 Debug.WriteLine($"Error inserting rig: {ex.Message}");
+                return false;
+            }
+        }
+
+        public async Task<bool> AddJumpTypeAsync(string name, string? notes)
+        {
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath) || string.IsNullOrWhiteSpace(name)) return false;
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                if (!await HasTableAsync(db, "ZJUMPTYPE")) return false;
+
+                var existing = await db.QueryAsync<ObjectNameRow>("SELECT ZNAME AS Name FROM ZJUMPTYPE WHERE LOWER(TRIM(ZNAME)) = LOWER(TRIM(?)) LIMIT 1;", name);
+                if (existing.Count > 0) return true;
+
+                var nextPk = await GetNextPrimaryKeyAsync(db, "ZJUMPTYPE", "Z_PK");
+                await db.ExecuteAsync("INSERT INTO ZJUMPTYPE (Z_PK, Z_ENT, Z_OPT, ZNAME, ZNOTES) VALUES (?,1,1,?,?);", nextPk, name.Trim(), notes?.Trim());
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error inserting jump type: {ex.Message}");
                 return false;
             }
         }
@@ -350,6 +403,8 @@ namespace BaseLogApp.Core.Data
             public string? TipoSalto { get; set; }
             public string? Note { get; set; }
             public string? ObjectPhotoPath { get; set; }
+            public byte[]? ObjectPhotoBlob { get; set; }
+            public byte[]? JumpPhotoBlob { get; set; }
             public string? Latitude { get; set; }
             public string? Longitude { get; set; }
         }

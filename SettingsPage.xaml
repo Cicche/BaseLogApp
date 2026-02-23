@@ -8,6 +8,7 @@
         <VerticalStackLayout Padding="16" Spacing="12">
             <Button Text="Aggiungi Object" Clicked="OnOpenAddObjectClicked" />
             <Button Text="Aggiungi Rig" Clicked="OnOpenAddRigClicked" />
+            <Button Text="Aggiungi Tipo Salto" Clicked="OnOpenAddJumpTypeClicked" />
             <Button Text="Import / Export DB" Clicked="OnOpenDbToolsClicked" />
         </VerticalStackLayout>
     </ScrollView>

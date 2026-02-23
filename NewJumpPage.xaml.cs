@@ -96,6 +96,16 @@ public partial class NewJumpPage : ContentPage
         }
     }
 
+
+
+    private async Task<byte[]?> LoadSelectedPhotoBytesAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_selectedPhotoPath) || !File.Exists(_selectedPhotoPath))
+            return null;
+
+        return await File.ReadAllBytesAsync(_selectedPhotoPath);
+    }
+
     private async void OnCancelClicked(object sender, EventArgs e)
     {
         await Navigation.PopModalAsync();
@@ -118,6 +128,7 @@ public partial class NewJumpPage : ContentPage
             TipoSalto = TypeEntry.Text,
             Note = NotesEditor.Text,
             ObjectPhotoPath = _selectedPhotoPath,
+            NewPhotoBytes = await LoadSelectedPhotoBytesAsync(),
             Latitude = LatitudeEntry.Text,
             Longitude = LongitudeEntry.Text
         };

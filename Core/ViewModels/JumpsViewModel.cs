@@ -91,6 +91,7 @@ namespace BaseLogApp.Core.ViewModels
         public ObservableCollection<JumpListItem> FilteredItems { get; } = new();
         public ObservableCollection<StatBarItem> ObjectStats { get; } = new();
         public ObservableCollection<StatBarItem> TopYearStats { get; } = new();
+        public ObservableCollection<StatBarItem> JumpTypeStats { get; } = new();
         public ObservableCollection<StatBarItem> MonthlyStats { get; } = new();
 
         private bool _isBusy;
@@ -128,6 +129,7 @@ namespace BaseLogApp.Core.ViewModels
                 Items.Clear();
                 FilteredItems.Clear();
 
+                await EnsureDefaultJumpTypesAsync();
                 var rows = await _reader.GetJumpsAsync();
                 foreach (var it in rows.OrderByDescending(x => x.NumeroSalto))
                     Items.Add(it);
@@ -177,11 +179,14 @@ namespace BaseLogApp.Core.ViewModels
             return saved;
         }
 
-        public async Task<bool> AddObjectAsync(string name, string? description, string? position, string? heightMeters)
-            => await _reader.AddObjectAsync(name, description, position, heightMeters);
+        public async Task<bool> AddObjectAsync(string name, string? description, string? position, string? heightMeters, byte[]? photoBytes)
+            => await _reader.AddObjectAsync(name, description, position, heightMeters, photoBytes);
 
         public async Task<bool> AddRigAsync(string name, string? description)
             => await _reader.AddRigAsync(name, description);
+
+        public async Task<bool> AddJumpTypeAsync(string name, string? notes)
+            => await _reader.AddJumpTypeAsync(name, notes);
 
         public void AddJump(JumpListItem newJump)
         {
@@ -190,6 +195,14 @@ namespace BaseLogApp.Core.ViewModels
 
             ApplyFilter(Query);
             RecalculateStats();
+        }
+
+
+        private async Task EnsureDefaultJumpTypesAsync()
+        {
+            await _reader.AddJumpTypeAsync("Low", "default");
+            await _reader.AddJumpTypeAsync("Terminal", "default");
+            await _reader.AddJumpTypeAsync("Subterminal", "default");
         }
 
         public void ApplyFilter(string? text)
@@ -273,6 +286,26 @@ namespace BaseLogApp.Core.ViewModels
                     Label = y.Label,
                     Value = y.Value,
                     Ratio = (double)y.Value / maxYear
+                });
+            }
+
+
+            JumpTypeStats.Clear();
+            var typeGroups = Items
+                .Where(i => !string.IsNullOrWhiteSpace(i.TipoSalto))
+                .GroupBy(i => i.TipoSalto!)
+                .Select(g => new { Label = g.Key, Value = g.Count() })
+                .OrderByDescending(g => g.Value)
+                .Take(3)
+                .ToList();
+            var maxType = Math.Max(1, typeGroups.Select(x => x.Value).DefaultIfEmpty(1).Max());
+            foreach (var t in typeGroups)
+            {
+                JumpTypeStats.Add(new StatBarItem
+                {
+                    Label = t.Label,
+                    Value = t.Value,
+                    Ratio = (double)t.Value / maxType
                 });
             }
 

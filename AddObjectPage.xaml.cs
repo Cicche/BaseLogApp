@@ -6,6 +6,7 @@ namespace BaseLogApp.Views;
 public partial class AddObjectPage : ContentPage
 {
     private readonly JumpsViewModel _vm;
+    private byte[]? _objectPhotoBytes;
 
     public AddObjectPage(JumpsViewModel vm)
     {
@@ -33,9 +34,21 @@ public partial class AddObjectPage : ContentPage
             await Launcher.OpenAsync("https://www.google.com/maps");
     }
 
+    private async void OnPickPhotoClicked(object sender, EventArgs e)
+    {
+        var file = await MediaPicker.Default.PickPhotoAsync();
+        if (file is null) return;
+
+        await using var stream = await file.OpenReadAsync();
+        using var ms = new MemoryStream();
+        await stream.CopyToAsync(ms);
+        _objectPhotoBytes = ms.ToArray();
+        PhotoNameLabel.Text = Path.GetFileName(file.FileName);
+    }
+
     private async void OnSaveClicked(object sender, EventArgs e)
     {
-        var ok = await _vm.AddObjectAsync(ObjectNameEntry.Text ?? string.Empty, ObjectDescriptionEntry.Text, ObjectPositionEntry.Text, ObjectHeightEntry.Text);
+        var ok = await _vm.AddObjectAsync(ObjectNameEntry.Text ?? string.Empty, ObjectDescriptionEntry.Text, ObjectPositionEntry.Text, ObjectHeightEntry.Text, _objectPhotoBytes);
         await DisplayAlert("Object", ok ? "Object salvato" : "Errore salvataggio object", "OK");
     }
 
