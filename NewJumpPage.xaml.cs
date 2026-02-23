@@ -1,5 +1,6 @@
 using BaseLogApp.Core.Models;
 using System.Collections.ObjectModel;
+using System.Globalization;
 
 namespace BaseLogApp.Views;
 
@@ -9,6 +10,7 @@ public partial class NewJumpPage : ContentPage
 
     private readonly List<string> _allObjects;
     private readonly ObservableCollection<string> _filteredObjects = new();
+    private string? _selectedPhotoPath;
 
     public NewJumpPage(int suggestedJumpNumber, IReadOnlyList<string> knownObjects)
     {
@@ -51,6 +53,49 @@ public partial class NewJumpPage : ContentPage
         ObjectSuggestionsView.IsVisible = false;
     }
 
+    private async void OnAutoGpsClicked(object sender, EventArgs e)
+    {
+        var location = await Geolocation.GetLastKnownLocationAsync() ?? await Geolocation.GetLocationAsync();
+        if (location is null)
+        {
+            await DisplayAlert("GPS", "Posizione non disponibile", "OK");
+            return;
+        }
+
+        LatitudeEntry.Text = location.Latitude.ToString(CultureInfo.InvariantCulture);
+        LongitudeEntry.Text = location.Longitude.ToString(CultureInfo.InvariantCulture);
+    }
+
+    private async void OnOpenMapClicked(object sender, EventArgs e)
+    {
+        if (double.TryParse(LatitudeEntry.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out var lat) &&
+            double.TryParse(LongitudeEntry.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out var lng))
+        {
+            await Launcher.OpenAsync($"https://www.google.com/maps/search/?api=1&query={lat.ToString(CultureInfo.InvariantCulture)},{lng.ToString(CultureInfo.InvariantCulture)}");
+        }
+        else
+        {
+            await Launcher.OpenAsync("https://www.google.com/maps");
+        }
+    }
+
+    private async void OnPickPhotoClicked(object sender, EventArgs e)
+    {
+        try
+        {
+            var file = await MediaPicker.Default.PickPhotoAsync();
+            if (file is null)
+                return;
+
+            _selectedPhotoPath = file.FullPath;
+            PhotoPathLabel.Text = Path.GetFileName(_selectedPhotoPath);
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Foto", $"Impossibile selezionare foto: {ex.Message}", "OK");
+        }
+    }
+
     private async void OnCancelClicked(object sender, EventArgs e)
     {
         await Navigation.PopModalAsync();
@@ -71,7 +116,10 @@ public partial class NewJumpPage : ContentPage
             Data = DatePicker.Date.ToString("dd/MM/yyyy"),
             Oggetto = ObjectEntry.Text,
             TipoSalto = TypeEntry.Text,
-            Note = NotesEditor.Text
+            Note = NotesEditor.Text,
+            ObjectPhotoPath = _selectedPhotoPath,
+            Latitude = LatitudeEntry.Text,
+            Longitude = LongitudeEntry.Text
         };
 
         JumpSaved?.Invoke(this, item);

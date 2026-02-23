@@ -25,6 +25,9 @@ public static class MauiProgram
         builder.Services.AddTransient<JumpsPage>();
         builder.Services.AddTransient<SummaryPage>();
         builder.Services.AddTransient<SettingsPage>();
+        builder.Services.AddTransient<DbToolsPage>();
+        builder.Services.AddTransient<AddRigPage>();
+        builder.Services.AddTransient<AddObjectPage>();
 
 #if DEBUG
         builder.Logging.AddDebug();

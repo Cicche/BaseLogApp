@@ -12,6 +12,8 @@ namespace BaseLogApp.Core.Models
         public string? TipoSalto { get; set; }
         public string? Note { get; set; }
         public string? ObjectPhotoPath { get; set; }
+        public string? Latitude { get; set; }
+        public string? Longitude { get; set; }
 
         public string ObjectPhotoSource => string.IsNullOrWhiteSpace(ObjectPhotoPath)
             ? "dotnet_bot.png"

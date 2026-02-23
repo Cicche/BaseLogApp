@@ -6,6 +6,7 @@ namespace BaseLogApp.Views;
 public partial class JumpsPage : ContentPage
 {
     private readonly JumpsViewModel _vm;
+    private readonly ToolbarItem _dbSwitchItem;
 
     public JumpsPage(JumpsViewModel vm)
     {
@@ -14,10 +15,19 @@ public partial class JumpsPage : ContentPage
         _vm = vm;
         BindingContext = _vm;
 
+        _dbSwitchItem = new ToolbarItem
+        {
+            Text = _vm.CurrentProfileLabel,
+            Priority = 0,
+            Order = ToolbarItemOrder.Primary,
+            Command = new Command(async () => await OnSwitchDbClicked())
+        };
+
+        ToolbarItems.Add(_dbSwitchItem);
         ToolbarItems.Add(new ToolbarItem
         {
             Text = "+",
-            Priority = 0,
+            Priority = 1,
             Order = ToolbarItemOrder.Primary,
             Command = new Command(async () => await OpenNewJumpPage())
         });
@@ -27,6 +37,14 @@ public partial class JumpsPage : ContentPage
     {
         base.OnAppearing();
         await _vm.LoadAsync();
+        _dbSwitchItem.Text = _vm.CurrentProfileLabel;
+    }
+
+    private async Task OnSwitchDbClicked()
+    {
+        await _vm.ToggleDbProfileAsync();
+        _dbSwitchItem.Text = _vm.CurrentProfileLabel;
+        await DisplayAlert("DB attivo", _vm.GetCurrentDbPath(), "OK");
     }
 
     private async Task OpenNewJumpPage()

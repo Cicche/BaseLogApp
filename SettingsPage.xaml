@@ -5,27 +5,10 @@
              Title="Settings"
              BackgroundColor="#0A0F1E">
     <ScrollView>
-        <VerticalStackLayout Padding="16" Spacing="14">
-            <Label Text="Nuovo Object" TextColor="White" FontAttributes="Bold" FontSize="18"/>
-            <Entry x:Name="ObjectNameEntry" Placeholder="Nome object" />
-            <Editor x:Name="ObjectDescriptionEntry" Placeholder="Descrizione" AutoSize="TextChanges" HeightRequest="80"/>
-            <Entry x:Name="ObjectHeightEntry" Placeholder="Altezza (m)" Keyboard="Numeric" />
-            <Entry x:Name="ObjectPositionEntry" Placeholder="Posizione GPS" />
-            <Button Text="Auto-position (GPS device)" Clicked="OnAutoPositionClicked" />
-            <Button Text="Aggiungi Object" Clicked="OnAddObjectClicked" BackgroundColor="#2D8CFF" TextColor="White"/>
-
-            <BoxView HeightRequest="1" BackgroundColor="#27314E" Margin="0,4"/>
-
-            <Label Text="Nuovo Rig" TextColor="White" FontAttributes="Bold" FontSize="18"/>
-            <Entry x:Name="RigNameEntry" Placeholder="Nome rig" />
-            <Editor x:Name="RigDescriptionEntry" Placeholder="Descrizione rig" AutoSize="TextChanges" HeightRequest="80"/>
-            <Button Text="Aggiungi Rig" Clicked="OnAddRigClicked" BackgroundColor="#2D8CFF" TextColor="White"/>
-
-            <BoxView HeightRequest="1" BackgroundColor="#27314E" Margin="0,4"/>
-
-            <Label Text="Database" TextColor="White" FontAttributes="Bold" FontSize="18"/>
-            <Button Text="Import DB" Clicked="OnImportDbClicked" />
-            <Button Text="Export DB" Clicked="OnExportDbClicked" />
+        <VerticalStackLayout Padding="16" Spacing="12">
+            <Button Text="Aggiungi Object" Clicked="OnOpenAddObjectClicked" />
+            <Button Text="Aggiungi Rig" Clicked="OnOpenAddRigClicked" />
+            <Button Text="Import / Export DB" Clicked="OnOpenDbToolsClicked" />
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

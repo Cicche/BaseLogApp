@@ -76,6 +76,16 @@ namespace BaseLogApp.Core.ViewModels
             private set { if (_last365Days != value) { _last365Days = value; OnPropertyChanged(); } }
         }
 
+
+        private DbProfile _currentProfile = DbProfile.Modern;
+        public DbProfile CurrentProfile
+        {
+            get => _currentProfile;
+            private set { if (_currentProfile != value) { _currentProfile = value; OnPropertyChanged(); OnPropertyChanged(nameof(CurrentProfileLabel)); } }
+        }
+
+        public string CurrentProfileLabel => CurrentProfile == DbProfile.Legacy ? "DB: Legacy" : "DB: Modern";
+
         private readonly IJumpsReader _reader;
         public ObservableCollection<JumpListItem> Items { get; } = new();
         public ObservableCollection<JumpListItem> FilteredItems { get; } = new();
@@ -106,6 +116,7 @@ namespace BaseLogApp.Core.ViewModels
         public JumpsViewModel(IJumpsReader reader)
         {
             _reader = reader;
+            _reader.SetDbProfile(CurrentProfile);
         }
 
         public async Task LoadAsync()
@@ -133,6 +144,29 @@ namespace BaseLogApp.Core.ViewModels
 
         public async Task<IReadOnlyList<string>> GetObjectNamesAsync()
             => await _reader.GetObjectNamesAsync();
+
+
+        public async Task ToggleDbProfileAsync()
+        {
+            CurrentProfile = CurrentProfile == DbProfile.Legacy ? DbProfile.Modern : DbProfile.Legacy;
+            _reader.SetDbProfile(CurrentProfile);
+            await LoadAsync();
+        }
+
+        public Task<bool> ExportLightweightJsonAsync(string filePath)
+            => _reader.ExportLightweightJsonAsync(filePath);
+
+        public Task<bool> ImportLightweightJsonAsync(string filePath)
+            => _reader.ImportLightweightJsonAsync(filePath);
+
+        public Task<bool> ExportFullDbAsync(string filePath)
+            => _reader.ExportFullDbAsync(filePath);
+
+        public Task<bool> ImportFullDbAsync(string filePath)
+            => _reader.ImportFullDbAsync(filePath);
+
+        public string GetCurrentDbPath()
+            => _reader.GetCurrentDbPath();
 
         public async Task<bool> SaveJumpAsync(JumpListItem newJump)
         {
