@@ -6,20 +6,29 @@
              BackgroundColor="#0A0F1E">
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="12">
-            <Grid ColumnDefinitions="*,Auto">
-                <Label Text="Object" TextColor="White" VerticalTextAlignment="Center" FontSize="16"/>
-                <Button Grid.Column="1" Text="+" WidthRequest="44" Clicked="OnOpenAddObjectClicked" />
-            </Grid>
+            <Border BackgroundColor="#151B2E" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="14">
+                <Label Text="Object" TextColor="White" FontSize="16">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnOpenObjectListClicked" />
+                    </Label.GestureRecognizers>
+                </Label>
+            </Border>
 
-            <Grid ColumnDefinitions="*,Auto">
-                <Label Text="Rig" TextColor="White" VerticalTextAlignment="Center" FontSize="16"/>
-                <Button Grid.Column="1" Text="+" WidthRequest="44" Clicked="OnOpenAddRigClicked" />
-            </Grid>
+            <Border BackgroundColor="#151B2E" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="14">
+                <Label Text="Rig" TextColor="White" FontSize="16">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnOpenRigListClicked" />
+                    </Label.GestureRecognizers>
+                </Label>
+            </Border>
 
-            <Grid ColumnDefinitions="*,Auto">
-                <Label Text="Tipo Salto" TextColor="White" VerticalTextAlignment="Center" FontSize="16"/>
-                <Button Grid.Column="1" Text="+" WidthRequest="44" Clicked="OnOpenAddJumpTypeClicked" />
-            </Grid>
+            <Border BackgroundColor="#151B2E" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="14">
+                <Label Text="Tipo Salto" TextColor="White" FontSize="16">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnOpenJumpTypeListClicked" />
+                    </Label.GestureRecognizers>
+                </Label>
+            </Border>
 
             <Button Text="Import / Export DB" Clicked="OnOpenDbToolsClicked" Margin="0,10,0,0" />
         </VerticalStackLayout>

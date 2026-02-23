@@ -19,9 +19,12 @@ namespace BaseLogApp.Core.Data
         Task<IReadOnlyList<JumpListItem>> GetJumpsAsync();
         Task<IReadOnlyList<string>> GetObjectNamesAsync();
         Task<IReadOnlyList<string>> GetJumpTypeNamesAsync();
+        Task<IReadOnlyList<string>> GetRigNamesAsync();
         Task<bool> AddJumpAsync(JumpListItem jump);
         Task<bool> UpdateJumpAsync(JumpListItem jump);
         Task<bool> DeleteJumpAsync(JumpListItem jump);
+        Task<bool> ShiftJumpNumbersUpFromAsync(int fromNumber, int? excludeId = null);
+        Task<bool> SupportsJumpNumberShiftAsync();
         Task<bool> AddObjectAsync(string name, string? description, string? position, string? heightMeters, byte[]? photoBytes);
         Task<bool> AddRigAsync(string name, string? description);
         Task<bool> AddJumpTypeAsync(string name, string? notes);
@@ -191,6 +194,30 @@ namespace BaseLogApp.Core.Data
             }
         }
 
+
+        public async Task<IReadOnlyList<string>> GetRigNamesAsync()
+        {
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath)) return Array.Empty<string>();
+
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                if (!await HasTableAsync(db, "ZRIG"))
+                    return Array.Empty<string>();
+
+                return (await db.QueryAsync<ObjectNameRow>("SELECT ZNAME AS Name FROM ZRIG WHERE ZNAME IS NOT NULL AND TRIM(ZNAME) <> '';"))
+                    .Select(x => x.Name!.Trim())
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(x => x)
+                    .ToList();
+            }
+            catch
+            {
+                return Array.Empty<string>();
+            }
+        }
+
         public async Task<bool> AddJumpAsync(JumpListItem jump)
         {
             var dbPath = ResolveDbPath();
@@ -307,6 +334,79 @@ namespace BaseLogApp.Core.Data
                     await db.ExecuteAsync("DELETE FROM ZLOGENTRYIMAGE WHERE ZLOGENTRY=?;", jump.Id);
                     await db.ExecuteAsync("DELETE FROM ZLOGENTRY WHERE Z_PK=?;", jump.Id);
                     await db.ExecuteAsync("UPDATE ZLOGENTRY SET ZJUMPNUMBER = ZJUMPNUMBER - 1 WHERE ZJUMPNUMBER > ?;", jump.NumeroSalto);
+                    return true;
+                }
+
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+
+        public async Task<bool> SupportsJumpNumberShiftAsync()
+        {
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath)) return false;
+
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                if (await HasTableAsync(db, "ZLOGENTRY"))
+                    return true;
+
+                if (await HasTableAsync(db, "Jump"))
+                {
+                    var cols = await db.QueryAsync<PragmaColumn>("PRAGMA table_info('Jump');");
+                    return cols.Any(c => string.Equals(c.Name, "JumpNumber", StringComparison.OrdinalIgnoreCase));
+                }
+
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> ShiftJumpNumbersUpFromAsync(int fromNumber, int? excludeId = null)
+        {
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath)) return false;
+
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+
+                if (await HasTableAsync(db, "ZLOGENTRY"))
+                {
+                    if (excludeId.HasValue)
+                    {
+                        await db.ExecuteAsync("UPDATE ZLOGENTRY SET ZJUMPNUMBER = ZJUMPNUMBER + 1 WHERE ZJUMPNUMBER >= ? AND Z_PK <> ?;", fromNumber, excludeId.Value);
+                    }
+                    else
+                    {
+                        await db.ExecuteAsync("UPDATE ZLOGENTRY SET ZJUMPNUMBER = ZJUMPNUMBER + 1 WHERE ZJUMPNUMBER >= ?;", fromNumber);
+                    }
+                    return true;
+                }
+
+                if (await HasTableAsync(db, "Jump"))
+                {
+                    var cols = await db.QueryAsync<PragmaColumn>("PRAGMA table_info('Jump');");
+                    if (!cols.Any(c => string.Equals(c.Name, "JumpNumber", StringComparison.OrdinalIgnoreCase)))
+                        return false;
+
+                    if (excludeId.HasValue)
+                    {
+                        await db.ExecuteAsync("UPDATE Jump SET JumpNumber = JumpNumber + 1 WHERE JumpNumber >= ? AND Id <> ?;", fromNumber, excludeId.Value);
+                    }
+                    else
+                    {
+                        await db.ExecuteAsync("UPDATE Jump SET JumpNumber = JumpNumber + 1 WHERE JumpNumber >= ?;", fromNumber);
+                    }
                     return true;
                 }
 

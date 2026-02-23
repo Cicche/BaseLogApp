@@ -6,7 +6,7 @@ namespace BaseLogApp.Views;
 
 public partial class NewJumpPage : ContentPage
 {
-    public event EventHandler<JumpListItem>? JumpSaved;
+    public Func<JumpListItem, Task<bool>>? SaveRequested;
 
     private readonly List<string> _allObjects;
     private readonly List<string> _allJumpTypes;
@@ -196,7 +196,14 @@ public partial class NewJumpPage : ContentPage
             Longitude = LongitudeEntry.Text
         };
 
-        JumpSaved?.Invoke(this, item);
-        await Navigation.PopModalAsync();
+        if (SaveRequested is null)
+        {
+            await DisplayAlert("Errore", "Salvataggio non disponibile.", "OK");
+            return;
+        }
+
+        var saved = await SaveRequested(item);
+        if (saved)
+            await Navigation.PopModalAsync();
     }
 }

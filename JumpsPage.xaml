@@ -120,6 +120,17 @@
 
                                     <Label Text="Note complete" TextColor="#8E99B8" FontSize="12" />
                                     <Label Text="{Binding Note}" TextColor="#D8DEEF" />
+
+                                    <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,0">
+                                        <Label Grid.Column="1"
+                                               Text="🔒"
+                                               FontSize="22"
+                                               TextColor="#D8DEEF">
+                                            <Label.GestureRecognizers>
+                                                <TapGestureRecognizer Tapped="OnLockEditTapped" CommandParameter="{Binding .}" />
+                                            </Label.GestureRecognizers>
+                                        </Label>
+                                    </Grid>
                                 </VerticalStackLayout>
                             </toolkit:Expander>
                         </Border>

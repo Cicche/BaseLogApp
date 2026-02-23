@@ -150,6 +150,9 @@ namespace BaseLogApp.Core.ViewModels
         public async Task<IReadOnlyList<string>> GetJumpTypeNamesAsync()
             => await _reader.GetJumpTypeNamesAsync();
 
+        public async Task<IReadOnlyList<string>> GetRigNamesAsync()
+            => await _reader.GetRigNamesAsync();
+
 
         public async Task ToggleDbProfileAsync()
         {
@@ -172,6 +175,15 @@ namespace BaseLogApp.Core.ViewModels
 
         public string GetCurrentDbPath()
             => _reader.GetCurrentDbPath();
+
+        public bool HasJumpNumberConflict(int number, int? currentId = null)
+            => Items.Any(x => x.NumeroSalto == number && (!currentId.HasValue || x.Id != currentId.Value));
+
+        public Task<bool> SupportsJumpNumberShiftAsync()
+            => _reader.SupportsJumpNumberShiftAsync();
+
+        public async Task<bool> ShiftJumpNumbersUpFromAsync(int fromNumber, int? excludeId = null)
+            => await _reader.ShiftJumpNumbersUpFromAsync(fromNumber, excludeId);
 
         public async Task<bool> SaveJumpAsync(JumpListItem newJump)
         {

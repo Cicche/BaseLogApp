@@ -52,19 +52,42 @@ public partial class JumpsPage : ContentPage
         var knownObjects = await _vm.GetObjectNamesAsync();
         var knownJumpTypes = await _vm.GetJumpTypeNamesAsync();
         var suggested = edit?.NumeroSalto ?? _vm.NextJumpNumber;
-        var page = new NewJumpPage(suggested, knownObjects, knownJumpTypes, edit);
-        page.JumpSaved += OnJumpSaved;
+        var page = new NewJumpPage(suggested, knownObjects, knownJumpTypes, edit)
+        {
+            SaveRequested = SaveJumpFromEditorAsync
+        };
         await Navigation.PushModalAsync(new NavigationPage(page));
     }
 
-    private async void OnJumpSaved(object? sender, JumpListItem e)
+    private async Task<bool> SaveJumpFromEditorAsync(JumpListItem e)
     {
+        var hasConflict = _vm.HasJumpNumberConflict(e.NumeroSalto, e.IsEdit ? e.Id : null);
+        if (hasConflict)
+        {
+            var canShift = await _vm.SupportsJumpNumberShiftAsync();
+            if (!canShift)
+            {
+                await DisplayAlert("Numero salto", "Numero già esistente. In questo DB non è possibile rinumerare automaticamente.", "OK");
+                return false;
+            }
+
+            var confirmShift = await DisplayAlert("Numero esistente", $"Il salto #{e.NumeroSalto} esiste già. Vuoi spostare in avanti i salti successivi?", "Sì", "No");
+            if (!confirmShift)
+                return false;
+
+            var shifted = await _vm.ShiftJumpNumbersUpFromAsync(e.NumeroSalto, e.IsEdit ? e.Id : null);
+            if (!shifted)
+            {
+                await DisplayAlert("DB", "Impossibile rinumerare i salti esistenti.", "OK");
+                return false;
+            }
+        }
+
         var saved = await _vm.SaveJumpAsync(e);
         if (!saved)
             await DisplayAlert("DB", "Impossibile salvare il salto nel database.", "OK");
 
-        if (sender is NewJumpPage page)
-            page.JumpSaved -= OnJumpSaved;
+        return saved;
     }
 
     private async void OnEditJumpInvoked(object? sender, EventArgs e)
@@ -85,6 +108,12 @@ public partial class JumpsPage : ContentPage
         var deleted = await _vm.DeleteJumpAsync(item);
         if (!deleted)
             await DisplayAlert("DB", "Impossibile eliminare il salto.", "OK");
+    }
+
+    private async void OnLockEditTapped(object? sender, TappedEventArgs e)
+    {
+        if (e.Parameter is JumpListItem item)
+            await OpenNewJumpPage(item);
     }
 
     private async void OnPhotoTapped(object? sender, TappedEventArgs e)
