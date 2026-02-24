@@ -9,8 +9,7 @@ public partial class AddObjectPage : ContentPage
 {
     private readonly JumpsViewModel _vm;
     private byte[]? _objectPhotoBytes;
-    private ObjectCatalogItem? _editing;
-    private readonly List<ObjectCatalogItem> _existing = new();
+    private readonly ObjectCatalogItem? _editing;
     private readonly string[] _fixedTypes = ["Building", "Antennas", "Span", "Earth", "Others"];
     private readonly ObservableCollection<string> _typeSuggestions = new();
 
@@ -29,15 +28,6 @@ public partial class AddObjectPage : ContentPage
         }
     }
 
-    protected override async void OnAppearing()
-    {
-        base.OnAppearing();
-        var rows = await _vm.GetObjectsCatalogAsync();
-        _existing.Clear();
-        _existing.AddRange(rows.OrderBy(x => x.Name));
-        ExistingObjectPicker.ItemsSource = _existing.Select(x => x.Name).ToList();
-    }
-
     private void FillFromObject(ObjectCatalogItem item)
     {
         ObjectNameEntry.Text = item.Name;
@@ -45,28 +35,26 @@ public partial class AddObjectPage : ContentPage
         ObjectDescriptionEntry.Text = item.Description ?? item.Notes;
         ObjectPositionEntry.Text = item.Position;
         ObjectHeightEntry.Text = item.HeightMeters;
+        NoPhotoNameLabel.Text = item.Name;
 
         if (item.PhotoBlob is { Length: > 0 })
         {
             ObjectPreviewImage.Source = ImageSource.FromStream(() => new MemoryStream(item.PhotoBlob));
             ObjectPreviewImage.IsVisible = true;
+            NoPhotoBorder.IsVisible = false;
         }
         else
         {
             ObjectPreviewImage.Source = null;
             ObjectPreviewImage.IsVisible = false;
+            NoPhotoBorder.IsVisible = true;
         }
     }
 
-    private void OnExistingObjectChanged(object? sender, EventArgs e)
+    private void OnObjectNameChanged(object? sender, TextChangedEventArgs e)
     {
-        if (ExistingObjectPicker.SelectedIndex < 0 || ExistingObjectPicker.SelectedIndex >= _existing.Count)
-            return;
-
-        _editing = _existing[ExistingObjectPicker.SelectedIndex];
-        Title = "Modifica Object";
-        SaveButton.Text = "Salva modifiche";
-        FillFromObject(_editing);
+        if (!ObjectPreviewImage.IsVisible)
+            NoPhotoNameLabel.Text = string.IsNullOrWhiteSpace(e.NewTextValue) ? "Nome object" : e.NewTextValue.Trim();
     }
 
     private void OnObjectTypeTextChanged(object? sender, TextChangedEventArgs e)
@@ -124,14 +112,14 @@ public partial class AddObjectPage : ContentPage
         PhotoNameLabel.Text = Path.GetFileName(file.FileName);
         ObjectPreviewImage.Source = ImageSource.FromStream(() => new MemoryStream(_objectPhotoBytes));
         ObjectPreviewImage.IsVisible = true;
+        NoPhotoBorder.IsVisible = false;
     }
 
     private async void OnSaveClicked(object sender, EventArgs e)
     {
-        var target = _editing;
-        var ok = target is null
+        var ok = _editing is null
             ? await _vm.AddObjectAsync(ObjectNameEntry.Text ?? string.Empty, ObjectTypeEntry.Text, ObjectDescriptionEntry.Text, ObjectPositionEntry.Text, ObjectHeightEntry.Text, _objectPhotoBytes)
-            : await _vm.UpdateObjectAsync(target.Id, ObjectNameEntry.Text ?? string.Empty, ObjectTypeEntry.Text, ObjectDescriptionEntry.Text, ObjectPositionEntry.Text, ObjectHeightEntry.Text, _objectPhotoBytes);
+            : await _vm.UpdateObjectAsync(_editing.Id, ObjectNameEntry.Text ?? string.Empty, ObjectTypeEntry.Text, ObjectDescriptionEntry.Text, ObjectPositionEntry.Text, ObjectHeightEntry.Text, _objectPhotoBytes);
 
         await DisplayAlert("Object", ok ? "Object salvato" : "Errore salvataggio object", "OK");
         if (ok) await Navigation.PopModalAsync();

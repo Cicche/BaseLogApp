@@ -6,12 +6,14 @@
              BackgroundColor="#0A0F1E">
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="12">
-            <Label Text="Seleziona object esistente" TextColor="#8E99B8" />
-            <Picker x:Name="ExistingObjectPicker" Title="(opzionale)" SelectedIndexChanged="OnExistingObjectChanged" />
+            <Grid>
+                <Image x:Name="ObjectPreviewImage" Aspect="AspectFit" HorizontalOptions="Fill" HeightRequest="220" IsVisible="False" />
+                <Border x:Name="NoPhotoBorder" BackgroundColor="#151B2E" StrokeThickness="0" StrokeShape="RoundRectangle 12" HeightRequest="220" IsVisible="True">
+                    <Label x:Name="NoPhotoNameLabel" Text="Nome object" TextColor="#8E99B8" HorizontalOptions="Center" VerticalOptions="Center" FontAttributes="Bold" FontSize="20"/>
+                </Border>
+            </Grid>
 
-            <Image x:Name="ObjectPreviewImage" Aspect="AspectFit" HorizontalOptions="Fill" HeightRequest="220" IsVisible="False" />
-
-            <Entry x:Name="ObjectNameEntry" Placeholder="Nome object" />
+            <Entry x:Name="ObjectNameEntry" Placeholder="Nome object" TextChanged="OnObjectNameChanged" />
             <Entry x:Name="ObjectTypeEntry" Placeholder="Tipo object (B/A/S/E/Others)" TextChanged="OnObjectTypeTextChanged" />
             <CollectionView x:Name="ObjectTypeSuggestionsView" IsVisible="False" HeightRequest="120" SelectionMode="Single" SelectionChanged="OnObjectTypeSuggestionSelected" BackgroundColor="#151B2E">
                 <CollectionView.ItemTemplate>
