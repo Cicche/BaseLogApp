@@ -6,3 +6,11 @@ public class CatalogItem
     public string Name { get; set; } = string.Empty;
     public string? Notes { get; set; }
 }
+
+public sealed class ObjectCatalogItem : CatalogItem
+{
+    public string? ObjectType { get; set; }
+    public string? Description { get; set; }
+    public string? HeightMeters { get; set; }
+    public string? Position { get; set; }
+}

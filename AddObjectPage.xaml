@@ -7,6 +7,7 @@
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="12">
             <Entry x:Name="ObjectNameEntry" Placeholder="Nome object" />
+            <Entry x:Name="ObjectTypeEntry" Placeholder="Tipo object (Earth, Building...)" />
             <Editor x:Name="ObjectDescriptionEntry" Placeholder="Descrizione" AutoSize="TextChanges" HeightRequest="80"/>
             <Entry x:Name="ObjectHeightEntry" Placeholder="Altezza (m)" Keyboard="Numeric" />
             <Entry x:Name="ObjectPositionEntry" Placeholder="Posizione GPS" />

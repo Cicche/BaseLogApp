@@ -20,7 +20,7 @@ namespace BaseLogApp.Core.Data
         Task<IReadOnlyList<string>> GetObjectNamesAsync();
         Task<IReadOnlyList<string>> GetJumpTypeNamesAsync();
         Task<IReadOnlyList<string>> GetRigNamesAsync();
-        Task<IReadOnlyList<CatalogItem>> GetObjectsCatalogAsync();
+        Task<IReadOnlyList<ObjectCatalogItem>> GetObjectsCatalogAsync();
         Task<IReadOnlyList<CatalogItem>> GetRigsCatalogAsync();
         Task<IReadOnlyList<CatalogItem>> GetJumpTypesCatalogAsync();
         Task<bool> AddJumpAsync(JumpListItem jump);
@@ -28,10 +28,10 @@ namespace BaseLogApp.Core.Data
         Task<bool> DeleteJumpAsync(JumpListItem jump);
         Task<bool> ShiftJumpNumbersUpFromAsync(int fromNumber, int? excludeId = null);
         Task<bool> SupportsJumpNumberShiftAsync();
-        Task<bool> AddObjectAsync(string name, string? description, string? position, string? heightMeters, byte[]? photoBytes);
+        Task<bool> AddObjectAsync(string name, string? objectType, string? description, string? position, string? heightMeters, byte[]? photoBytes);
         Task<bool> AddRigAsync(string name, string? description);
         Task<bool> AddJumpTypeAsync(string name, string? notes);
-        Task<bool> UpdateObjectAsync(int id, string name, string? description, string? position, string? heightMeters, byte[]? photoBytes);
+        Task<bool> UpdateObjectAsync(int id, string name, string? objectType, string? description, string? position, string? heightMeters, byte[]? photoBytes);
         Task<bool> UpdateRigAsync(int id, string name, string? description);
         Task<bool> UpdateJumpTypeAsync(int id, string name, string? notes);
         Task<bool> ExportLightweightJsonAsync(string filePath);
@@ -224,20 +224,39 @@ namespace BaseLogApp.Core.Data
             }
         }
 
-        public async Task<IReadOnlyList<CatalogItem>> GetObjectsCatalogAsync()
+        public async Task<IReadOnlyList<ObjectCatalogItem>> GetObjectsCatalogAsync()
         {
             var dbPath = ResolveDbPath();
-            if (!File.Exists(dbPath)) return Array.Empty<CatalogItem>();
+            if (!File.Exists(dbPath)) return Array.Empty<ObjectCatalogItem>();
 
             try
             {
                 var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
-                if (!await HasTableAsync(db, "ZOBJECT")) return Array.Empty<CatalogItem>();
-                return (await db.QueryAsync<CatalogItem>("SELECT Z_PK AS Id, ZNAME AS Name, ZNOTES AS Notes FROM ZOBJECT ORDER BY ZNAME;"))
-                    .Where(x => !string.IsNullOrWhiteSpace(x.Name))
-                    .ToList();
+                if (!await HasTableAsync(db, "ZOBJECT")) return Array.Empty<ObjectCatalogItem>();
+
+                var columns = await GetTableColumnsAsync(db, "ZOBJECT");
+                var typeExpr = BuildColumnExpression("o", columns, "ZOBJECTTYPE", "ZTYPE", "ZCATEGORY");
+                var descExpr = BuildColumnExpression("o", columns, "ZDESCRIPTION", "ZDESC");
+                var posExpr = BuildColumnExpression("o", columns, "ZPOSITION", "ZGPS", "ZLOCATION", "ZCOORDINATES");
+                var heightExpr = BuildColumnExpression("o", columns, "ZHEIGHT", "ZHEIGHTMETERS", "ZALTITUDE");
+
+                var sql = $@"SELECT o.Z_PK AS Id,
+                                    o.ZNAME AS Name,
+                                    o.ZNOTES AS Notes,
+                                    {typeExpr} AS ObjectType,
+                                    {descExpr} AS Description,
+                                    {heightExpr} AS HeightMeters,
+                                    {posExpr} AS Position
+                             FROM ZOBJECT o
+                             ORDER BY o.ZNAME;";
+
+                var rows = await db.QueryAsync<ObjectCatalogItem>(sql);
+                foreach (var row in rows)
+                    PopulateObjectFieldsFromNotes(row);
+
+                return rows.Where(x => !string.IsNullOrWhiteSpace(x.Name)).ToList();
             }
-            catch { return Array.Empty<CatalogItem>(); }
+            catch { return Array.Empty<ObjectCatalogItem>(); }
         }
 
         public async Task<IReadOnlyList<CatalogItem>> GetRigsCatalogAsync()
@@ -472,7 +491,7 @@ namespace BaseLogApp.Core.Data
             }
         }
 
-        public async Task<bool> AddObjectAsync(string name, string? description, string? position, string? heightMeters, byte[]? photoBytes)
+        public async Task<bool> AddObjectAsync(string name, string? objectType, string? description, string? position, string? heightMeters, byte[]? photoBytes)
         {
             var dbPath = ResolveDbPath();
             if (!File.Exists(dbPath) || string.IsNullOrWhiteSpace(name)) return false;
@@ -482,10 +501,18 @@ namespace BaseLogApp.Core.Data
                 if (!await HasTableAsync(db, "ZOBJECT")) return false;
 
                 var nextPk = await GetNextPrimaryKeyAsync(db, "ZOBJECT", "Z_PK");
-                var notes = string.Join(" | ", new[] { description, position is null ? null : $"GPS:{position}", heightMeters is null ? null : $"H:{heightMeters}m" }
-                    .Where(x => !string.IsNullOrWhiteSpace(x)));
+                var columns = await GetTableColumnsAsync(db, "ZOBJECT");
+                var notes = BuildObjectNotes(objectType, description, position, heightMeters);
 
-                await db.ExecuteAsync("INSERT INTO ZOBJECT (Z_PK, Z_ENT, Z_OPT, ZNAME, ZNOTES) VALUES (?,1,1,?,?);", nextPk, name.Trim(), notes);
+                var insertColumns = new List<string> { "Z_PK", "Z_ENT", "Z_OPT", "ZNAME", "ZNOTES" };
+                var values = new List<object?> { nextPk, 1, 1, name.Trim(), notes };
+                TryAddObjectField(columns, insertColumns, values, "ZOBJECTTYPE", "ZTYPE", "ZCATEGORY", objectType?.Trim());
+                TryAddObjectField(columns, insertColumns, values, "ZDESCRIPTION", "ZDESC", description?.Trim());
+                TryAddObjectField(columns, insertColumns, values, "ZPOSITION", "ZGPS", "ZLOCATION", "ZCOORDINATES", position?.Trim());
+                TryAddObjectField(columns, insertColumns, values, "ZHEIGHT", "ZHEIGHTMETERS", "ZALTITUDE", heightMeters?.Trim());
+
+                var placeholders = string.Join(",", Enumerable.Repeat("?", insertColumns.Count));
+                await db.ExecuteAsync($"INSERT INTO ZOBJECT ({string.Join(",", insertColumns)}) VALUES ({placeholders});", values.ToArray());
 
                 if (photoBytes is { Length: > 0 } && await HasTableAsync(db, "ZOBJECTIMAGE"))
                 {
@@ -545,7 +572,7 @@ namespace BaseLogApp.Core.Data
             }
         }
 
-        public async Task<bool> UpdateObjectAsync(int id, string name, string? description, string? position, string? heightMeters, byte[]? photoBytes)
+        public async Task<bool> UpdateObjectAsync(int id, string name, string? objectType, string? description, string? position, string? heightMeters, byte[]? photoBytes)
         {
             var dbPath = ResolveDbPath();
             if (!File.Exists(dbPath) || string.IsNullOrWhiteSpace(name)) return false;
@@ -554,9 +581,18 @@ namespace BaseLogApp.Core.Data
                 var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
                 if (!await HasTableAsync(db, "ZOBJECT")) return false;
 
-                var notes = string.Join(" | ", new[] { description, position is null ? null : $"GPS:{position}", heightMeters is null ? null : $"H:{heightMeters}m" }
-                    .Where(x => !string.IsNullOrWhiteSpace(x)));
-                await db.ExecuteAsync("UPDATE ZOBJECT SET ZNAME=?, ZNOTES=? WHERE Z_PK=?;", name.Trim(), notes, id);
+                var columns = await GetTableColumnsAsync(db, "ZOBJECT");
+                var notes = BuildObjectNotes(objectType, description, position, heightMeters);
+
+                var updates = new List<string> { "ZNAME=?", "ZNOTES=?" };
+                var values = new List<object?> { name.Trim(), notes };
+                TryAddObjectUpdate(columns, updates, values, "ZOBJECTTYPE", "ZTYPE", "ZCATEGORY", objectType?.Trim());
+                TryAddObjectUpdate(columns, updates, values, "ZDESCRIPTION", "ZDESC", description?.Trim());
+                TryAddObjectUpdate(columns, updates, values, "ZPOSITION", "ZGPS", "ZLOCATION", "ZCOORDINATES", position?.Trim());
+                TryAddObjectUpdate(columns, updates, values, "ZHEIGHT", "ZHEIGHTMETERS", "ZALTITUDE", heightMeters?.Trim());
+                values.Add(id);
+
+                await db.ExecuteAsync($"UPDATE ZOBJECT SET {string.Join(",", updates)} WHERE Z_PK=?;", values.ToArray());
 
                 if (photoBytes is { Length: > 0 } && await HasTableAsync(db, "ZOBJECTIMAGE"))
                 {
@@ -647,6 +683,93 @@ namespace BaseLogApp.Core.Data
                 return Task.FromResult(true);
             }
             catch { return Task.FromResult(false); }
+        }
+
+        private static async Task<HashSet<string>> GetTableColumnsAsync(SQLiteAsyncConnection db, string table)
+            => (await db.QueryAsync<PragmaColumn>($"PRAGMA table_info('{table}');"))
+                .Select(c => c.Name ?? string.Empty)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        private static string BuildColumnExpression(string alias, HashSet<string> columns, params string[] candidates)
+        {
+            var col = candidates.FirstOrDefault(columns.Contains);
+            return col is null ? "NULL" : $"{alias}.{col}";
+        }
+
+        private static string BuildObjectNotes(string? objectType, string? description, string? position, string? heightMeters)
+            => string.Join(" | ", new[]
+            {
+                string.IsNullOrWhiteSpace(objectType) ? null : $"TYPE:{objectType.Trim()}",
+                string.IsNullOrWhiteSpace(description) ? null : description.Trim(),
+                string.IsNullOrWhiteSpace(position) ? null : $"GPS:{position.Trim()}",
+                string.IsNullOrWhiteSpace(heightMeters) ? null : $"H:{heightMeters.Trim()}m"
+            }.Where(x => !string.IsNullOrWhiteSpace(x)));
+
+        private static void PopulateObjectFieldsFromNotes(ObjectCatalogItem row)
+        {
+            if (string.IsNullOrWhiteSpace(row.Notes))
+                return;
+
+            var chunks = row.Notes.Split('|', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            foreach (var chunk in chunks)
+            {
+                if (chunk.StartsWith("TYPE:", StringComparison.OrdinalIgnoreCase) && string.IsNullOrWhiteSpace(row.ObjectType))
+                    row.ObjectType = chunk[5..].Trim();
+                else if (chunk.StartsWith("GPS:", StringComparison.OrdinalIgnoreCase) && string.IsNullOrWhiteSpace(row.Position))
+                    row.Position = chunk[4..].Trim();
+                else if (chunk.StartsWith("H:", StringComparison.OrdinalIgnoreCase) && string.IsNullOrWhiteSpace(row.HeightMeters))
+                    row.HeightMeters = chunk[2..].Trim().TrimEnd('m', 'M');
+                else if (string.IsNullOrWhiteSpace(row.Description))
+                    row.Description = chunk;
+            }
+        }
+
+        private static void TryAddObjectField(HashSet<string> columns, List<string> insertColumns, List<object?> values, string c1, string c2, string c3, string c4, string? value)
+        {
+            var c = new[] { c1, c2, c3, c4 }.FirstOrDefault(columns.Contains);
+            if (c is null) return;
+            insertColumns.Add(c);
+            values.Add(value);
+        }
+
+        private static void TryAddObjectField(HashSet<string> columns, List<string> insertColumns, List<object?> values, string c1, string c2, string c3, string? value)
+        {
+            var c = new[] { c1, c2, c3 }.FirstOrDefault(columns.Contains);
+            if (c is null) return;
+            insertColumns.Add(c);
+            values.Add(value);
+        }
+
+        private static void TryAddObjectField(HashSet<string> columns, List<string> insertColumns, List<object?> values, string c1, string c2, string? value)
+        {
+            var c = new[] { c1, c2 }.FirstOrDefault(columns.Contains);
+            if (c is null) return;
+            insertColumns.Add(c);
+            values.Add(value);
+        }
+
+        private static void TryAddObjectUpdate(HashSet<string> columns, List<string> updates, List<object?> values, string c1, string c2, string c3, string c4, string? value)
+        {
+            var c = new[] { c1, c2, c3, c4 }.FirstOrDefault(columns.Contains);
+            if (c is null) return;
+            updates.Add($"{c}=?");
+            values.Add(value);
+        }
+
+        private static void TryAddObjectUpdate(HashSet<string> columns, List<string> updates, List<object?> values, string c1, string c2, string c3, string? value)
+        {
+            var c = new[] { c1, c2, c3 }.FirstOrDefault(columns.Contains);
+            if (c is null) return;
+            updates.Add($"{c}=?");
+            values.Add(value);
+        }
+
+        private static void TryAddObjectUpdate(HashSet<string> columns, List<string> updates, List<object?> values, string c1, string c2, string? value)
+        {
+            var c = new[] { c1, c2 }.FirstOrDefault(columns.Contains);
+            if (c is null) return;
+            updates.Add($"{c}=?");
+            values.Add(value);
         }
 
         private string ResolveDbPath()

@@ -8,9 +8,9 @@ public partial class AddObjectPage : ContentPage
 {
     private readonly JumpsViewModel _vm;
     private byte[]? _objectPhotoBytes;
-    private readonly CatalogItem? _editing;
+    private readonly ObjectCatalogItem? _editing;
 
-    public AddObjectPage(JumpsViewModel vm, CatalogItem? editing = null)
+    public AddObjectPage(JumpsViewModel vm, ObjectCatalogItem? editing = null)
     {
         InitializeComponent();
         _vm = vm;
@@ -20,7 +20,10 @@ public partial class AddObjectPage : ContentPage
         {
             Title = "Modifica Object";
             ObjectNameEntry.Text = _editing.Name;
-            ObjectDescriptionEntry.Text = _editing.Notes;
+            ObjectTypeEntry.Text = _editing.ObjectType;
+            ObjectDescriptionEntry.Text = _editing.Description ?? _editing.Notes;
+            ObjectPositionEntry.Text = _editing.Position;
+            ObjectHeightEntry.Text = _editing.HeightMeters;
             SaveButton.Text = "Salva modifiche";
         }
     }
@@ -60,8 +63,8 @@ public partial class AddObjectPage : ContentPage
     private async void OnSaveClicked(object sender, EventArgs e)
     {
         var ok = _editing is null
-            ? await _vm.AddObjectAsync(ObjectNameEntry.Text ?? string.Empty, ObjectDescriptionEntry.Text, ObjectPositionEntry.Text, ObjectHeightEntry.Text, _objectPhotoBytes)
-            : await _vm.UpdateObjectAsync(_editing.Id, ObjectNameEntry.Text ?? string.Empty, ObjectDescriptionEntry.Text, ObjectPositionEntry.Text, ObjectHeightEntry.Text, _objectPhotoBytes);
+            ? await _vm.AddObjectAsync(ObjectNameEntry.Text ?? string.Empty, ObjectTypeEntry.Text, ObjectDescriptionEntry.Text, ObjectPositionEntry.Text, ObjectHeightEntry.Text, _objectPhotoBytes)
+            : await _vm.UpdateObjectAsync(_editing.Id, ObjectNameEntry.Text ?? string.Empty, ObjectTypeEntry.Text, ObjectDescriptionEntry.Text, ObjectPositionEntry.Text, ObjectHeightEntry.Text, _objectPhotoBytes);
 
         await DisplayAlert("Object", ok ? "Object salvato" : "Errore salvataggio object", "OK");
         if (ok)

@@ -156,7 +156,7 @@ namespace BaseLogApp.Core.ViewModels
         public async Task<IReadOnlyList<string>> GetRigNamesAsync()
             => await _reader.GetRigNamesAsync();
 
-        public Task<IReadOnlyList<CatalogItem>> GetObjectsCatalogAsync()
+        public Task<IReadOnlyList<ObjectCatalogItem>> GetObjectsCatalogAsync()
             => _reader.GetObjectsCatalogAsync();
 
         public Task<IReadOnlyList<CatalogItem>> GetRigsCatalogAsync()
@@ -208,8 +208,8 @@ namespace BaseLogApp.Core.ViewModels
             return saved;
         }
 
-        public async Task<bool> AddObjectAsync(string name, string? description, string? position, string? heightMeters, byte[]? photoBytes)
-            => await _reader.AddObjectAsync(name, description, position, heightMeters, photoBytes);
+        public async Task<bool> AddObjectAsync(string name, string? objectType, string? description, string? position, string? heightMeters, byte[]? photoBytes)
+            => await _reader.AddObjectAsync(name, objectType, description, position, heightMeters, photoBytes);
 
         public async Task<bool> AddRigAsync(string name, string? description)
             => await _reader.AddRigAsync(name, description);
@@ -217,8 +217,8 @@ namespace BaseLogApp.Core.ViewModels
         public async Task<bool> AddJumpTypeAsync(string name, string? notes)
             => await _reader.AddJumpTypeAsync(name, notes);
 
-        public Task<bool> UpdateObjectAsync(int id, string name, string? description, string? position, string? heightMeters, byte[]? photoBytes)
-            => _reader.UpdateObjectAsync(id, name, description, position, heightMeters, photoBytes);
+        public Task<bool> UpdateObjectAsync(int id, string name, string? objectType, string? description, string? position, string? heightMeters, byte[]? photoBytes)
+            => _reader.UpdateObjectAsync(id, name, objectType, description, position, heightMeters, photoBytes);
 
         public Task<bool> UpdateRigAsync(int id, string name, string? description)
             => _reader.UpdateRigAsync(id, name, description);

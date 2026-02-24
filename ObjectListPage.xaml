@@ -10,7 +10,7 @@
             <LinearItemsLayout Orientation="Vertical" ItemSpacing="12" />
         </CollectionView.ItemsLayout>
         <CollectionView.ItemTemplate>
-            <DataTemplate x:DataType="core:CatalogItem">
+            <DataTemplate x:DataType="core:ObjectCatalogItem">
                 <Border BackgroundColor="#151B2E" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="12">
                     <Label Text="{Binding Name}" TextColor="White" FontSize="16"/>
                 </Border>

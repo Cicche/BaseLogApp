@@ -7,7 +7,7 @@ namespace BaseLogApp.Views;
 public partial class ObjectListPage : ContentPage
 {
     private readonly JumpsViewModel _vm;
-    private readonly ObservableCollection<CatalogItem> _items = new();
+    private readonly ObservableCollection<ObjectCatalogItem> _items = new();
 
     public ObjectListPage(JumpsViewModel vm)
     {
@@ -33,7 +33,7 @@ public partial class ObjectListPage : ContentPage
 
     private async void OnObjectSelected(object? sender, SelectionChangedEventArgs e)
     {
-        if (e.CurrentSelection.FirstOrDefault() is CatalogItem item)
+        if (e.CurrentSelection.FirstOrDefault() is ObjectCatalogItem item)
             await Navigation.PushModalAsync(new NavigationPage(new AddObjectPage(_vm, item)));
 
         ObjectsView.SelectedItem = null;
