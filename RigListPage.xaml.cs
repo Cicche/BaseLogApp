@@ -1,3 +1,4 @@
+using BaseLogApp.Core.Models;
 using BaseLogApp.Core.ViewModels;
 using System.Collections.ObjectModel;
 
@@ -6,7 +7,7 @@ namespace BaseLogApp.Views;
 public partial class RigListPage : ContentPage
 {
     private readonly JumpsViewModel _vm;
-    private readonly ObservableCollection<string> _items = new();
+    private readonly ObservableCollection<CatalogItem> _items = new();
 
     public RigListPage(JumpsViewModel vm)
     {
@@ -24,9 +25,17 @@ public partial class RigListPage : ContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        var rows = await _vm.GetRigNamesAsync();
+        var rows = await _vm.GetRigsCatalogAsync();
         _items.Clear();
         foreach (var r in rows)
             _items.Add(r);
+    }
+
+    private async void OnRigSelected(object? sender, SelectionChangedEventArgs e)
+    {
+        if (e.CurrentSelection.FirstOrDefault() is CatalogItem item)
+            await Navigation.PushModalAsync(new NavigationPage(new AddRigPage(_vm, item)));
+
+        RigsView.SelectedItem = null;
     }
 }

@@ -14,7 +14,7 @@
             <Button Text="Apri mappa" Clicked="OnOpenMapClicked" />
             <Button Text="Seleziona foto object" Clicked="OnPickPhotoClicked" />
             <Label x:Name="PhotoNameLabel" TextColor="#8E99B8" FontSize="12" />
-            <Button Text="Salva Object" Clicked="OnSaveClicked" BackgroundColor="#2D8CFF" TextColor="White"/>
+            <Button x:Name="SaveButton" Text="Salva Object" Clicked="OnSaveClicked" BackgroundColor="#2D8CFF" TextColor="White"/>
             <Button Text="Chiudi" Clicked="OnCloseClicked" />
         </VerticalStackLayout>
     </ScrollView>

@@ -134,6 +134,9 @@ namespace BaseLogApp.Core.ViewModels
                 foreach (var it in rows.OrderByDescending(x => x.NumeroSalto))
                     Items.Add(it);
 
+                var objectNames = await _reader.GetObjectNamesAsync();
+                UniqueObjects = objectNames.Count;
+
                 ApplyFilter(Query);
                 RecalculateStats();
             }
@@ -152,6 +155,15 @@ namespace BaseLogApp.Core.ViewModels
 
         public async Task<IReadOnlyList<string>> GetRigNamesAsync()
             => await _reader.GetRigNamesAsync();
+
+        public Task<IReadOnlyList<CatalogItem>> GetObjectsCatalogAsync()
+            => _reader.GetObjectsCatalogAsync();
+
+        public Task<IReadOnlyList<CatalogItem>> GetRigsCatalogAsync()
+            => _reader.GetRigsCatalogAsync();
+
+        public Task<IReadOnlyList<CatalogItem>> GetJumpTypesCatalogAsync()
+            => _reader.GetJumpTypesCatalogAsync();
 
 
         public async Task ToggleDbProfileAsync()
@@ -205,6 +217,15 @@ namespace BaseLogApp.Core.ViewModels
         public async Task<bool> AddJumpTypeAsync(string name, string? notes)
             => await _reader.AddJumpTypeAsync(name, notes);
 
+        public Task<bool> UpdateObjectAsync(int id, string name, string? description, string? position, string? heightMeters, byte[]? photoBytes)
+            => _reader.UpdateObjectAsync(id, name, description, position, heightMeters, photoBytes);
+
+        public Task<bool> UpdateRigAsync(int id, string name, string? description)
+            => _reader.UpdateRigAsync(id, name, description);
+
+        public Task<bool> UpdateJumpTypeAsync(int id, string name, string? notes)
+            => _reader.UpdateJumpTypeAsync(id, name, notes);
+
         public void AddJump(JumpListItem newJump)
         {
             var insertIndex = Items.TakeWhile(x => x.NumeroSalto > newJump.NumeroSalto).Count();
@@ -251,11 +272,6 @@ namespace BaseLogApp.Core.ViewModels
         {
             TotalJumps = Items.Count;
             NextJumpNumber = Items.Count == 0 ? 1 : Items.Max(x => x.NumeroSalto) + 1;
-
-            UniqueObjects = Items.Select(x => x.Oggetto)
-                .Where(x => !string.IsNullOrWhiteSpace(x))
-                .Distinct(StringComparer.OrdinalIgnoreCase)
-                .Count();
 
             var dated = Items
                 .Select(i => new { Item = i, Date = ParseDate(i.Data) })

@@ -1,3 +1,4 @@
+using BaseLogApp.Core.Models;
 using BaseLogApp.Core.ViewModels;
 using System.Globalization;
 
@@ -7,11 +8,21 @@ public partial class AddObjectPage : ContentPage
 {
     private readonly JumpsViewModel _vm;
     private byte[]? _objectPhotoBytes;
+    private readonly CatalogItem? _editing;
 
-    public AddObjectPage(JumpsViewModel vm)
+    public AddObjectPage(JumpsViewModel vm, CatalogItem? editing = null)
     {
         InitializeComponent();
         _vm = vm;
+        _editing = editing;
+
+        if (_editing is not null)
+        {
+            Title = "Modifica Object";
+            ObjectNameEntry.Text = _editing.Name;
+            ObjectDescriptionEntry.Text = _editing.Notes;
+            SaveButton.Text = "Salva modifiche";
+        }
     }
 
     private async void OnAutoPositionClicked(object sender, EventArgs e)
@@ -48,8 +59,13 @@ public partial class AddObjectPage : ContentPage
 
     private async void OnSaveClicked(object sender, EventArgs e)
     {
-        var ok = await _vm.AddObjectAsync(ObjectNameEntry.Text ?? string.Empty, ObjectDescriptionEntry.Text, ObjectPositionEntry.Text, ObjectHeightEntry.Text, _objectPhotoBytes);
+        var ok = _editing is null
+            ? await _vm.AddObjectAsync(ObjectNameEntry.Text ?? string.Empty, ObjectDescriptionEntry.Text, ObjectPositionEntry.Text, ObjectHeightEntry.Text, _objectPhotoBytes)
+            : await _vm.UpdateObjectAsync(_editing.Id, ObjectNameEntry.Text ?? string.Empty, ObjectDescriptionEntry.Text, ObjectPositionEntry.Text, ObjectHeightEntry.Text, _objectPhotoBytes);
+
         await DisplayAlert("Object", ok ? "Object salvato" : "Errore salvataggio object", "OK");
+        if (ok)
+            await Navigation.PopModalAsync();
     }
 
     private async void OnCloseClicked(object sender, EventArgs e)

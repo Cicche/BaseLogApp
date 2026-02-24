@@ -20,6 +20,9 @@ namespace BaseLogApp.Core.Data
         Task<IReadOnlyList<string>> GetObjectNamesAsync();
         Task<IReadOnlyList<string>> GetJumpTypeNamesAsync();
         Task<IReadOnlyList<string>> GetRigNamesAsync();
+        Task<IReadOnlyList<CatalogItem>> GetObjectsCatalogAsync();
+        Task<IReadOnlyList<CatalogItem>> GetRigsCatalogAsync();
+        Task<IReadOnlyList<CatalogItem>> GetJumpTypesCatalogAsync();
         Task<bool> AddJumpAsync(JumpListItem jump);
         Task<bool> UpdateJumpAsync(JumpListItem jump);
         Task<bool> DeleteJumpAsync(JumpListItem jump);
@@ -28,6 +31,9 @@ namespace BaseLogApp.Core.Data
         Task<bool> AddObjectAsync(string name, string? description, string? position, string? heightMeters, byte[]? photoBytes);
         Task<bool> AddRigAsync(string name, string? description);
         Task<bool> AddJumpTypeAsync(string name, string? notes);
+        Task<bool> UpdateObjectAsync(int id, string name, string? description, string? position, string? heightMeters, byte[]? photoBytes);
+        Task<bool> UpdateRigAsync(int id, string name, string? description);
+        Task<bool> UpdateJumpTypeAsync(int id, string name, string? notes);
         Task<bool> ExportLightweightJsonAsync(string filePath);
         Task<bool> ImportLightweightJsonAsync(string filePath);
         Task<bool> ExportFullDbAsync(string destinationPath);
@@ -216,6 +222,54 @@ namespace BaseLogApp.Core.Data
             {
                 return Array.Empty<string>();
             }
+        }
+
+        public async Task<IReadOnlyList<CatalogItem>> GetObjectsCatalogAsync()
+        {
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath)) return Array.Empty<CatalogItem>();
+
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                if (!await HasTableAsync(db, "ZOBJECT")) return Array.Empty<CatalogItem>();
+                return (await db.QueryAsync<CatalogItem>("SELECT Z_PK AS Id, ZNAME AS Name, ZNOTES AS Notes FROM ZOBJECT ORDER BY ZNAME;"))
+                    .Where(x => !string.IsNullOrWhiteSpace(x.Name))
+                    .ToList();
+            }
+            catch { return Array.Empty<CatalogItem>(); }
+        }
+
+        public async Task<IReadOnlyList<CatalogItem>> GetRigsCatalogAsync()
+        {
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath)) return Array.Empty<CatalogItem>();
+
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                if (!await HasTableAsync(db, "ZRIG")) return Array.Empty<CatalogItem>();
+                return (await db.QueryAsync<CatalogItem>("SELECT Z_PK AS Id, ZNAME AS Name, ZNOTES AS Notes FROM ZRIG ORDER BY ZNAME;"))
+                    .Where(x => !string.IsNullOrWhiteSpace(x.Name))
+                    .ToList();
+            }
+            catch { return Array.Empty<CatalogItem>(); }
+        }
+
+        public async Task<IReadOnlyList<CatalogItem>> GetJumpTypesCatalogAsync()
+        {
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath)) return Array.Empty<CatalogItem>();
+
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                if (!await HasTableAsync(db, "ZJUMPTYPE")) return Array.Empty<CatalogItem>();
+                return (await db.QueryAsync<CatalogItem>("SELECT Z_PK AS Id, ZNAME AS Name, ZNOTES AS Notes FROM ZJUMPTYPE ORDER BY ZNAME;"))
+                    .Where(x => !string.IsNullOrWhiteSpace(x.Name))
+                    .ToList();
+            }
+            catch { return Array.Empty<CatalogItem>(); }
         }
 
         public async Task<bool> AddJumpAsync(JumpListItem jump)
@@ -489,6 +543,64 @@ namespace BaseLogApp.Core.Data
                 Debug.WriteLine($"Error inserting jump type: {ex.Message}");
                 return false;
             }
+        }
+
+        public async Task<bool> UpdateObjectAsync(int id, string name, string? description, string? position, string? heightMeters, byte[]? photoBytes)
+        {
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath) || string.IsNullOrWhiteSpace(name)) return false;
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                if (!await HasTableAsync(db, "ZOBJECT")) return false;
+
+                var notes = string.Join(" | ", new[] { description, position is null ? null : $"GPS:{position}", heightMeters is null ? null : $"H:{heightMeters}m" }
+                    .Where(x => !string.IsNullOrWhiteSpace(x)));
+                await db.ExecuteAsync("UPDATE ZOBJECT SET ZNAME=?, ZNOTES=? WHERE Z_PK=?;", name.Trim(), notes, id);
+
+                if (photoBytes is { Length: > 0 } && await HasTableAsync(db, "ZOBJECTIMAGE"))
+                {
+                    var exists = await db.QueryAsync<ScalarInt>("SELECT COUNT(*) AS Value FROM ZOBJECTIMAGE WHERE ZOBJECT=?;", id);
+                    if ((exists.FirstOrDefault()?.Value ?? 0) > 0)
+                        await db.ExecuteAsync("UPDATE ZOBJECTIMAGE SET ZIMAGE=? WHERE ZOBJECT=?;", photoBytes, id);
+                    else
+                    {
+                        var nextImgPk = await GetNextPrimaryKeyAsync(db, "ZOBJECTIMAGE", "Z_PK");
+                        await db.ExecuteAsync("INSERT INTO ZOBJECTIMAGE (Z_PK, Z_ENT, Z_OPT, ZOBJECT, ZIMAGE) VALUES (?,1,1,?,?);", nextImgPk, id, photoBytes);
+                    }
+                }
+
+                return true;
+            }
+            catch { return false; }
+        }
+
+        public async Task<bool> UpdateRigAsync(int id, string name, string? description)
+        {
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath) || string.IsNullOrWhiteSpace(name)) return false;
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                if (!await HasTableAsync(db, "ZRIG")) return false;
+                await db.ExecuteAsync("UPDATE ZRIG SET ZNAME=?, ZNOTES=? WHERE Z_PK=?;", name.Trim(), description?.Trim(), id);
+                return true;
+            }
+            catch { return false; }
+        }
+
+        public async Task<bool> UpdateJumpTypeAsync(int id, string name, string? notes)
+        {
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath) || string.IsNullOrWhiteSpace(name)) return false;
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                if (!await HasTableAsync(db, "ZJUMPTYPE")) return false;
+                await db.ExecuteAsync("UPDATE ZJUMPTYPE SET ZNAME=?, ZNOTES=? WHERE Z_PK=?;", name.Trim(), notes?.Trim(), id);
+                return true;
+            }
+            catch { return false; }
         }
 
         public async Task<bool> ExportLightweightJsonAsync(string filePath)

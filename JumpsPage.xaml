@@ -46,7 +46,7 @@
                                 BackgroundColor="#151B2E"
                                 StrokeShape="RoundRectangle 16"
                                 Padding="0"
-                                Margin="0,0,0,2">
+                                Margin="0">
                             <toolkit:Expander>
                                 <toolkit:Expander.Header>
                                     <Grid Padding="12" ColumnDefinitions="64,*,Auto" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="2">
