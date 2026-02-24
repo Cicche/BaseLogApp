@@ -21,6 +21,7 @@ namespace BaseLogApp.Core.Data
         Task<IReadOnlyList<string>> GetJumpTypeNamesAsync();
         Task<IReadOnlyList<string>> GetRigNamesAsync();
         Task<IReadOnlyList<ObjectCatalogItem>> GetObjectsCatalogAsync();
+        Task<(double? Latitude, double? Longitude)> GetObjectCoordinatesAsync(string? objectName);
         Task<IReadOnlyList<CatalogItem>> GetRigsCatalogAsync();
         Task<IReadOnlyList<CatalogItem>> GetJumpTypesCatalogAsync();
         Task<bool> AddJumpAsync(JumpListItem jump);
@@ -250,7 +251,8 @@ namespace BaseLogApp.Core.Data
                                     CAST({heightExpr} AS TEXT) AS HeightMeters,
                                     {heightUnitExpr} AS HeightUnit,
                                     CAST({latExpr} AS TEXT) AS Latitude,
-                                    CAST({lonExpr} AS TEXT) AS Longitude
+                                    CAST({lonExpr} AS TEXT) AS Longitude,
+                                    (SELECT oi.ZIMAGE FROM ZOBJECTIMAGE oi WHERE oi.ZOBJECT = o.Z_PK LIMIT 1) AS PhotoBlob
                              FROM ZOBJECT o
                              ORDER BY o.ZNAME;";
 
@@ -261,6 +263,30 @@ namespace BaseLogApp.Core.Data
                 return rows.Where(x => !string.IsNullOrWhiteSpace(x.Name)).ToList();
             }
             catch { return Array.Empty<ObjectCatalogItem>(); }
+        }
+
+        public async Task<(double? Latitude, double? Longitude)> GetObjectCoordinatesAsync(string? objectName)
+        {
+            if (string.IsNullOrWhiteSpace(objectName))
+                return (null, null);
+
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath))
+                return (null, null);
+
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                if (!await HasTableAsync(db, "ZOBJECT"))
+                    return (null, null);
+
+                var row = (await db.QueryAsync<ObjectCoordRow>("SELECT ZLATITUDE AS Latitude, ZLONGITUDE AS Longitude FROM ZOBJECT WHERE LOWER(TRIM(ZNAME)) = LOWER(TRIM(?)) LIMIT 1;", objectName.Trim())).FirstOrDefault();
+                return row is null ? (null, null) : (row.Latitude, row.Longitude);
+            }
+            catch
+            {
+                return (null, null);
+            }
         }
 
         public async Task<IReadOnlyList<CatalogItem>> GetRigsCatalogAsync()
@@ -882,5 +908,6 @@ namespace BaseLogApp.Core.Data
         private sealed class ObjectNameRow { public string? Name { get; set; } }
         private sealed class PragmaColumn { public string? Name { get; set; } }
         private sealed class ScalarInt { public int Value { get; set; } }
+        private sealed class ObjectCoordRow { public double? Latitude { get; set; } public double? Longitude { get; set; } }
     }
 }

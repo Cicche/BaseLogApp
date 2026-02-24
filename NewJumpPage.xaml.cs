@@ -1,4 +1,5 @@
 using BaseLogApp.Core.Models;
+using BaseLogApp.Core.ViewModels;
 using System.Collections.ObjectModel;
 using System.Globalization;
 
@@ -14,23 +15,16 @@ public partial class NewJumpPage : ContentPage
     private readonly ObservableCollection<string> _filteredJumpTypes = new();
     private string? _selectedPhotoPath;
     private readonly JumpListItem? _editing;
+    private readonly JumpsViewModel _vm;
 
-    public NewJumpPage(int suggestedJumpNumber, IReadOnlyList<string> knownObjects, IReadOnlyList<string> knownJumpTypes, JumpListItem? editing = null)
+    public NewJumpPage(JumpsViewModel vm, int suggestedJumpNumber, IReadOnlyList<string> knownObjects, IReadOnlyList<string> knownJumpTypes, JumpListItem? editing = null)
     {
         InitializeComponent();
 
+        _vm = vm;
         _editing = editing;
-        _allObjects = knownObjects
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .OrderBy(x => x)
-            .ToList();
-
-        _allJumpTypes = knownJumpTypes
-            .Where(x => !string.IsNullOrWhiteSpace(x))
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .OrderBy(x => x)
-            .ToList();
+        _allObjects = knownObjects.Where(x => !string.IsNullOrWhiteSpace(x)).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x).ToList();
+        _allJumpTypes = knownJumpTypes.Where(x => !string.IsNullOrWhiteSpace(x)).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x).ToList();
 
         ObjectSuggestionsView.ItemsSource = _filteredObjects;
         JumpTypeSuggestionsView.ItemsSource = _filteredJumpTypes;
@@ -50,92 +44,46 @@ public partial class NewJumpPage : ContentPage
             ObjectEntry.Text = _editing.Oggetto;
             TypeEntry.Text = _editing.TipoSalto;
             NotesEditor.Text = _editing.Note;
-            LatitudeEntry.Text = _editing.Latitude;
-            LongitudeEntry.Text = _editing.Longitude;
 
             if (DateTime.TryParseExact(_editing.Data, new[] { "dd/MM/yyyy HH:mm", "dd/MM/yyyy" }, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed))
             {
                 DatePicker.Date = parsed.Date;
                 TimePicker.Time = parsed.TimeOfDay;
             }
-            else
-            {
-                var now = DateTime.Now;
-                DatePicker.Date = now.Date;
-                TimePicker.Time = now.TimeOfDay;
-            }
         }
     }
 
-    private void OnObjectTextChanged(object? sender, TextChangedEventArgs e)
-    {
-        FilterSuggestions(e.NewTextValue, _allObjects, _filteredObjects, ObjectSuggestionsView);
-    }
-
-    private void OnJumpTypeTextChanged(object? sender, TextChangedEventArgs e)
-    {
-        FilterSuggestions(e.NewTextValue, _allJumpTypes, _filteredJumpTypes, JumpTypeSuggestionsView);
-    }
+    private void OnObjectTextChanged(object? sender, TextChangedEventArgs e) => FilterSuggestions(e.NewTextValue, _allObjects, _filteredObjects, ObjectSuggestionsView);
+    private void OnJumpTypeTextChanged(object? sender, TextChangedEventArgs e) => FilterSuggestions(e.NewTextValue, _allJumpTypes, _filteredJumpTypes, JumpTypeSuggestionsView);
 
     private static void FilterSuggestions(string? query, List<string> source, ObservableCollection<string> target, CollectionView list)
     {
         var text = (query ?? string.Empty).Trim();
         target.Clear();
-
-        if (text.Length < 1)
-        {
-            list.IsVisible = false;
-            return;
-        }
-
-        foreach (var item in source.Where(x => x.Contains(text, StringComparison.OrdinalIgnoreCase)).Take(8))
-            target.Add(item);
-
+        if (text.Length < 1) { list.IsVisible = false; return; }
+        foreach (var item in source.Where(x => x.Contains(text, StringComparison.OrdinalIgnoreCase)).Take(8)) target.Add(item);
         list.IsVisible = target.Count > 0;
     }
 
     private void OnObjectSuggestionSelected(object? sender, SelectionChangedEventArgs e)
     {
-        if (e.CurrentSelection.FirstOrDefault() is string selected)
-            ObjectEntry.Text = selected;
-
-        ObjectSuggestionsView.SelectedItem = null;
-        ObjectSuggestionsView.IsVisible = false;
+        if (e.CurrentSelection.FirstOrDefault() is string selected) ObjectEntry.Text = selected;
+        ObjectSuggestionsView.SelectedItem = null; ObjectSuggestionsView.IsVisible = false;
     }
 
     private void OnJumpTypeSuggestionSelected(object? sender, SelectionChangedEventArgs e)
     {
-        if (e.CurrentSelection.FirstOrDefault() is string selected)
-            TypeEntry.Text = selected;
-
-        JumpTypeSuggestionsView.SelectedItem = null;
-        JumpTypeSuggestionsView.IsVisible = false;
-    }
-
-    private async void OnAutoGpsClicked(object sender, EventArgs e)
-    {
-        var location = await Geolocation.GetLastKnownLocationAsync() ?? await Geolocation.GetLocationAsync();
-        if (location is null)
-        {
-            await DisplayAlert("GPS", "Posizione non disponibile", "OK");
-            return;
-        }
-
-        LatitudeEntry.Text = location.Latitude.ToString(CultureInfo.InvariantCulture);
-        LongitudeEntry.Text = location.Longitude.ToString(CultureInfo.InvariantCulture);
+        if (e.CurrentSelection.FirstOrDefault() is string selected) TypeEntry.Text = selected;
+        JumpTypeSuggestionsView.SelectedItem = null; JumpTypeSuggestionsView.IsVisible = false;
     }
 
     private async void OnOpenMapClicked(object sender, EventArgs e)
     {
-        if (double.TryParse(LatitudeEntry.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out var lat) &&
-            double.TryParse(LongitudeEntry.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out var lng))
-        {
-            await Launcher.OpenAsync($"https://www.google.com/maps/search/?api=1&query={lat.ToString(CultureInfo.InvariantCulture)},{lng.ToString(CultureInfo.InvariantCulture)}");
-        }
+        var (lat, lon) = await _vm.GetObjectCoordinatesAsync(ObjectEntry.Text);
+        if (lat.HasValue && lon.HasValue)
+            await Launcher.OpenAsync($"https://www.google.com/maps/search/?api=1&query={lat.Value.ToString(CultureInfo.InvariantCulture)},{lon.Value.ToString(CultureInfo.InvariantCulture)}");
         else
-        {
-            await Launcher.OpenAsync("https://www.google.com/maps");
-        }
+            await DisplayAlert("Mappa", "Coordinate non disponibili per questo object.", "OK");
     }
 
     private async void OnPickPhotoClicked(object sender, EventArgs e)
@@ -143,9 +91,7 @@ public partial class NewJumpPage : ContentPage
         try
         {
             var file = await MediaPicker.Default.PickPhotoAsync();
-            if (file is null)
-                return;
-
+            if (file is null) return;
             _selectedPhotoPath = file.FullPath;
             PhotoPathLabel.Text = Path.GetFileName(_selectedPhotoPath);
         }
@@ -156,17 +102,9 @@ public partial class NewJumpPage : ContentPage
     }
 
     private async Task<byte[]?> LoadSelectedPhotoBytesAsync()
-    {
-        if (string.IsNullOrWhiteSpace(_selectedPhotoPath) || !File.Exists(_selectedPhotoPath))
-            return null;
+        => string.IsNullOrWhiteSpace(_selectedPhotoPath) || !File.Exists(_selectedPhotoPath) ? null : await File.ReadAllBytesAsync(_selectedPhotoPath);
 
-        return await File.ReadAllBytesAsync(_selectedPhotoPath);
-    }
-
-    private async void OnCancelClicked(object sender, EventArgs e)
-    {
-        await Navigation.PopModalAsync();
-    }
+    private async void OnCancelClicked(object sender, EventArgs e) => await Navigation.PopModalAsync();
 
     private async void OnSaveClicked(object sender, EventArgs e)
     {
@@ -177,6 +115,7 @@ public partial class NewJumpPage : ContentPage
         }
 
         var composedDate = DatePicker.Date.Date.Add(TimePicker.Time);
+        var coords = await _vm.GetObjectCoordinatesAsync(ObjectEntry.Text);
 
         var item = new JumpListItem
         {
@@ -192,8 +131,8 @@ public partial class NewJumpPage : ContentPage
             ObjectPhotoBlob = _editing?.ObjectPhotoBlob,
             JumpPhotoBlob = _editing?.JumpPhotoBlob,
             NewPhotoBytes = await LoadSelectedPhotoBytesAsync(),
-            Latitude = LatitudeEntry.Text,
-            Longitude = LongitudeEntry.Text
+            Latitude = coords.Latitude?.ToString(CultureInfo.InvariantCulture),
+            Longitude = coords.Longitude?.ToString(CultureInfo.InvariantCulture)
         };
 
         if (SaveRequested is null)
@@ -203,7 +142,6 @@ public partial class NewJumpPage : ContentPage
         }
 
         var saved = await SaveRequested(item);
-        if (saved)
-            await Navigation.PopModalAsync();
+        if (saved) await Navigation.PopModalAsync();
     }
 }

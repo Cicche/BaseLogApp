@@ -52,7 +52,7 @@ public partial class JumpsPage : ContentPage
         var knownObjects = await _vm.GetObjectNamesAsync();
         var knownJumpTypes = await _vm.GetJumpTypeNamesAsync();
         var suggested = edit?.NumeroSalto ?? _vm.NextJumpNumber;
-        var page = new NewJumpPage(suggested, knownObjects, knownJumpTypes, edit)
+        var page = new NewJumpPage(_vm, suggested, knownObjects, knownJumpTypes, edit)
         {
             SaveRequested = SaveJumpFromEditorAsync
         };

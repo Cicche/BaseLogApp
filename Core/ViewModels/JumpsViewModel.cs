@@ -77,6 +77,18 @@ namespace BaseLogApp.Core.ViewModels
         }
 
 
+
+        private int _baseB;
+        public int BaseB { get => _baseB; private set { if (_baseB != value) { _baseB = value; OnPropertyChanged(); } } }
+        private int _baseA;
+        public int BaseA { get => _baseA; private set { if (_baseA != value) { _baseA = value; OnPropertyChanged(); } } }
+        private int _baseS;
+        public int BaseS { get => _baseS; private set { if (_baseS != value) { _baseS = value; OnPropertyChanged(); } } }
+        private int _baseE;
+        public int BaseE { get => _baseE; private set { if (_baseE != value) { _baseE = value; OnPropertyChanged(); } } }
+        private int _baseOthers;
+        public int BaseOthers { get => _baseOthers; private set { if (_baseOthers != value) { _baseOthers = value; OnPropertyChanged(); } } }
+
         private DbProfile _currentProfile = DbProfile.Modern;
         public DbProfile CurrentProfile
         {
@@ -87,6 +99,7 @@ namespace BaseLogApp.Core.ViewModels
         public string CurrentProfileLabel => CurrentProfile == DbProfile.Legacy ? "DB: Legacy" : "DB: Modern";
 
         private readonly IJumpsReader _reader;
+        private readonly Dictionary<string, string> _objectTypeByName = new(StringComparer.OrdinalIgnoreCase);
         public ObservableCollection<JumpListItem> Items { get; } = new();
         public ObservableCollection<JumpListItem> FilteredItems { get; } = new();
         public ObservableCollection<StatBarItem> ObjectStats { get; } = new();
@@ -134,6 +147,11 @@ namespace BaseLogApp.Core.ViewModels
                 foreach (var it in rows.OrderByDescending(x => x.NumeroSalto))
                     Items.Add(it);
 
+                var objects = await _reader.GetObjectsCatalogAsync();
+                _objectTypeByName.Clear();
+                foreach (var o in objects.Where(o => !string.IsNullOrWhiteSpace(o.Name)))
+                    _objectTypeByName[o.Name.Trim()] = o.ObjectType?.Trim() ?? string.Empty;
+
                 var objectNames = await _reader.GetObjectNamesAsync();
                 UniqueObjects = objectNames.Count;
 
@@ -164,6 +182,9 @@ namespace BaseLogApp.Core.ViewModels
 
         public Task<IReadOnlyList<CatalogItem>> GetJumpTypesCatalogAsync()
             => _reader.GetJumpTypesCatalogAsync();
+
+        public Task<(double? Latitude, double? Longitude)> GetObjectCoordinatesAsync(string? objectName)
+            => _reader.GetObjectCoordinatesAsync(objectName);
 
 
         public async Task ToggleDbProfileAsync()
@@ -272,6 +293,18 @@ namespace BaseLogApp.Core.ViewModels
         {
             TotalJumps = Items.Count;
             NextJumpNumber = Items.Count == 0 ? 1 : Items.Max(x => x.NumeroSalto) + 1;
+
+            BaseB = 0; BaseA = 0; BaseS = 0; BaseE = 0; BaseOthers = 0;
+            foreach (var jump in Items.Where(i => !string.IsNullOrWhiteSpace(i.Oggetto)))
+            {
+                _objectTypeByName.TryGetValue(jump.Oggetto!.Trim(), out var t);
+                var type = (t ?? string.Empty).Trim();
+                if (type.StartsWith("B", StringComparison.OrdinalIgnoreCase) || type.Equals("Building", StringComparison.OrdinalIgnoreCase)) BaseB++;
+                else if (type.StartsWith("A", StringComparison.OrdinalIgnoreCase) || type.Equals("Antenna", StringComparison.OrdinalIgnoreCase) || type.Equals("Antennas", StringComparison.OrdinalIgnoreCase)) BaseA++;
+                else if (type.StartsWith("S", StringComparison.OrdinalIgnoreCase) || type.Equals("Span", StringComparison.OrdinalIgnoreCase)) BaseS++;
+                else if (type.StartsWith("E", StringComparison.OrdinalIgnoreCase) || type.Equals("Earth", StringComparison.OrdinalIgnoreCase)) BaseE++;
+                else BaseOthers++;
+            }
 
             var dated = Items
                 .Select(i => new { Item = i, Date = ParseDate(i.Data) })

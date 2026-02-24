@@ -16,4 +16,5 @@ public sealed class ObjectCatalogItem : CatalogItem
     public string? Position { get; set; }
     public string? Latitude { get; set; }
     public string? Longitude { get; set; }
+    public byte[]? PhotoBlob { get; set; }
 }

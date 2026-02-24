@@ -12,6 +12,13 @@ public partial class SettingsPage : ContentPage
         _vm = vm;
     }
 
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+        if (Navigation.NavigationStack.Count > 1)
+            await Navigation.PopToRootAsync(false);
+    }
+
     private async void OnOpenObjectListClicked(object sender, EventArgs e)
         => await Navigation.PushAsync(new ObjectListPage(_vm));
 

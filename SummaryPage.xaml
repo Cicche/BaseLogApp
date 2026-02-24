@@ -33,7 +33,28 @@
                 </Grid>
             </Border>
 
-            <Label Text="Top Objects" TextColor="White" FontSize="18" FontAttributes="Bold" Margin="2,8,0,0"/>
+
+            <Border BackgroundColor="#151B2E" StrokeThickness="0" StrokeShape="RoundRectangle 16" Padding="14">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="B.A.S.E. Breakdown" TextColor="White" FontSize="18" FontAttributes="Bold" />
+                    <Grid ColumnDefinitions="*,*,*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="6">
+                        <Label Text="B." TextColor="#8E99B8" HorizontalTextAlignment="Center" />
+                        <Label Grid.Column="1" Text="A." TextColor="#8E99B8" HorizontalTextAlignment="Center" />
+                        <Label Grid.Column="2" Text="S." TextColor="#8E99B8" HorizontalTextAlignment="Center" />
+                        <Label Grid.Column="3" Text="E." TextColor="#8E99B8" HorizontalTextAlignment="Center" />
+
+                        <Label Grid.Row="1" Text="{Binding BaseB}" TextColor="White" FontSize="24" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                        <Label Grid.Row="1" Grid.Column="1" Text="{Binding BaseA}" TextColor="White" FontSize="24" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                        <Label Grid.Row="1" Grid.Column="2" Text="{Binding BaseS}" TextColor="White" FontSize="24" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                        <Label Grid.Row="1" Grid.Column="3" Text="{Binding BaseE}" TextColor="White" FontSize="24" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                    </Grid>
+                    <Grid ColumnDefinitions="Auto,*">
+                        <Label Text="Others" TextColor="#8E99B8" />
+                        <Label Grid.Column="1" Text="{Binding BaseOthers}" TextColor="White" FontAttributes="Bold" HorizontalTextAlignment="End" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+<Label Text="Top Objects" TextColor="White" FontSize="18" FontAttributes="Bold" Margin="2,8,0,0"/>
             <CollectionView ItemsSource="{Binding ObjectStats}" SelectionMode="None">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="core:StatBarItem">

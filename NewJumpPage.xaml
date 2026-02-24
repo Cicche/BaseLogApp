@@ -45,14 +45,7 @@
 
             <Editor x:Name="NotesEditor" Placeholder="Note" AutoSize="TextChanges" HeightRequest="100" />
 
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
-                <Entry x:Name="LatitudeEntry" Placeholder="Latitudine" Keyboard="Text" />
-                <Entry x:Name="LongitudeEntry" Grid.Column="1" Placeholder="Longitudine" Keyboard="Text" />
-            </Grid>
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
-                <Button Text="Auto GPS" Clicked="OnAutoGpsClicked" />
-                <Button Grid.Column="1" Text="Apri mappa" Clicked="OnOpenMapClicked" />
-            </Grid>
+            <Button Text="Mappa" Clicked="OnOpenMapClicked" />
 
             <Button Text="Seleziona foto" Clicked="OnPickPhotoClicked" />
             <Label x:Name="PhotoPathLabel" TextColor="#8E99B8" FontSize="12" />

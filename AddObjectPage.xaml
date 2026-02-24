@@ -6,11 +6,24 @@
              BackgroundColor="#0A0F1E">
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="12">
+            <Label Text="Seleziona object esistente" TextColor="#8E99B8" />
+            <Picker x:Name="ExistingObjectPicker" Title="(opzionale)" SelectedIndexChanged="OnExistingObjectChanged" />
+
+            <Image x:Name="ObjectPreviewImage" Aspect="AspectFit" HorizontalOptions="Fill" HeightRequest="220" IsVisible="False" />
+
             <Entry x:Name="ObjectNameEntry" Placeholder="Nome object" />
-            <Entry x:Name="ObjectTypeEntry" Placeholder="Tipo object (Earth, Building...)" />
+            <Entry x:Name="ObjectTypeEntry" Placeholder="Tipo object (B/A/S/E/Others)" TextChanged="OnObjectTypeTextChanged" />
+            <CollectionView x:Name="ObjectTypeSuggestionsView" IsVisible="False" HeightRequest="120" SelectionMode="Single" SelectionChanged="OnObjectTypeSuggestionSelected" BackgroundColor="#151B2E">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Label Text="{Binding .}" TextColor="White" Padding="10,8"/>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
             <Editor x:Name="ObjectDescriptionEntry" Placeholder="Descrizione" AutoSize="TextChanges" HeightRequest="80"/>
             <Entry x:Name="ObjectHeightEntry" Placeholder="Altezza (m)" Keyboard="Numeric" />
-            <Entry x:Name="ObjectPositionEntry" Placeholder="Posizione GPS" />
+            <Entry x:Name="ObjectPositionEntry" Placeholder="Posizione GPS (lat, lon)" />
             <Button Text="Auto-position GPS" Clicked="OnAutoPositionClicked" />
             <Button Text="Apri mappa" Clicked="OnOpenMapClicked" />
             <Button Text="Seleziona foto object" Clicked="OnPickPhotoClicked" />
