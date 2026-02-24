@@ -235,18 +235,22 @@ namespace BaseLogApp.Core.Data
                 if (!await HasTableAsync(db, "ZOBJECT")) return Array.Empty<ObjectCatalogItem>();
 
                 var columns = await GetTableColumnsAsync(db, "ZOBJECT");
-                var typeExpr = BuildColumnExpression("o", columns, "ZOBJECTTYPE", "ZTYPE", "ZCATEGORY");
+                var typeExpr = BuildColumnExpression("o", columns, "ZOBJECTTYPE");
                 var descExpr = BuildColumnExpression("o", columns, "ZDESCRIPTION", "ZDESC");
-                var posExpr = BuildColumnExpression("o", columns, "ZPOSITION", "ZGPS", "ZLOCATION", "ZCOORDINATES");
                 var heightExpr = BuildColumnExpression("o", columns, "ZHEIGHT", "ZHEIGHTMETERS", "ZALTITUDE");
+                var heightUnitExpr = BuildColumnExpression("o", columns, "ZHEIGHTUNIT");
+                var latExpr = BuildColumnExpression("o", columns, "ZLATITUDE");
+                var lonExpr = BuildColumnExpression("o", columns, "ZLONGITUDE");
 
                 var sql = $@"SELECT o.Z_PK AS Id,
                                     o.ZNAME AS Name,
                                     o.ZNOTES AS Notes,
                                     {typeExpr} AS ObjectType,
                                     {descExpr} AS Description,
-                                    {heightExpr} AS HeightMeters,
-                                    {posExpr} AS Position
+                                    CAST({heightExpr} AS TEXT) AS HeightMeters,
+                                    {heightUnitExpr} AS HeightUnit,
+                                    CAST({latExpr} AS TEXT) AS Latitude,
+                                    CAST({lonExpr} AS TEXT) AS Longitude
                              FROM ZOBJECT o
                              ORDER BY o.ZNAME;";
 
@@ -502,14 +506,17 @@ namespace BaseLogApp.Core.Data
 
                 var nextPk = await GetNextPrimaryKeyAsync(db, "ZOBJECT", "Z_PK");
                 var columns = await GetTableColumnsAsync(db, "ZOBJECT");
-                var notes = BuildObjectNotes(objectType, description, position, heightMeters);
+                var pos = ParseLatLon(position);
+                var notes = BuildObjectNotes(description);
 
                 var insertColumns = new List<string> { "Z_PK", "Z_ENT", "Z_OPT", "ZNAME", "ZNOTES" };
                 var values = new List<object?> { nextPk, 1, 1, name.Trim(), notes };
-                TryAddObjectField(columns, insertColumns, values, "ZOBJECTTYPE", "ZTYPE", "ZCATEGORY", objectType?.Trim());
+                TryAddObjectField(columns, insertColumns, values, "ZOBJECTTYPE", objectType?.Trim());
                 TryAddObjectField(columns, insertColumns, values, "ZDESCRIPTION", "ZDESC", description?.Trim());
-                TryAddObjectField(columns, insertColumns, values, "ZPOSITION", "ZGPS", "ZLOCATION", "ZCOORDINATES", position?.Trim());
-                TryAddObjectField(columns, insertColumns, values, "ZHEIGHT", "ZHEIGHTMETERS", "ZALTITUDE", heightMeters?.Trim());
+                TryAddObjectField(columns, insertColumns, values, "ZLATITUDE", pos?.lat);
+                TryAddObjectField(columns, insertColumns, values, "ZLONGITUDE", pos?.lon);
+                TryAddObjectField(columns, insertColumns, values, "ZHEIGHT", ToNullableDouble(heightMeters));
+                TryAddObjectField(columns, insertColumns, values, "ZHEIGHTUNIT", "m");
 
                 var placeholders = string.Join(",", Enumerable.Repeat("?", insertColumns.Count));
                 await db.ExecuteAsync($"INSERT INTO ZOBJECT ({string.Join(",", insertColumns)}) VALUES ({placeholders});", values.ToArray());
@@ -582,14 +589,17 @@ namespace BaseLogApp.Core.Data
                 if (!await HasTableAsync(db, "ZOBJECT")) return false;
 
                 var columns = await GetTableColumnsAsync(db, "ZOBJECT");
-                var notes = BuildObjectNotes(objectType, description, position, heightMeters);
+                var pos = ParseLatLon(position);
+                var notes = BuildObjectNotes(description);
 
                 var updates = new List<string> { "ZNAME=?", "ZNOTES=?" };
                 var values = new List<object?> { name.Trim(), notes };
-                TryAddObjectUpdate(columns, updates, values, "ZOBJECTTYPE", "ZTYPE", "ZCATEGORY", objectType?.Trim());
+                TryAddObjectUpdate(columns, updates, values, "ZOBJECTTYPE", objectType?.Trim());
                 TryAddObjectUpdate(columns, updates, values, "ZDESCRIPTION", "ZDESC", description?.Trim());
-                TryAddObjectUpdate(columns, updates, values, "ZPOSITION", "ZGPS", "ZLOCATION", "ZCOORDINATES", position?.Trim());
-                TryAddObjectUpdate(columns, updates, values, "ZHEIGHT", "ZHEIGHTMETERS", "ZALTITUDE", heightMeters?.Trim());
+                TryAddObjectUpdate(columns, updates, values, "ZLATITUDE", pos?.lat);
+                TryAddObjectUpdate(columns, updates, values, "ZLONGITUDE", pos?.lon);
+                TryAddObjectUpdate(columns, updates, values, "ZHEIGHT", ToNullableDouble(heightMeters));
+                TryAddObjectUpdate(columns, updates, values, "ZHEIGHTUNIT", "m");
                 values.Add(id);
 
                 await db.ExecuteAsync($"UPDATE ZOBJECT SET {string.Join(",", updates)} WHERE Z_PK=?;", values.ToArray());
@@ -696,32 +706,42 @@ namespace BaseLogApp.Core.Data
             return col is null ? "NULL" : $"{alias}.{col}";
         }
 
-        private static string BuildObjectNotes(string? objectType, string? description, string? position, string? heightMeters)
-            => string.Join(" | ", new[]
-            {
-                string.IsNullOrWhiteSpace(objectType) ? null : $"TYPE:{objectType.Trim()}",
-                string.IsNullOrWhiteSpace(description) ? null : description.Trim(),
-                string.IsNullOrWhiteSpace(position) ? null : $"GPS:{position.Trim()}",
-                string.IsNullOrWhiteSpace(heightMeters) ? null : $"H:{heightMeters.Trim()}m"
-            }.Where(x => !string.IsNullOrWhiteSpace(x)));
+        private static string BuildObjectNotes(string? description)
+            => string.IsNullOrWhiteSpace(description) ? string.Empty : description.Trim();
+
+        private static (double lat, double lon)? ParseLatLon(string? position)
+        {
+            if (string.IsNullOrWhiteSpace(position)) return null;
+            var parts = position.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length != 2) return null;
+            if (!double.TryParse(parts[0], NumberStyles.Float, CultureInfo.InvariantCulture, out var lat)) return null;
+            if (!double.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out var lon)) return null;
+            return (lat, lon);
+        }
 
         private static void PopulateObjectFieldsFromNotes(ObjectCatalogItem row)
         {
-            if (string.IsNullOrWhiteSpace(row.Notes))
-                return;
+            if (string.IsNullOrWhiteSpace(row.Description) && !string.IsNullOrWhiteSpace(row.Notes))
+                row.Description = row.Notes;
 
-            var chunks = row.Notes.Split('|', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-            foreach (var chunk in chunks)
+            if (string.IsNullOrWhiteSpace(row.Position) && !string.IsNullOrWhiteSpace(row.Latitude) && !string.IsNullOrWhiteSpace(row.Longitude))
+                row.Position = $"{row.Latitude}, {row.Longitude}";
+
+            if (!string.IsNullOrWhiteSpace(row.HeightMeters))
             {
-                if (chunk.StartsWith("TYPE:", StringComparison.OrdinalIgnoreCase) && string.IsNullOrWhiteSpace(row.ObjectType))
-                    row.ObjectType = chunk[5..].Trim();
-                else if (chunk.StartsWith("GPS:", StringComparison.OrdinalIgnoreCase) && string.IsNullOrWhiteSpace(row.Position))
-                    row.Position = chunk[4..].Trim();
-                else if (chunk.StartsWith("H:", StringComparison.OrdinalIgnoreCase) && string.IsNullOrWhiteSpace(row.HeightMeters))
-                    row.HeightMeters = chunk[2..].Trim().TrimEnd('m', 'M');
-                else if (string.IsNullOrWhiteSpace(row.Description))
-                    row.Description = chunk;
+                var cleaned = row.HeightMeters.Trim();
+                row.HeightMeters = cleaned.Contains(',') ? cleaned.Replace(',', '.') : cleaned;
             }
+
+            if (string.IsNullOrWhiteSpace(row.HeightUnit))
+                row.HeightUnit = "m";
+        }
+
+        private static void TryAddObjectField(HashSet<string> columns, List<string> insertColumns, List<object?> values, string c1, object? value)
+        {
+            if (!columns.Contains(c1)) return;
+            insertColumns.Add(c1);
+            values.Add(value);
         }
 
         private static void TryAddObjectField(HashSet<string> columns, List<string> insertColumns, List<object?> values, string c1, string c2, string c3, string c4, string? value)
@@ -745,6 +765,13 @@ namespace BaseLogApp.Core.Data
             var c = new[] { c1, c2 }.FirstOrDefault(columns.Contains);
             if (c is null) return;
             insertColumns.Add(c);
+            values.Add(value);
+        }
+
+        private static void TryAddObjectUpdate(HashSet<string> columns, List<string> updates, List<object?> values, string c1, object? value)
+        {
+            if (!columns.Contains(c1)) return;
+            updates.Add($"{c1}=?");
             values.Add(value);
         }
 
