@@ -6,12 +6,10 @@
              BackgroundColor="#0A0F1E">
     <ScrollView>
         <VerticalStackLayout Padding="16" Spacing="12">
-            <Grid>
-                <Image x:Name="ObjectPreviewImage" Aspect="AspectFit" HorizontalOptions="Fill" HeightRequest="220" IsVisible="False" />
-                <Border x:Name="NoPhotoBorder" BackgroundColor="#151B2E" StrokeThickness="0" StrokeShape="RoundRectangle 12" HeightRequest="220" IsVisible="True">
-                    <Label Text="NO PHOTO" TextColor="#8E99B8" HorizontalOptions="Center" VerticalOptions="Center" FontAttributes="Bold" />
-                </Border>
-            </Grid>
+            <Label Text="Seleziona object esistente" TextColor="#8E99B8" />
+            <Picker x:Name="ExistingObjectPicker" Title="(opzionale)" SelectedIndexChanged="OnExistingObjectChanged" />
+
+            <Image x:Name="ObjectPreviewImage" Aspect="AspectFit" HorizontalOptions="Fill" HeightRequest="220" IsVisible="False" />
 
             <Entry x:Name="ObjectNameEntry" Placeholder="Nome object" />
             <Entry x:Name="ObjectTypeEntry" Placeholder="Tipo object (B/A/S/E/Others)" TextChanged="OnObjectTypeTextChanged" />
