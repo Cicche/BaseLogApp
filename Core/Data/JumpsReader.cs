@@ -346,23 +346,52 @@ namespace BaseLogApp.Core.Data
                 if (await HasTableAsync(db, "ZLOGENTRY"))
                 {
                     var nextPk = await GetNextPrimaryKeyAsync(db, "ZLOGENTRY", "Z_PK");
-                    await db.ExecuteAsync(@"
-                        INSERT INTO ZLOGENTRY (Z_PK, Z_ENT, Z_OPT, ZJUMPNUMBER, ZDATE, ZNOTES)
-                        VALUES (?, 1, 1, ?, ?, ?);",
-                        nextPk,
-                        jump.NumeroSalto,
-                        ToAppleSeconds(jump.Data),
-                        jump.Note);
+                    var logEntryColumns = await GetTableColumnsAsync(db, "ZLOGENTRY");
+                    if (logEntryColumns.Contains("ZUNIQUEID"))
+                    {
+                        await db.ExecuteAsync(@"
+                            INSERT INTO ZLOGENTRY (Z_PK, Z_ENT, Z_OPT, ZJUMPNUMBER, ZDATE, ZNOTES, ZUNIQUEID)
+                            VALUES (?, 1, 1, ?, ?, ?, ?);",
+                            nextPk,
+                            jump.NumeroSalto,
+                            ToAppleSeconds(jump.Data),
+                            jump.Note,
+                            Guid.NewGuid().ToString("D"));
+                    }
+                    else
+                    {
+                        await db.ExecuteAsync(@"
+                            INSERT INTO ZLOGENTRY (Z_PK, Z_ENT, Z_OPT, ZJUMPNUMBER, ZDATE, ZNOTES)
+                            VALUES (?, 1, 1, ?, ?, ?);",
+                            nextPk,
+                            jump.NumeroSalto,
+                            ToAppleSeconds(jump.Data),
+                            jump.Note);
+                    }
 
                     if (jump.NewPhotoBytes is { Length: > 0 } && await HasTableAsync(db, "ZLOGENTRYIMAGE"))
                     {
                         var nextImgPk = await GetNextPrimaryKeyAsync(db, "ZLOGENTRYIMAGE", "Z_PK");
-                        await db.ExecuteAsync(@"
-                            INSERT INTO ZLOGENTRYIMAGE (Z_PK, Z_ENT, Z_OPT, ZLOGENTRY, ZIMAGE)
-                            VALUES (?, 1, 1, ?, ?);",
-                            nextImgPk,
-                            nextPk,
-                            jump.NewPhotoBytes);
+                        var logEntryImageColumns = await GetTableColumnsAsync(db, "ZLOGENTRYIMAGE");
+                        if (logEntryImageColumns.Contains("ZUNIQUEID"))
+                        {
+                            await db.ExecuteAsync(@"
+                                INSERT INTO ZLOGENTRYIMAGE (Z_PK, Z_ENT, Z_OPT, ZLOGENTRY, ZIMAGE, ZUNIQUEID)
+                                VALUES (?, 1, 1, ?, ?, ?);",
+                                nextImgPk,
+                                nextPk,
+                                jump.NewPhotoBytes,
+                                Guid.NewGuid().ToString("D"));
+                        }
+                        else
+                        {
+                            await db.ExecuteAsync(@"
+                                INSERT INTO ZLOGENTRYIMAGE (Z_PK, Z_ENT, Z_OPT, ZLOGENTRY, ZIMAGE)
+                                VALUES (?, 1, 1, ?, ?);",
+                                nextImgPk,
+                                nextPk,
+                                jump.NewPhotoBytes);
+                        }
                     }
 
                     return true;
@@ -543,6 +572,7 @@ namespace BaseLogApp.Core.Data
                 TryAddObjectField(columns, insertColumns, values, "ZLONGITUDE", pos?.lon);
                 TryAddObjectField(columns, insertColumns, values, "ZHEIGHT", ToNullableDouble(heightMeters));
                 TryAddObjectField(columns, insertColumns, values, "ZHEIGHTUNIT", "m");
+                TryAddObjectField(columns, insertColumns, values, "ZUNIQUEID", Guid.NewGuid().ToString("D"));
 
                 var placeholders = string.Join(",", Enumerable.Repeat("?", insertColumns.Count));
                 await db.ExecuteAsync($"INSERT INTO ZOBJECT ({string.Join(",", insertColumns)}) VALUES ({placeholders});", values.ToArray());
@@ -550,7 +580,11 @@ namespace BaseLogApp.Core.Data
                 if (photoBytes is { Length: > 0 } && await HasTableAsync(db, "ZOBJECTIMAGE"))
                 {
                     var nextImgPk = await GetNextPrimaryKeyAsync(db, "ZOBJECTIMAGE", "Z_PK");
-                    await db.ExecuteAsync("INSERT INTO ZOBJECTIMAGE (Z_PK, Z_ENT, Z_OPT, ZOBJECT, ZIMAGE) VALUES (?,1,1,?,?);", nextImgPk, nextPk, photoBytes);
+                    var objectImageColumns = await GetTableColumnsAsync(db, "ZOBJECTIMAGE");
+                    if (objectImageColumns.Contains("ZUNIQUEID"))
+                        await db.ExecuteAsync("INSERT INTO ZOBJECTIMAGE (Z_PK, Z_ENT, Z_OPT, ZOBJECT, ZIMAGE, ZUNIQUEID) VALUES (?,1,1,?,?,?);", nextImgPk, nextPk, photoBytes, Guid.NewGuid().ToString("D"));
+                    else
+                        await db.ExecuteAsync("INSERT INTO ZOBJECTIMAGE (Z_PK, Z_ENT, Z_OPT, ZOBJECT, ZIMAGE) VALUES (?,1,1,?,?);", nextImgPk, nextPk, photoBytes);
                 }
 
                 return true;
@@ -572,7 +606,11 @@ namespace BaseLogApp.Core.Data
                 if (!await HasTableAsync(db, "ZRIG")) return false;
 
                 var nextPk = await GetNextPrimaryKeyAsync(db, "ZRIG", "Z_PK");
-                await db.ExecuteAsync("INSERT INTO ZRIG (Z_PK, Z_ENT, Z_OPT, ZNAME, ZNOTES) VALUES (?,1,1,?,?);", nextPk, name.Trim(), description?.Trim());
+                var rigColumns = await GetTableColumnsAsync(db, "ZRIG");
+                if (rigColumns.Contains("ZUNIQUEID"))
+                    await db.ExecuteAsync("INSERT INTO ZRIG (Z_PK, Z_ENT, Z_OPT, ZNAME, ZNOTES, ZUNIQUEID) VALUES (?,1,1,?,?,?);", nextPk, name.Trim(), description?.Trim(), Guid.NewGuid().ToString("D"));
+                else
+                    await db.ExecuteAsync("INSERT INTO ZRIG (Z_PK, Z_ENT, Z_OPT, ZNAME, ZNOTES) VALUES (?,1,1,?,?);", nextPk, name.Trim(), description?.Trim());
                 return true;
             }
             catch (Exception ex)
@@ -595,7 +633,11 @@ namespace BaseLogApp.Core.Data
                 if (existing.Count > 0) return true;
 
                 var nextPk = await GetNextPrimaryKeyAsync(db, "ZJUMPTYPE", "Z_PK");
-                await db.ExecuteAsync("INSERT INTO ZJUMPTYPE (Z_PK, Z_ENT, Z_OPT, ZNAME, ZNOTES) VALUES (?,1,1,?,?);", nextPk, name.Trim(), notes?.Trim());
+                var jumpTypeColumns = await GetTableColumnsAsync(db, "ZJUMPTYPE");
+                if (jumpTypeColumns.Contains("ZUNIQUEID"))
+                    await db.ExecuteAsync("INSERT INTO ZJUMPTYPE (Z_PK, Z_ENT, Z_OPT, ZNAME, ZNOTES, ZUNIQUEID) VALUES (?,1,1,?,?,?);", nextPk, name.Trim(), notes?.Trim(), Guid.NewGuid().ToString("D"));
+                else
+                    await db.ExecuteAsync("INSERT INTO ZJUMPTYPE (Z_PK, Z_ENT, Z_OPT, ZNAME, ZNOTES) VALUES (?,1,1,?,?);", nextPk, name.Trim(), notes?.Trim());
                 return true;
             }
             catch (Exception ex)
@@ -638,7 +680,11 @@ namespace BaseLogApp.Core.Data
                     else
                     {
                         var nextImgPk = await GetNextPrimaryKeyAsync(db, "ZOBJECTIMAGE", "Z_PK");
-                        await db.ExecuteAsync("INSERT INTO ZOBJECTIMAGE (Z_PK, Z_ENT, Z_OPT, ZOBJECT, ZIMAGE) VALUES (?,1,1,?,?);", nextImgPk, id, photoBytes);
+                        var objectImageColumns = await GetTableColumnsAsync(db, "ZOBJECTIMAGE");
+                        if (objectImageColumns.Contains("ZUNIQUEID"))
+                            await db.ExecuteAsync("INSERT INTO ZOBJECTIMAGE (Z_PK, Z_ENT, Z_OPT, ZOBJECT, ZIMAGE, ZUNIQUEID) VALUES (?,1,1,?,?,?);", nextImgPk, id, photoBytes, Guid.NewGuid().ToString("D"));
+                        else
+                            await db.ExecuteAsync("INSERT INTO ZOBJECTIMAGE (Z_PK, Z_ENT, Z_OPT, ZOBJECT, ZIMAGE) VALUES (?,1,1,?,?);", nextImgPk, id, photoBytes);
                     }
                 }
 

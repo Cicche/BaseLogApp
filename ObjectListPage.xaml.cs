@@ -8,6 +8,7 @@ public partial class ObjectListPage : ContentPage
 {
     private readonly JumpsViewModel _vm;
     private readonly ObservableCollection<ObjectCatalogItem> _items = new();
+    private readonly List<ObjectCatalogItem> _allItems = new();
 
     public ObjectListPage(JumpsViewModel vm)
     {
@@ -26,9 +27,34 @@ public partial class ObjectListPage : ContentPage
     {
         base.OnAppearing();
         var rows = await _vm.GetObjectsCatalogAsync();
+        _allItems.Clear();
+        _allItems.AddRange(rows);
+        ApplyFilter(ObjectSearch.Text);
+    }
+
+
+    private void OnSearchTextChanged(object? sender, TextChangedEventArgs e)
+        => ApplyFilter(e.NewTextValue);
+
+    private void ApplyFilter(string? query)
+    {
+        var q = (query ?? string.Empty).Trim();
+        IEnumerable<ObjectCatalogItem> filtered = _allItems;
+
+        if (!string.IsNullOrWhiteSpace(q))
+        {
+            filtered = _allItems.Where(it =>
+                   (!string.IsNullOrWhiteSpace(it.Name) && it.Name.Contains(q, StringComparison.OrdinalIgnoreCase))
+                || (!string.IsNullOrWhiteSpace(it.ObjectType) && it.ObjectType.Contains(q, StringComparison.OrdinalIgnoreCase))
+                || (!string.IsNullOrWhiteSpace(it.Description) && it.Description.Contains(q, StringComparison.OrdinalIgnoreCase))
+                || (!string.IsNullOrWhiteSpace(it.Notes) && it.Notes.Contains(q, StringComparison.OrdinalIgnoreCase))
+                || (!string.IsNullOrWhiteSpace(it.Position) && it.Position.Contains(q, StringComparison.OrdinalIgnoreCase))
+                || (!string.IsNullOrWhiteSpace(it.HeightMeters) && it.HeightMeters.Contains(q, StringComparison.OrdinalIgnoreCase)));
+        }
+
         _items.Clear();
-        foreach (var r in rows)
-            _items.Add(r);
+        foreach (var item in filtered.OrderBy(x => x.Name))
+            _items.Add(item);
     }
 
     private async void OnObjectSelected(object? sender, SelectionChangedEventArgs e)

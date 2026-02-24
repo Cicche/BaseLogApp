@@ -17,9 +17,9 @@
         <CollectionView Grid.Row="1"
                         ItemsSource="{Binding FilteredItems}"
                         SelectionMode="None"
-                        Margin="0,14,0,0">
+                        Margin="0,8,0,0">
             <CollectionView.ItemsLayout>
-                <LinearItemsLayout Orientation="Vertical" ItemSpacing="12" />
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
             </CollectionView.ItemsLayout>
 
             <CollectionView.ItemTemplate>

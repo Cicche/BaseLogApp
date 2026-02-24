@@ -5,16 +5,27 @@
              x:Class="BaseLogApp.Views.ObjectListPage"
              Title="Object"
              BackgroundColor="#0A0F1E">
-    <CollectionView x:Name="ObjectsView" Margin="16" SelectionMode="Single" SelectionChanged="OnObjectSelected">
-        <CollectionView.ItemsLayout>
-            <LinearItemsLayout Orientation="Vertical" ItemSpacing="12" />
-        </CollectionView.ItemsLayout>
-        <CollectionView.ItemTemplate>
-            <DataTemplate x:DataType="core:ObjectCatalogItem">
-                <Border BackgroundColor="#151B2E" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="12">
-                    <Label Text="{Binding Name}" TextColor="White" FontSize="16"/>
-                </Border>
-            </DataTemplate>
-        </CollectionView.ItemTemplate>
-    </CollectionView>
+    <Grid RowDefinitions="Auto,*" Padding="16,12,16,0">
+        <Border BackgroundColor="#151B2E" StrokeThickness="0" StrokeShape="RoundRectangle 16" Padding="8,2">
+            <SearchBar x:Name="ObjectSearch"
+                       Placeholder="Cerca per nome, tipo, descrizione, note, posizione..."
+                       TextChanged="OnSearchTextChanged" />
+        </Border>
+
+        <CollectionView Grid.Row="1" x:Name="ObjectsView" SelectionMode="Single" SelectionChanged="OnObjectSelected" Margin="0,8,0,0">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="core:ObjectCatalogItem">
+                    <Border BackgroundColor="#151B2E" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="12">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="{Binding Name}" TextColor="White" FontSize="16"/>
+                            <Label Text="{Binding ObjectType}" TextColor="#8E99B8" FontSize="12" />
+                        </VerticalStackLayout>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
 </ContentPage>
