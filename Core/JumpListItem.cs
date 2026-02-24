@@ -1,4 +1,4 @@
-﻿using SQLite;
+using SQLite;
 
 namespace BaseLogApp.Core.Models
 {
@@ -11,5 +11,41 @@ namespace BaseLogApp.Core.Models
         public string? Oggetto { get; set; }
         public string? TipoSalto { get; set; }
         public string? Note { get; set; }
+        public string? ObjectPhotoPath { get; set; }
+        public byte[]? ObjectPhotoBlob { get; set; }
+        public byte[]? JumpPhotoBlob { get; set; }
+        public byte[]? NewPhotoBytes { get; set; }
+        public string? Latitude { get; set; }
+        public string? Longitude { get; set; }
+
+        public bool IsEdit { get; set; }
+        public int OriginalNumeroSalto { get; set; }
+
+        public string TimeDisplay
+        {
+            get
+            {
+                if (DateTime.TryParseExact(Data, new[] { "dd/MM/yyyy HH:mm", "dd/MM/yyyy" }, null, System.Globalization.DateTimeStyles.None, out var dt))
+                    return dt.ToString("HH:mm");
+                return "";
+            }
+        }
+
+        public ImageSource ObjectPhotoSource
+        {
+            get
+            {
+                if (JumpPhotoBlob is { Length: > 0 })
+                    return ImageSource.FromStream(() => new MemoryStream(JumpPhotoBlob));
+
+                if (ObjectPhotoBlob is { Length: > 0 })
+                    return ImageSource.FromStream(() => new MemoryStream(ObjectPhotoBlob));
+
+                if (!string.IsNullOrWhiteSpace(ObjectPhotoPath))
+                    return ImageSource.FromFile(ObjectPhotoPath);
+
+                return ImageSource.FromFile("dotnet_bot.png");
+            }
+        }
     }
 }
