@@ -267,6 +267,19 @@ namespace BaseLogApp.Core.ViewModels
             return deleted;
         }
 
+
+        public void SetExpandedState(JumpListItem target, bool isExpanded)
+        {
+            if (!isExpanded)
+            {
+                target.IsExpanded = false;
+                return;
+            }
+
+            foreach (var item in FilteredItems)
+                item.IsExpanded = ReferenceEquals(item, target);
+        }
+
         public void ApplyFilter(string? text)
         {
             var q = (text ?? string.Empty).Trim();

@@ -47,7 +47,7 @@
                                 StrokeShape="RoundRectangle 16"
                                 Padding="0"
                                 Margin="0">
-                            <toolkit:Expander>
+                            <toolkit:Expander IsExpanded="{Binding IsExpanded, Mode=TwoWay}" ExpandedChanged="OnJumpExpanderExpandedChanged">
                                 <toolkit:Expander.Header>
                                     <Grid Padding="12" ColumnDefinitions="64,*,Auto" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="2">
                                         <Label Grid.RowSpan="3"

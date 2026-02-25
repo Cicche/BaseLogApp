@@ -1,8 +1,10 @@
 using SQLite;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace BaseLogApp.Core.Models
 {
-    public class JumpListItem
+    public class JumpListItem : INotifyPropertyChanged
     {
         [PrimaryKey]
         public int Id { get; set; }
@@ -18,6 +20,19 @@ namespace BaseLogApp.Core.Models
         public string? Latitude { get; set; }
         public string? Longitude { get; set; }
 
+
+        private bool _isExpanded;
+        public bool IsExpanded
+        {
+            get => _isExpanded;
+            set
+            {
+                if (_isExpanded == value) return;
+                _isExpanded = value;
+                OnPropertyChanged();
+            }
+        }
+
         public bool IsEdit { get; set; }
         public int OriginalNumeroSalto { get; set; }
 
@@ -30,6 +45,11 @@ namespace BaseLogApp.Core.Models
                 return "";
             }
         }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        private void OnPropertyChanged([CallerMemberName] string? name = null)
+            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
         public ImageSource ObjectPhotoSource
         {
