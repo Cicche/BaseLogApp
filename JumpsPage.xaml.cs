@@ -118,12 +118,12 @@ public partial class JumpsPage : ContentPage
     }
 
 
-    private void OnJumpExpanderExpandedChanged(object? sender, ExpandedChangedEventArgs e)
+    private void OnJumpExpanderExpandedChanged(object? sender, EventArgs e)
     {
         if (sender is not Expander expander || expander.BindingContext is not JumpListItem item)
             return;
 
-        _vm.SetExpandedState(item, e.IsExpanded);
+        _vm.SetExpandedState(item, expander.IsExpanded);
     }
 
     private async void OnPhotoTapped(object? sender, TappedEventArgs e)
