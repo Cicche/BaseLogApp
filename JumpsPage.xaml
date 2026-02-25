@@ -17,6 +17,7 @@
         <CollectionView Grid.Row="1"
                         ItemsSource="{Binding FilteredItems}"
                         SelectionMode="None"
+                        ItemSizingStrategy="MeasureAllItems"
                         Margin="0,8,0,0">
             <CollectionView.ItemsLayout>
                 <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
@@ -64,10 +65,10 @@
                                                TextColor="White"
                                                LineBreakMode="TailTruncation" />
                                         <Label Grid.Column="2"
-                                               Text="{Binding Data}"
+                                               Text="{Binding DateOnlyDisplay}"
                                                FontSize="14"
                                                TextColor="#8E99B8"
-                                               HorizontalTextAlignment="End" />
+                                               HorizontalTextAlignment="End" HorizontalOptions="End" />
 
                                         <Label Grid.Row="1" Grid.Column="1"
                                                Text="{Binding TipoSalto}"
@@ -78,7 +79,8 @@
                                                Text="{Binding TimeDisplay}"
                                                FontSize="14"
                                                TextColor="#8E99B8"
-                                               HorizontalTextAlignment="End" />
+                                               HorizontalTextAlignment="End"
+                                               HorizontalOptions="End" />
 
                                         <Label Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
                                                Text="{Binding Note}"
@@ -107,6 +109,14 @@
                                     <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
                                         <Label Text="Data" TextColor="#8E99B8" />
                                         <Label Grid.Column="1" Text="{Binding Data}" TextColor="White" />
+                                    </Grid>
+                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                        <Label Text="Delay (s)" TextColor="#8E99B8" />
+                                        <Label Grid.Column="1" Text="{Binding DelayDisplay}" TextColor="White" />
+                                    </Grid>
+                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                        <Label Text="Apertura" TextColor="#8E99B8" />
+                                        <Label Grid.Column="1" Text="{Binding HeadingDisplay}" TextColor="White" />
                                     </Grid>
 
                                     <Label Text="Foto / preview" TextColor="#8E99B8" FontSize="12" />

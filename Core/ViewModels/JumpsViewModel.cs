@@ -338,12 +338,17 @@ namespace BaseLogApp.Core.ViewModels
                     || (!string.IsNullOrEmpty(it.Data) && it.Data.Contains(q, StringComparison.OrdinalIgnoreCase))
                     || (!string.IsNullOrEmpty(it.Oggetto) && it.Oggetto.Contains(q, StringComparison.OrdinalIgnoreCase))
                     || (!string.IsNullOrEmpty(it.TipoSalto) && it.TipoSalto.Contains(q, StringComparison.OrdinalIgnoreCase))
-                    || (!string.IsNullOrEmpty(it.Note) && it.Note.Contains(q, StringComparison.OrdinalIgnoreCase)));
+                    || (!string.IsNullOrEmpty(it.Note) && it.Note.Contains(q, StringComparison.OrdinalIgnoreCase))
+                    || (it.DelaySeconds.HasValue && it.DelaySeconds.Value.ToString(CultureInfo.InvariantCulture).Contains(q, StringComparison.OrdinalIgnoreCase))
+                    || (it.HeadingDegrees.HasValue && it.HeadingDegrees.Value.ToString(CultureInfo.InvariantCulture).Contains(q, StringComparison.OrdinalIgnoreCase)));
             }
 
             FilteredItems.Clear();
             foreach (var it in filtered.OrderByDescending(x => x.NumeroSalto))
+            {
+                it.IsExpanded = false;
                 FilteredItems.Add(it);
+            }
 
             Count = FilteredItems.Count;
         }

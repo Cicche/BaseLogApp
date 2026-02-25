@@ -8,6 +8,7 @@ public partial class JumpsPage : ContentPage
 {
     private readonly JumpsViewModel _vm;
     private readonly ToolbarItem _dbSwitchItem;
+    private bool _coherenceChecked;
 
     public JumpsPage(JumpsViewModel vm)
     {
@@ -39,11 +40,15 @@ public partial class JumpsPage : ContentPage
         base.OnAppearing();
         await _vm.LoadAsync();
 
-        var normalized = await _vm.NormalizeJumpNumbersAsync();
-        if (normalized > 0)
+        if (!_coherenceChecked)
         {
-            await DisplayAlert("Coerenza logbook", $"Trovate incongruenze nella numerazione salti. Normalizzati {normalized} record in base all'ordine di inserimento.", "OK");
-            await _vm.LoadAsync();
+            _coherenceChecked = true;
+            var normalized = await _vm.NormalizeJumpNumbersAsync();
+            if (normalized > 0)
+            {
+                await DisplayAlert("Coerenza logbook", $"Trovate incongruenze nella numerazione salti. Normalizzati {normalized} record in base all'ordine di inserimento.", "OK");
+                await _vm.LoadAsync();
+            }
         }
 
         _dbSwitchItem.Text = _vm.CurrentProfileLabel;
@@ -52,6 +57,7 @@ public partial class JumpsPage : ContentPage
     private async Task OnSwitchDbClicked()
     {
         await _vm.ToggleDbProfileAsync();
+        _coherenceChecked = false;
         _dbSwitchItem.Text = _vm.CurrentProfileLabel;
         await DisplayAlert("DB attivo", _vm.GetCurrentDbPath(), "OK");
     }

@@ -81,7 +81,9 @@ namespace BaseLogApp.Core.Data
                             NULL AS ObjectPhotoBlob,
                             NULL AS JumpPhotoBlob,
                             CAST(Latitude AS TEXT) AS Latitude,
-                            CAST(Longitude AS TEXT) AS Longitude
+                            CAST(Longitude AS TEXT) AS Longitude,
+                            NULL AS DelaySecondsText,
+                            NULL AS HeadingDegreesText
                         FROM Jump
                         ORDER BY Id DESC;";
 
@@ -93,6 +95,9 @@ namespace BaseLogApp.Core.Data
                 }
 
                 var photoExpr = await ResolveObjectPhotoExpressionAsync(db);
+                var logColumns = await GetTableColumnsAsync(db, "ZLOGENTRY");
+                var delayExpr = BuildColumnExpression("l", logColumns, "ZDELAY", "ZDELAYSECONDS", "ZDELAYINSECONDS");
+                var headingExpr = BuildColumnExpression("l", logColumns, "ZHEADING", "ZOPENINGHEADING", "ZTRACK");
                 var sql = $@"
                     SELECT
                         l.Z_PK AS Id,
@@ -105,7 +110,9 @@ namespace BaseLogApp.Core.Data
                         (SELECT oi.ZIMAGE FROM ZOBJECTIMAGE oi WHERE oi.ZOBJECT = o.Z_PK LIMIT 1) AS ObjectPhotoBlob,
                         (SELECT li.ZIMAGE FROM ZLOGENTRYIMAGE li WHERE li.ZLOGENTRY = l.Z_PK LIMIT 1) AS JumpPhotoBlob,
                         NULL AS Latitude,
-                        NULL AS Longitude
+                        NULL AS Longitude,
+                        CAST({delayExpr} AS TEXT) AS DelaySecondsText,
+                        CAST({headingExpr} AS TEXT) AS HeadingDegreesText
                     FROM ZLOGENTRY l
                     LEFT JOIN ZOBJECT o ON l.ZOBJECT = o.Z_PK
                     LEFT JOIN ZJUMPTYPE jt ON l.ZJUMPTYPE = jt.Z_PK
@@ -131,7 +138,9 @@ namespace BaseLogApp.Core.Data
             Note = r.Note,
             ObjectPhotoPath = NormalizePhotoPath(r.ObjectPhotoPath),
             Latitude = r.Latitude,
-            Longitude = r.Longitude
+            Longitude = r.Longitude,
+            DelaySeconds = ParseNullableInt(r.DelaySecondsText),
+            HeadingDegrees = ParseNullableInt(r.HeadingDegreesText)
         };
 
         private static JumpListItem ToJumpItemLegacy(JumpRow r) => new()
@@ -144,7 +153,9 @@ namespace BaseLogApp.Core.Data
             Note = r.Note,
             ObjectPhotoPath = NormalizePhotoPath(r.ObjectPhotoPath),
             ObjectPhotoBlob = r.ObjectPhotoBlob,
-            JumpPhotoBlob = r.JumpPhotoBlob
+            JumpPhotoBlob = r.JumpPhotoBlob,
+            DelaySeconds = ParseNullableInt(r.DelaySecondsText),
+            HeadingDegrees = ParseNullableInt(r.HeadingDegreesText)
         };
 
         public async Task<IReadOnlyList<string>> GetObjectNamesAsync()
@@ -354,27 +365,14 @@ namespace BaseLogApp.Core.Data
                 {
                     var nextPk = await GetNextPrimaryKeyAsync(db, "ZLOGENTRY", "Z_PK");
                     var logEntryColumns = await GetTableColumnsAsync(db, "ZLOGENTRY");
-                    if (logEntryColumns.Contains("ZUNIQUEID"))
-                    {
-                        await db.ExecuteAsync(@"
-                            INSERT INTO ZLOGENTRY (Z_PK, Z_ENT, Z_OPT, ZJUMPNUMBER, ZDATE, ZNOTES, ZUNIQUEID)
-                            VALUES (?, 1, 1, ?, ?, ?, ?);",
-                            nextPk,
-                            jump.NumeroSalto,
-                            ToAppleSeconds(jump.Data),
-                            jump.Note,
-                            Guid.NewGuid().ToString("D"));
-                    }
-                    else
-                    {
-                        await db.ExecuteAsync(@"
-                            INSERT INTO ZLOGENTRY (Z_PK, Z_ENT, Z_OPT, ZJUMPNUMBER, ZDATE, ZNOTES)
-                            VALUES (?, 1, 1, ?, ?, ?);",
-                            nextPk,
-                            jump.NumeroSalto,
-                            ToAppleSeconds(jump.Data),
-                            jump.Note);
-                    }
+                    var insertColumns = new List<string> { "Z_PK", "Z_ENT", "Z_OPT", "ZJUMPNUMBER", "ZDATE", "ZNOTES" };
+                    var insertValues = new List<object?> { nextPk, 1, 1, jump.NumeroSalto, ToAppleSeconds(jump.Data), jump.Note };
+                    TryAddFirstAvailableField(logEntryColumns, insertColumns, insertValues, jump.DelaySeconds, "ZDELAY", "ZDELAYSECONDS", "ZDELAYINSECONDS");
+                    TryAddFirstAvailableField(logEntryColumns, insertColumns, insertValues, jump.HeadingDegrees, "ZHEADING", "ZOPENINGHEADING", "ZTRACK");
+                    TryAddObjectField(logEntryColumns, insertColumns, insertValues, "ZUNIQUEID", Guid.NewGuid().ToString("D"));
+
+                    var placeholders = string.Join(",", Enumerable.Repeat("?", insertColumns.Count));
+                    await db.ExecuteAsync($"INSERT INTO ZLOGENTRY ({string.Join(",", insertColumns)}) VALUES ({placeholders});", insertValues.ToArray());
 
                     if (jump.NewPhotoBytes is { Length: > 0 } && await HasTableAsync(db, "ZLOGENTRYIMAGE"))
                     {
@@ -437,13 +435,14 @@ namespace BaseLogApp.Core.Data
 
                 if (await HasTableAsync(db, "ZLOGENTRY"))
                 {
-                    await db.ExecuteAsync(@"UPDATE ZLOGENTRY
-                                            SET ZJUMPNUMBER=?, ZDATE=?, ZNOTES=?
-                                            WHERE Z_PK=?;",
-                        jump.NumeroSalto,
-                        ToAppleSeconds(jump.Data),
-                        jump.Note,
-                        jump.Id);
+                    var columns = await GetTableColumnsAsync(db, "ZLOGENTRY");
+                    var updates = new List<string> { "ZJUMPNUMBER=?", "ZDATE=?", "ZNOTES=?" };
+                    var values = new List<object?> { jump.NumeroSalto, ToAppleSeconds(jump.Data), jump.Note };
+                    TryAddFirstAvailableUpdate(columns, updates, values, jump.DelaySeconds, "ZDELAY", "ZDELAYSECONDS", "ZDELAYINSECONDS");
+                    TryAddFirstAvailableUpdate(columns, updates, values, jump.HeadingDegrees, "ZHEADING", "ZOPENINGHEADING", "ZTRACK");
+                    values.Add(jump.Id);
+
+                    await db.ExecuteAsync($"UPDATE ZLOGENTRY SET {string.Join(",", updates)} WHERE Z_PK=?;", values.ToArray());
                     return true;
                 }
 
@@ -1049,6 +1048,22 @@ namespace BaseLogApp.Core.Data
             values.Add(value);
         }
 
+        private static void TryAddFirstAvailableField(HashSet<string> columns, List<string> insertColumns, List<object?> values, object? value, params string[] candidates)
+        {
+            var c = candidates.FirstOrDefault(columns.Contains);
+            if (c is null) return;
+            insertColumns.Add(c);
+            values.Add(value);
+        }
+
+        private static void TryAddFirstAvailableUpdate(HashSet<string> columns, List<string> updates, List<object?> values, object? value, params string[] candidates)
+        {
+            var c = candidates.FirstOrDefault(columns.Contains);
+            if (c is null) return;
+            updates.Add($"{c}=?");
+            values.Add(value);
+        }
+
         private static void TryAddObjectUpdate(HashSet<string> columns, List<string> updates, List<object?> values, string c1, object? value)
         {
             if (!columns.Contains(c1)) return;
@@ -1151,6 +1166,9 @@ namespace BaseLogApp.Core.Data
         private static double? ToNullableDouble(string? text)
             => double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var value) ? value : null;
 
+        private static int? ParseNullableInt(string? text)
+            => int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value) ? value : null;
+
         private sealed class JumpRow
         {
             public int Id { get; set; }
@@ -1164,6 +1182,8 @@ namespace BaseLogApp.Core.Data
             public byte[]? JumpPhotoBlob { get; set; }
             public string? Latitude { get; set; }
             public string? Longitude { get; set; }
+            public string? DelaySecondsText { get; set; }
+            public string? HeadingDegreesText { get; set; }
         }
 
         private sealed class ObjectNameRow { public string? Name { get; set; } }

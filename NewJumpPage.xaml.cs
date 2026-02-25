@@ -35,6 +35,8 @@ public partial class NewJumpPage : ContentPage
             DatePicker.Date = now.Date;
             TimePicker.Time = now.TimeOfDay;
             NumberEntry.Text = suggestedJumpNumber.ToString();
+            HeadingSlider.Value = 0;
+            UpdateHeadingLabel(0);
             Title = "Nuovo salto";
         }
         else
@@ -44,6 +46,9 @@ public partial class NewJumpPage : ContentPage
             ObjectEntry.Text = _editing.Oggetto;
             TypeEntry.Text = _editing.TipoSalto;
             NotesEditor.Text = _editing.Note;
+            DelayEntry.Text = _editing.DelaySeconds?.ToString(CultureInfo.InvariantCulture);
+            HeadingSlider.Value = ClampHeading(_editing.HeadingDegrees ?? 0);
+            UpdateHeadingLabel((int)HeadingSlider.Value);
 
             if (DateTime.TryParseExact(_editing.Data, new[] { "dd/MM/yyyy HH:mm", "dd/MM/yyyy" }, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed))
             {
@@ -134,7 +139,9 @@ public partial class NewJumpPage : ContentPage
             JumpPhotoBlob = _editing?.JumpPhotoBlob,
             NewPhotoBytes = await LoadSelectedPhotoBytesAsync(),
             Latitude = coords.Latitude?.ToString(CultureInfo.InvariantCulture),
-            Longitude = coords.Longitude?.ToString(CultureInfo.InvariantCulture)
+            Longitude = coords.Longitude?.ToString(CultureInfo.InvariantCulture),
+            DelaySeconds = ParseNullableInt(DelayEntry.Text),
+            HeadingDegrees = ClampHeading((int)Math.Round(HeadingSlider.Value / 15d) * 15)
         };
 
         if (SaveRequested is null)
@@ -146,6 +153,28 @@ public partial class NewJumpPage : ContentPage
         var saved = await SaveRequested(item);
         if (saved) await Navigation.PopModalAsync();
     }
+
+
+    private void OnHeadingDragCompleted(object? sender, EventArgs e)
+    {
+        var snapped = ClampHeading((int)Math.Round(HeadingSlider.Value / 15d) * 15);
+        HeadingSlider.Value = snapped;
+        UpdateHeadingLabel(snapped);
+    }
+
+    private void UpdateHeadingLabel(int degrees)
+        => HeadingLabel.Text = $"Apertura: {ClampHeading(degrees)}°";
+
+    private static int ClampHeading(int value)
+    {
+        if (value < 0) return 0;
+        if (value > 345) return 345;
+        var snapped = (int)Math.Round(value / 15d) * 15;
+        return Math.Clamp(snapped, 0, 345);
+    }
+
+    private static int? ParseNullableInt(string? text)
+        => int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value) ? Math.Max(0, value) : null;
 
     private async void OnDeleteClicked(object sender, EventArgs e)
     {

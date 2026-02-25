@@ -19,7 +19,8 @@ namespace BaseLogApp.Core.Models
         public byte[]? NewPhotoBytes { get; set; }
         public string? Latitude { get; set; }
         public string? Longitude { get; set; }
-
+        public int? DelaySeconds { get; set; }
+        public int? HeadingDegrees { get; set; }
 
         private bool _isExpanded;
         public bool IsExpanded
@@ -45,6 +46,20 @@ namespace BaseLogApp.Core.Models
                 return "";
             }
         }
+
+        public string DateOnlyDisplay
+        {
+            get
+            {
+                if (DateTime.TryParseExact(Data, new[] { "dd/MM/yyyy HH:mm", "dd/MM/yyyy" }, null, System.Globalization.DateTimeStyles.None, out var dt))
+                    return dt.ToString("dd/MM/yyyy");
+                return Data;
+            }
+        }
+
+
+        public string DelayDisplay => DelaySeconds?.ToString() ?? "-";
+        public string HeadingDisplay => HeadingDegrees.HasValue ? $"{HeadingDegrees.Value}°" : "-";
 
         public event PropertyChangedEventHandler? PropertyChanged;
 

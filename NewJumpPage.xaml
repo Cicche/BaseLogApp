@@ -45,6 +45,14 @@
 
             <Editor x:Name="NotesEditor" Placeholder="Note" AutoSize="TextChanges" HeightRequest="100" />
 
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                <Entry x:Name="DelayEntry" Placeholder="Delay (s)" Keyboard="Numeric" />
+                <VerticalStackLayout Grid.Column="1" Spacing="2">
+                    <Label x:Name="HeadingLabel" Text="Apertura: 0°" TextColor="#8E99B8" FontSize="12" HorizontalTextAlignment="End" />
+                    <Slider x:Name="HeadingSlider" Minimum="0" Maximum="345" Value="0" DragCompleted="OnHeadingDragCompleted" />
+                </VerticalStackLayout>
+            </Grid>
+
             <Button Text="Mappa" Clicked="OnOpenMapClicked" />
 
             <Button Text="Seleziona foto" Clicked="OnPickPhotoClicked" />
