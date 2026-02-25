@@ -8,6 +8,7 @@
         <Entry x:Name="RigNameEntry" Placeholder="Nome rig" />
         <Editor x:Name="RigDescriptionEntry" Placeholder="Descrizione" HeightRequest="100" />
         <Button x:Name="SaveButton" Text="Salva Rig" Clicked="OnSaveClicked" BackgroundColor="#2D8CFF" TextColor="White"/>
+        <Button x:Name="DeleteButton" Text="Elimina Rig" IsVisible="False" Clicked="OnDeleteClicked" BackgroundColor="#C62828" TextColor="White"/>
         <Button Text="Chiudi" Clicked="OnCloseClicked" />
     </VerticalStackLayout>
 </ContentPage>

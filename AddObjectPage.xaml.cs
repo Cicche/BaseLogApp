@@ -25,6 +25,7 @@ public partial class AddObjectPage : ContentPage
             Title = "Modifica Object";
             FillFromObject(_editing);
             SaveButton.Text = "Salva modifiche";
+            DeleteButton.IsVisible = true;
         }
     }
 
@@ -123,6 +124,28 @@ public partial class AddObjectPage : ContentPage
 
         await DisplayAlert("Object", ok ? "Object salvato" : "Errore salvataggio object", "OK");
         if (ok) await Navigation.PopModalAsync();
+    }
+
+    private async void OnDeleteClicked(object sender, EventArgs e)
+    {
+        if (_editing is null)
+            return;
+
+        var check = await _vm.CanDeleteObjectAsync(_editing.Id);
+        if (!check.CanDelete)
+        {
+            await DisplayAlert("Object", check.Reason ?? "Impossibile eliminare object associato a salti.", "OK");
+            return;
+        }
+
+        var confirm = await DisplayAlert("Object", $"Eliminare '{_editing.Name}'?", "Sì", "No");
+        if (!confirm)
+            return;
+
+        var ok = await _vm.DeleteObjectAsync(_editing.Id);
+        await DisplayAlert("Object", ok ? "Object eliminato" : "Errore eliminazione object", "OK");
+        if (ok)
+            await Navigation.PopModalAsync();
     }
 
     private async void OnCloseClicked(object sender, EventArgs e)

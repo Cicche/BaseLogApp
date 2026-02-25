@@ -31,6 +31,7 @@
             <Button Text="Seleziona foto object" Clicked="OnPickPhotoClicked" />
             <Label x:Name="PhotoNameLabel" TextColor="#8E99B8" FontSize="12" />
             <Button x:Name="SaveButton" Text="Salva Object" Clicked="OnSaveClicked" BackgroundColor="#2D8CFF" TextColor="White"/>
+            <Button x:Name="DeleteButton" Text="Elimina Object" IsVisible="False" Clicked="OnDeleteClicked" BackgroundColor="#C62828" TextColor="White"/>
             <Button Text="Chiudi" Clicked="OnCloseClicked" />
         </VerticalStackLayout>
     </ScrollView>

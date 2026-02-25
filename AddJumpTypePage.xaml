@@ -8,6 +8,7 @@
         <Entry x:Name="NameEntry" Placeholder="Nome tipo salto" />
         <Editor x:Name="NotesEntry" Placeholder="Note" HeightRequest="100" />
         <Button x:Name="SaveButton" Text="Salva tipo salto" Clicked="OnSaveClicked" BackgroundColor="#2D8CFF" TextColor="White"/>
+        <Button x:Name="DeleteButton" Text="Elimina tipo salto" IsVisible="False" Clicked="OnDeleteClicked" BackgroundColor="#C62828" TextColor="White"/>
         <Button x:Name="SeedDefaultsButton" Text="Inserisci default (Low/Terminal/Subterminal)" Clicked="OnSeedDefaultsClicked" />
         <Button Text="Chiudi" Clicked="OnCloseClicked" />
     </VerticalStackLayout>

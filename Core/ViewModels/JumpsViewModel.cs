@@ -247,6 +247,52 @@ namespace BaseLogApp.Core.ViewModels
         public Task<bool> UpdateJumpTypeAsync(int id, string name, string? notes)
             => _reader.UpdateJumpTypeAsync(id, name, notes);
 
+        public Task<int> NormalizeJumpNumbersAsync()
+            => _reader.NormalizeJumpNumbersAsync();
+
+        public int GetMaxAllowedJumpNumber(int? currentId = null)
+        {
+            var maxExisting = Items
+                .Where(x => !currentId.HasValue || x.Id != currentId.Value)
+                .Select(x => x.NumeroSalto)
+                .DefaultIfEmpty(0)
+                .Max();
+            return maxExisting + 1;
+        }
+
+        public Task<(bool CanDelete, string? Reason)> CanDeleteObjectAsync(int id)
+            => _reader.CanDeleteObjectAsync(id);
+
+        public Task<(bool CanDelete, string? Reason)> CanDeleteRigAsync(int id)
+            => _reader.CanDeleteRigAsync(id);
+
+        public Task<(bool CanDelete, string? Reason)> CanDeleteJumpTypeAsync(int id)
+            => _reader.CanDeleteJumpTypeAsync(id);
+
+        public async Task<bool> DeleteObjectAsync(int id)
+        {
+            var ok = await _reader.DeleteObjectAsync(id);
+            if (ok)
+                await LoadAsync();
+            return ok;
+        }
+
+        public async Task<bool> DeleteRigAsync(int id)
+        {
+            var ok = await _reader.DeleteRigAsync(id);
+            if (ok)
+                await LoadAsync();
+            return ok;
+        }
+
+        public async Task<bool> DeleteJumpTypeAsync(int id)
+        {
+            var ok = await _reader.DeleteJumpTypeAsync(id);
+            if (ok)
+                await LoadAsync();
+            return ok;
+        }
+
         public void AddJump(JumpListItem newJump)
         {
             var insertIndex = Items.TakeWhile(x => x.NumeroSalto > newJump.NumeroSalto).Count();

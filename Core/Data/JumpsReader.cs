@@ -35,6 +35,13 @@ namespace BaseLogApp.Core.Data
         Task<bool> UpdateObjectAsync(int id, string name, string? objectType, string? description, string? position, string? heightMeters, byte[]? photoBytes);
         Task<bool> UpdateRigAsync(int id, string name, string? description);
         Task<bool> UpdateJumpTypeAsync(int id, string name, string? notes);
+        Task<int> NormalizeJumpNumbersAsync();
+        Task<(bool CanDelete, string? Reason)> CanDeleteObjectAsync(int id);
+        Task<(bool CanDelete, string? Reason)> CanDeleteRigAsync(int id);
+        Task<(bool CanDelete, string? Reason)> CanDeleteJumpTypeAsync(int id);
+        Task<bool> DeleteObjectAsync(int id);
+        Task<bool> DeleteRigAsync(int id);
+        Task<bool> DeleteJumpTypeAsync(int id);
         Task<bool> ExportLightweightJsonAsync(string filePath);
         Task<bool> ImportLightweightJsonAsync(string filePath);
         Task<bool> ExportFullDbAsync(string destinationPath);
@@ -721,6 +728,208 @@ namespace BaseLogApp.Core.Data
             catch { return false; }
         }
 
+        public async Task<int> NormalizeJumpNumbersAsync()
+        {
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath)) return 0;
+
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+
+                if (await HasTableAsync(db, "ZLOGENTRY"))
+                {
+                    var cols = await GetTableColumnsAsync(db, "ZLOGENTRY");
+                    if (!cols.Contains("ZJUMPNUMBER")) return 0;
+
+                    var rows = await db.QueryAsync<LegacyOrderRow>("SELECT Z_PK AS Pk, IFNULL(ZJUMPNUMBER,0) AS Number FROM ZLOGENTRY ORDER BY Z_PK ASC;");
+                    var expected = 1;
+                    var changes = 0;
+                    foreach (var row in rows)
+                    {
+                        if (row.Number != expected)
+                        {
+                            await db.ExecuteAsync("UPDATE ZLOGENTRY SET ZJUMPNUMBER=? WHERE Z_PK=?;", expected, row.Pk);
+                            changes++;
+                        }
+                        expected++;
+                    }
+                    return changes;
+                }
+
+                if (await HasTableAsync(db, "Jump"))
+                {
+                    var cols = await GetTableColumnsAsync(db, "Jump");
+                    if (!cols.Contains("JumpNumber")) return 0;
+
+                    var rows = await db.QueryAsync<LegacyOrderRow>("SELECT Id AS Pk, IFNULL(JumpNumber,0) AS Number FROM Jump ORDER BY Id ASC;");
+                    var expected = 1;
+                    var changes = 0;
+                    foreach (var row in rows)
+                    {
+                        if (row.Number != expected)
+                        {
+                            await db.ExecuteAsync("UPDATE Jump SET JumpNumber=? WHERE Id=?;", expected, row.Pk);
+                            changes++;
+                        }
+                        expected++;
+                    }
+                    return changes;
+                }
+
+                return 0;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        public async Task<(bool CanDelete, string? Reason)> CanDeleteObjectAsync(int id)
+        {
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath)) return (false, "DB non trovato.");
+
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                var objectName = await GetObjectNameByIdAsync(db, id);
+                var refs = 0;
+
+                if (await HasTableAsync(db, "ZLOGENTRY"))
+                {
+                    var cols = await GetTableColumnsAsync(db, "ZLOGENTRY");
+                    if (cols.Contains("ZOBJECT"))
+                    {
+                        refs += (await db.QueryAsync<ScalarInt>("SELECT COUNT(*) AS Value FROM ZLOGENTRY WHERE ZOBJECT=?;", id)).FirstOrDefault()?.Value ?? 0;
+                    }
+                }
+
+                if (!string.IsNullOrWhiteSpace(objectName) && await HasTableAsync(db, "Jump"))
+                {
+                    refs += (await db.QueryAsync<ScalarInt>("SELECT COUNT(*) AS Value FROM Jump WHERE LOWER(TRIM(ObjectName)) = LOWER(TRIM(?));", objectName)).FirstOrDefault()?.Value ?? 0;
+                }
+
+                return refs > 0
+                    ? (false, $"Impossibile eliminare: object associato a {refs} salto/i.")
+                    : (true, null);
+            }
+            catch
+            {
+                return (false, "Errore durante il controllo delle associazioni object.");
+            }
+        }
+
+        public async Task<(bool CanDelete, string? Reason)> CanDeleteRigAsync(int id)
+        {
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath)) return (false, "DB non trovato.");
+
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                var refs = 0;
+                if (await HasTableAsync(db, "ZLOGENTRY"))
+                {
+                    var cols = await GetTableColumnsAsync(db, "ZLOGENTRY");
+                    if (cols.Contains("ZRIG"))
+                        refs += (await db.QueryAsync<ScalarInt>("SELECT COUNT(*) AS Value FROM ZLOGENTRY WHERE ZRIG=?;", id)).FirstOrDefault()?.Value ?? 0;
+                }
+
+                return refs > 0
+                    ? (false, $"Impossibile eliminare: rig associato a {refs} salto/i.")
+                    : (true, null);
+            }
+            catch
+            {
+                return (false, "Errore durante il controllo delle associazioni rig.");
+            }
+        }
+
+        public async Task<(bool CanDelete, string? Reason)> CanDeleteJumpTypeAsync(int id)
+        {
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath)) return (false, "DB non trovato.");
+
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                var typeName = await GetJumpTypeNameByIdAsync(db, id);
+                var refs = 0;
+
+                if (await HasTableAsync(db, "ZLOGENTRY"))
+                {
+                    var cols = await GetTableColumnsAsync(db, "ZLOGENTRY");
+                    if (cols.Contains("ZJUMPTYPE"))
+                        refs += (await db.QueryAsync<ScalarInt>("SELECT COUNT(*) AS Value FROM ZLOGENTRY WHERE ZJUMPTYPE=?;", id)).FirstOrDefault()?.Value ?? 0;
+                }
+
+                if (!string.IsNullOrWhiteSpace(typeName) && await HasTableAsync(db, "Jump"))
+                    refs += (await db.QueryAsync<ScalarInt>("SELECT COUNT(*) AS Value FROM Jump WHERE LOWER(TRIM(ExitName)) = LOWER(TRIM(?));", typeName)).FirstOrDefault()?.Value ?? 0;
+
+                return refs > 0
+                    ? (false, $"Impossibile eliminare: tipo salto associato a {refs} salto/i.")
+                    : (true, null);
+            }
+            catch
+            {
+                return (false, "Errore durante il controllo delle associazioni tipo salto.");
+            }
+        }
+
+        public async Task<bool> DeleteObjectAsync(int id)
+        {
+            var check = await CanDeleteObjectAsync(id);
+            if (!check.CanDelete) return false;
+
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath)) return false;
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                if (await HasTableAsync(db, "ZOBJECTIMAGE"))
+                    await db.ExecuteAsync("DELETE FROM ZOBJECTIMAGE WHERE ZOBJECT=?;", id);
+                if (await HasTableAsync(db, "ZOBJECT"))
+                    await db.ExecuteAsync("DELETE FROM ZOBJECT WHERE Z_PK=?;", id);
+                return true;
+            }
+            catch { return false; }
+        }
+
+        public async Task<bool> DeleteRigAsync(int id)
+        {
+            var check = await CanDeleteRigAsync(id);
+            if (!check.CanDelete) return false;
+
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath)) return false;
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                if (await HasTableAsync(db, "ZRIG"))
+                    await db.ExecuteAsync("DELETE FROM ZRIG WHERE Z_PK=?;", id);
+                return true;
+            }
+            catch { return false; }
+        }
+
+        public async Task<bool> DeleteJumpTypeAsync(int id)
+        {
+            var check = await CanDeleteJumpTypeAsync(id);
+            if (!check.CanDelete) return false;
+
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath)) return false;
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                if (await HasTableAsync(db, "ZJUMPTYPE"))
+                    await db.ExecuteAsync("DELETE FROM ZJUMPTYPE WHERE Z_PK=?;", id);
+                return true;
+            }
+            catch { return false; }
+        }
+
         public async Task<bool> ExportLightweightJsonAsync(string filePath)
         {
             try
@@ -871,6 +1080,12 @@ namespace BaseLogApp.Core.Data
             values.Add(value);
         }
 
+        private static async Task<string?> GetObjectNameByIdAsync(SQLiteAsyncConnection db, int id)
+            => (await db.QueryAsync<ObjectNameRow>("SELECT ZNAME AS Name FROM ZOBJECT WHERE Z_PK=? LIMIT 1;", id)).FirstOrDefault()?.Name;
+
+        private static async Task<string?> GetJumpTypeNameByIdAsync(SQLiteAsyncConnection db, int id)
+            => (await db.QueryAsync<ObjectNameRow>("SELECT ZNAME AS Name FROM ZJUMPTYPE WHERE Z_PK=? LIMIT 1;", id)).FirstOrDefault()?.Name;
+
         private string ResolveDbPath()
         {
 #if WINDOWS
@@ -955,5 +1170,6 @@ namespace BaseLogApp.Core.Data
         private sealed class PragmaColumn { public string? Name { get; set; } }
         private sealed class ScalarInt { public int Value { get; set; } }
         private sealed class ObjectCoordRow { public double? Latitude { get; set; } public double? Longitude { get; set; } }
+        private sealed class LegacyOrderRow { public int Pk { get; set; } public int Number { get; set; } }
     }
 }

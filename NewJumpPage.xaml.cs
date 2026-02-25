@@ -50,6 +50,8 @@ public partial class NewJumpPage : ContentPage
                 DatePicker.Date = parsed.Date;
                 TimePicker.Time = parsed.TimeOfDay;
             }
+
+            DeleteButton.IsVisible = true;
         }
     }
 
@@ -143,5 +145,25 @@ public partial class NewJumpPage : ContentPage
 
         var saved = await SaveRequested(item);
         if (saved) await Navigation.PopModalAsync();
+    }
+
+    private async void OnDeleteClicked(object sender, EventArgs e)
+    {
+        if (_editing is null)
+            return;
+
+        var confirm = await DisplayAlert("Elimina salto", $"Eliminare il salto #{_editing.NumeroSalto}?", "Sì", "No");
+        if (!confirm)
+            return;
+
+        var ok = await _vm.DeleteJumpAsync(_editing);
+        if (!ok)
+        {
+            await DisplayAlert("Salto", "Impossibile eliminare il salto.", "OK");
+            return;
+        }
+
+        await DisplayAlert("Salto", "Salto eliminato.", "OK");
+        await Navigation.PopModalAsync();
     }
 }

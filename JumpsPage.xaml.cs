@@ -38,6 +38,14 @@ public partial class JumpsPage : ContentPage
     {
         base.OnAppearing();
         await _vm.LoadAsync();
+
+        var normalized = await _vm.NormalizeJumpNumbersAsync();
+        if (normalized > 0)
+        {
+            await DisplayAlert("Coerenza logbook", $"Trovate incongruenze nella numerazione salti. Normalizzati {normalized} record in base all'ordine di inserimento.", "OK");
+            await _vm.LoadAsync();
+        }
+
         _dbSwitchItem.Text = _vm.CurrentProfileLabel;
     }
 
@@ -62,6 +70,13 @@ public partial class JumpsPage : ContentPage
 
     private async Task<bool> SaveJumpFromEditorAsync(JumpListItem e)
     {
+        var maxAllowed = _vm.GetMaxAllowedJumpNumber(e.IsEdit ? e.Id : null);
+        if (e.NumeroSalto > maxAllowed)
+        {
+            e.NumeroSalto = maxAllowed;
+            await DisplayAlert("Numero salto", $"Numero troppo alto: impostato automaticamente a {maxAllowed} (ultimo + 1).", "OK");
+        }
+
         var hasConflict = _vm.HasJumpNumberConflict(e.NumeroSalto, e.IsEdit ? e.Id : null);
         if (hasConflict)
         {
