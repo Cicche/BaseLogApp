@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BaseLogApp.Views.SettingsPage"
+             Title="Settings"
+             BackgroundColor="#0A0F1E">
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="12">
+            <Border BackgroundColor="#151B2E" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="14">
+                <Label Text="Object" TextColor="White" FontSize="16">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnOpenObjectListClicked" />
+                    </Label.GestureRecognizers>
+                </Label>
+            </Border>
+
+            <Border BackgroundColor="#151B2E" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="14">
+                <Label Text="Rig" TextColor="White" FontSize="16">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnOpenRigListClicked" />
+                    </Label.GestureRecognizers>
+                </Label>
+            </Border>
+
+            <Border BackgroundColor="#151B2E" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="14">
+                <Label Text="Tipo Salto" TextColor="White" FontSize="16">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnOpenJumpTypeListClicked" />
+                    </Label.GestureRecognizers>
+                </Label>
+            </Border>
+
+            <Button Text="Import / Export DB" Clicked="OnOpenDbToolsClicked" Margin="0,10,0,0" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
