@@ -1,4 +1,3 @@
-using CommunityToolkit.Maui.Views;
 using BaseLogApp.Core.Models;
 using BaseLogApp.Core.ViewModels;
 
@@ -137,14 +136,12 @@ public partial class JumpsPage : ContentPage
         if (e.Parameter is JumpListItem item)
             await OpenNewJumpPage(item);
     }
-
-
-    private void OnJumpExpanderExpandedChanged(object? sender, EventArgs e)
+    private void OnCardHeaderTapped(object? sender, TappedEventArgs e)
     {
-        if (sender is not Expander expander || expander.BindingContext is not JumpListItem item)
+        if (e.Parameter is not JumpListItem item)
             return;
 
-        _vm.SetExpandedState(item, expander.IsExpanded);
+        _vm.SetExpandedState(item, !item.IsExpanded);
     }
 
     private async void OnPhotoTapped(object? sender, TappedEventArgs e)

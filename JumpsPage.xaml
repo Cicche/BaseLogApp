@@ -2,7 +2,6 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:core="clr-namespace:BaseLogApp.Core.Models"
-             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              x:Class="BaseLogApp.Views.JumpsPage"
              Title="Logbook"
              BackgroundColor="#0A0F1E">
@@ -14,134 +13,143 @@
                        Text="{Binding Query, Mode=TwoWay}" />
         </Border>
 
-        <ScrollView Grid.Row="1" Margin="0,8,0,0">
-            <VerticalStackLayout Spacing="8" BindableLayout.ItemsSource="{Binding FilteredItems}">
-                <BindableLayout.ItemTemplate>
-                    <DataTemplate x:DataType="core:JumpListItem">
-                        <SwipeView>
-                            <SwipeView.LeftItems>
-                                <SwipeItems Mode="Reveal">
-                                    <SwipeItem Text="Modifica"
-                                               BackgroundColor="#2D8CFF"
-                                               Invoked="OnEditJumpInvoked"
-                                               CommandParameter="{Binding .}" />
-                                </SwipeItems>
-                            </SwipeView.LeftItems>
-                            <SwipeView.RightItems>
-                                <SwipeItems Mode="Reveal">
-                                    <SwipeItem Text="Elimina"
-                                               BackgroundColor="#C62828"
-                                               Invoked="OnDeleteJumpInvoked"
-                                               CommandParameter="{Binding .}" />
-                                </SwipeItems>
-                            </SwipeView.RightItems>
+        <CollectionView Grid.Row="1"
+                        ItemsSource="{Binding FilteredItems}"
+                        SelectionMode="None"
+                        Margin="0,8,0,0"
+                        ItemSizingStrategy="MeasureAllItems">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+            </CollectionView.ItemsLayout>
 
-                            <Border StrokeThickness="0"
-                                    BackgroundColor="#151B2E"
-                                    StrokeShape="RoundRectangle 16"
-                                    Padding="0"
-                                    Margin="0">
-                                <toolkit:Expander IsExpanded="{Binding IsExpanded, Mode=TwoWay}" ExpandedChanged="OnJumpExpanderExpandedChanged">
-                                    <toolkit:Expander.Header>
-                                        <Grid Padding="12" ColumnDefinitions="64,*,Auto" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="2">
-                                            <Label Grid.RowSpan="3"
-                                                   Text="{Binding NumeroSalto}"
-                                                   FontSize="34"
-                                                   FontAttributes="Bold"
-                                                   TextColor="White"
-                                                   VerticalTextAlignment="Start" />
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="core:JumpListItem">
+                    <SwipeView>
+                        <SwipeView.LeftItems>
+                            <SwipeItems Mode="Reveal">
+                                <SwipeItem Text="Modifica"
+                                           BackgroundColor="#2D8CFF"
+                                           Invoked="OnEditJumpInvoked"
+                                           CommandParameter="{Binding .}" />
+                            </SwipeItems>
+                        </SwipeView.LeftItems>
+                        <SwipeView.RightItems>
+                            <SwipeItems Mode="Reveal">
+                                <SwipeItem Text="Elimina"
+                                           BackgroundColor="#C62828"
+                                           Invoked="OnDeleteJumpInvoked"
+                                           CommandParameter="{Binding .}" />
+                            </SwipeItems>
+                        </SwipeView.RightItems>
 
-                                            <Label Grid.Column="1"
-                                                   Text="{Binding Oggetto}"
-                                                   FontSize="21"
-                                                   FontAttributes="Bold"
-                                                   TextColor="White"
-                                                   LineBreakMode="TailTruncation" />
-                                            <Label Grid.Column="2"
-                                                   Text="{Binding DateOnlyDisplay}"
-                                                   FontSize="14"
-                                                   TextColor="#8E99B8"
-                                                   HorizontalTextAlignment="End"
-                                                   HorizontalOptions="End" />
+                        <Border StrokeThickness="0"
+                                BackgroundColor="#151B2E"
+                                StrokeShape="RoundRectangle 16"
+                                Padding="0"
+                                Margin="0">
 
-                                            <Label Grid.Row="1" Grid.Column="1"
-                                                   Text="{Binding TipoSalto}"
-                                                   FontSize="16"
-                                                   TextColor="#D8DEEF" />
+                            <VerticalStackLayout Spacing="0">
+                                <Grid Padding="12" ColumnDefinitions="64,*,Auto" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="2">
+                                    <Grid.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnCardHeaderTapped" CommandParameter="{Binding .}" />
+                                    </Grid.GestureRecognizers>
 
-                                            <Label Grid.Row="1" Grid.Column="2"
-                                                   Text="{Binding TimeDisplay}"
-                                                   FontSize="14"
-                                                   TextColor="#8E99B8"
-                                                   HorizontalTextAlignment="End"
-                                                   HorizontalOptions="End" />
+                                    <Label Grid.RowSpan="3"
+                                           Text="{Binding NumeroSalto}"
+                                           FontSize="34"
+                                           FontAttributes="Bold"
+                                           TextColor="White"
+                                           VerticalTextAlignment="Start" />
 
-                                            <Label Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
-                                                   Text="{Binding Note}"
-                                                   FontSize="14"
-                                                   MaxLines="1"
-                                                   LineBreakMode="TailTruncation"
-                                                   TextColor="#8E99B8" />
-                                        </Grid>
-                                    </toolkit:Expander.Header>
+                                    <Label Grid.Column="1"
+                                           Text="{Binding Oggetto}"
+                                           FontSize="21"
+                                           FontAttributes="Bold"
+                                           TextColor="White"
+                                           LineBreakMode="TailTruncation" />
+                                    <Label Grid.Column="2"
+                                           Text="{Binding DateOnlyDisplay}"
+                                           FontSize="14"
+                                           TextColor="#8E99B8"
+                                           HorizontalTextAlignment="End"
+                                           HorizontalOptions="End" />
 
-                                    <VerticalStackLayout Padding="12,0,12,12" Spacing="10">
-                                        <BoxView HeightRequest="1" BackgroundColor="#27314E" />
+                                    <Label Grid.Row="1" Grid.Column="1"
+                                           Text="{Binding TipoSalto}"
+                                           FontSize="16"
+                                           TextColor="#D8DEEF" />
 
-                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
-                                            <Label Text="Numero" TextColor="#8E99B8" />
-                                            <Label Grid.Column="1" Text="{Binding NumeroSalto}" TextColor="White" FontAttributes="Bold" />
-                                        </Grid>
-                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
-                                            <Label Text="Oggetto" TextColor="#8E99B8" />
-                                            <Label Grid.Column="1" Text="{Binding Oggetto}" TextColor="White" />
-                                        </Grid>
-                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
-                                            <Label Text="Tipo" TextColor="#8E99B8" />
-                                            <Label Grid.Column="1" Text="{Binding TipoSalto}" TextColor="White" />
-                                        </Grid>
-                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
-                                            <Label Text="Data" TextColor="#8E99B8" />
-                                            <Label Grid.Column="1" Text="{Binding Data}" TextColor="White" />
-                                        </Grid>
-                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
-                                            <Label Text="Delay (s)" TextColor="#8E99B8" />
-                                            <Label Grid.Column="1" Text="{Binding DelayDisplay}" TextColor="White" />
-                                        </Grid>
-                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
-                                            <Label Text="Apertura" TextColor="#8E99B8" />
-                                            <Label Grid.Column="1" Text="{Binding HeadingDisplay}" TextColor="White" />
-                                        </Grid>
+                                    <Label Grid.Row="1" Grid.Column="2"
+                                           Text="{Binding TimeDisplay}"
+                                           FontSize="14"
+                                           TextColor="#8E99B8"
+                                           HorizontalTextAlignment="End"
+                                           HorizontalOptions="End" />
 
-                                        <Label Text="Foto / preview" TextColor="#8E99B8" FontSize="12" />
-                                        <Image Source="{Binding ObjectPhotoSource}"
-                                               HeightRequest="120"
-                                               Aspect="AspectFill">
-                                            <Image.GestureRecognizers>
-                                                <TapGestureRecognizer Tapped="OnPhotoTapped" CommandParameter="{Binding .}" />
-                                            </Image.GestureRecognizers>
-                                        </Image>
+                                    <Label Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
+                                           Text="{Binding Note}"
+                                           FontSize="14"
+                                           MaxLines="1"
+                                           LineBreakMode="TailTruncation"
+                                           TextColor="#8E99B8" />
+                                </Grid>
 
-                                        <Label Text="Note complete" TextColor="#8E99B8" FontSize="12" />
-                                        <Label Text="{Binding Note}" TextColor="#D8DEEF" />
+                                <VerticalStackLayout IsVisible="{Binding IsExpanded}" Padding="12,0,12,12" Spacing="10">
+                                    <BoxView HeightRequest="1" BackgroundColor="#27314E" />
 
-                                        <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,0">
-                                            <Label Grid.Column="1"
-                                                   Text="🔒"
-                                                   FontSize="22"
-                                                   TextColor="#D8DEEF">
-                                                <Label.GestureRecognizers>
-                                                    <TapGestureRecognizer Tapped="OnLockEditTapped" CommandParameter="{Binding .}" />
-                                                </Label.GestureRecognizers>
-                                            </Label>
-                                        </Grid>
-                                    </VerticalStackLayout>
-                                </toolkit:Expander>
-                            </Border>
-                        </SwipeView>
-                    </DataTemplate>
-                </BindableLayout.ItemTemplate>
-            </VerticalStackLayout>
-        </ScrollView>
+                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                        <Label Text="Numero" TextColor="#8E99B8" />
+                                        <Label Grid.Column="1" Text="{Binding NumeroSalto}" TextColor="White" FontAttributes="Bold" />
+                                    </Grid>
+                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                        <Label Text="Oggetto" TextColor="#8E99B8" />
+                                        <Label Grid.Column="1" Text="{Binding Oggetto}" TextColor="White" />
+                                    </Grid>
+                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                        <Label Text="Tipo" TextColor="#8E99B8" />
+                                        <Label Grid.Column="1" Text="{Binding TipoSalto}" TextColor="White" />
+                                    </Grid>
+                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                        <Label Text="Data" TextColor="#8E99B8" />
+                                        <Label Grid.Column="1" Text="{Binding Data}" TextColor="White" />
+                                    </Grid>
+                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                        <Label Text="Delay (s)" TextColor="#8E99B8" />
+                                        <Label Grid.Column="1" Text="{Binding DelayDisplay}" TextColor="White" />
+                                    </Grid>
+                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                        <Label Text="Apertura" TextColor="#8E99B8" />
+                                        <Label Grid.Column="1" Text="{Binding HeadingDisplay}" TextColor="White" />
+                                    </Grid>
+
+                                    <Label Text="Foto / preview" TextColor="#8E99B8" FontSize="12" />
+                                    <Image Source="{Binding ObjectPhotoSource}"
+                                           HeightRequest="120"
+                                           Aspect="AspectFill">
+                                        <Image.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnPhotoTapped" CommandParameter="{Binding .}" />
+                                        </Image.GestureRecognizers>
+                                    </Image>
+
+                                    <Label Text="Note complete" TextColor="#8E99B8" FontSize="12" />
+                                    <Label Text="{Binding Note}" TextColor="#D8DEEF" />
+
+                                    <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,0">
+                                        <Label Grid.Column="1"
+                                               Text="🔒"
+                                               FontSize="22"
+                                               TextColor="#D8DEEF">
+                                            <Label.GestureRecognizers>
+                                                <TapGestureRecognizer Tapped="OnLockEditTapped" CommandParameter="{Binding .}" />
+                                            </Label.GestureRecognizers>
+                                        </Label>
+                                    </Grid>
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+                        </Border>
+                    </SwipeView>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
     </Grid>
 </ContentPage>
