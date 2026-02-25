@@ -3,7 +3,7 @@ name: .NET Build
 on:
   pull_request:
   push:
-    branches: [ main ]
+    branches: [ master ]
 
 jobs:
   build:
@@ -17,7 +17,7 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Restore
-        run: dotnet restore BaseLogApp.sln
+        run: dotnet restore
 
       - name: Build
-        run: dotnet build BaseLogApp.sln -c Release -v minimal --no-restore
+        run: dotnet build -c Release -v minimal --no-restore
