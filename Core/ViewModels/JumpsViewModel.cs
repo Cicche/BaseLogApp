@@ -142,6 +142,7 @@ namespace BaseLogApp.Core.ViewModels
                 Items.Clear();
                 FilteredItems.Clear();
 
+                //await EnsureDefaultJumpTypesAsync();
                 var rows = await _reader.GetJumpsAsync();
                 foreach (var it in rows.OrderByDescending(x => x.NumeroSalto))
                     Items.Add(it);
