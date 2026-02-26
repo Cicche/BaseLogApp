@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BaseLogApp.Views.DiagnosticPage"
+             Title="Diagnostic"
+             BackgroundColor="#0A0F1E">
+    <Grid RowDefinitions="Auto,Auto,Auto,*" Padding="16" RowSpacing="10">
+        <Label x:Name="LogPathLabel" TextColor="#8E99B8" FontSize="12" />
+
+        <Grid Grid.Row="1" ColumnDefinitions="Auto,Auto,*" ColumnSpacing="8">
+            <Button Text="Aggiorna" Clicked="OnRefreshClicked" BackgroundColor="#27314E" TextColor="White" />
+            <Button Grid.Column="1" Text="Pulisci log" Clicked="OnClearClicked" BackgroundColor="#C62828" TextColor="White" />
+        </Grid>
+
+        <Border Grid.Row="2" BackgroundColor="#151B2E" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="8,2">
+            <Picker x:Name="CategoryPicker" Title="Categoria" SelectedIndexChanged="OnCategoryChanged" TextColor="White" />
+        </Border>
+
+        <Editor Grid.Row="3"
+                x:Name="LogEditor"
+                IsReadOnly="True"
+                AutoSize="TextChanges"
+                BackgroundColor="#151B2E"
+                TextColor="White"
+                FontFamily="OpenSansRegular" />
+    </Grid>
+</ContentPage>
