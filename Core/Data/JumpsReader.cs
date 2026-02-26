@@ -1207,7 +1207,7 @@ namespace BaseLogApp.Core.Data
             return DateTimeOffset.FromUnixTimeSeconds(seconds).ToLocalTime().DateTime;
         }
 
-        private string ResolveDbPath()
+        public async Task<IReadOnlyList<string>> GetJumpTypeNamesAsync()
         {
 #if WINDOWS
             var legacy = Environment.GetEnvironmentVariable("BASELOG_DB_PATH_LEGACY");
