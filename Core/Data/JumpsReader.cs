@@ -1207,6 +1207,890 @@ namespace BaseLogApp.Core.Data
             return DateTimeOffset.FromUnixTimeSeconds(seconds).ToLocalTime().DateTime;
         }
 
+        public async Task<IReadOnlyList<CatalogItem>> GetJumpTypesCatalogAsync()
+        {
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath)) return Array.Empty<CatalogItem>();
+
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                if (!await HasTableAsync(db, "ZJUMPTYPE")) return Array.Empty<CatalogItem>();
+                return (await db.QueryAsync<CatalogItem>("SELECT Z_PK AS Id, ZNAME AS Name, ZNOTES AS Notes FROM ZJUMPTYPE ORDER BY ZNAME;"))
+                    .Where(x => !string.IsNullOrWhiteSpace(x.Name))
+                    .ToList();
+            }
+            catch { return Array.Empty<CatalogItem>(); }
+        }
+
+        public async Task<bool> AddJumpAsync(JumpListItem jump)
+        {
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath)) return false;
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                if (await HasTableAsync(db, "Jump"))
+                {
+                    await db.ExecuteAsync(@"
+                        INSERT INTO Jump (ExitName, ObjectName, JumpDateUtc, Latitude, Longitude, PhotoPath, Notes)
+                        VALUES (?, ?, ?, ?, ?, ?, ?);",
+                        jump.TipoSalto,
+                        jump.Oggetto,
+                        ToUnixSeconds(jump.Data),
+                        ToNullableDouble(jump.Latitude),
+                        ToNullableDouble(jump.Longitude),
+                        jump.ObjectPhotoPath,
+                        jump.Note);
+                    return true;
+                }
+
+                if (await HasTableAsync(db, "ZLOGENTRY"))
+                {
+                    var nextPk = await GetNextPrimaryKeyAsync(db, "ZLOGENTRY", "Z_PK");
+                    var logEntryColumns = await GetTableColumnsAsync(db, "ZLOGENTRY");
+                    var insertColumns = new List<string> { "Z_PK", "Z_ENT", "Z_OPT", "ZJUMPNUMBER", "ZDATE", "ZNOTES" };
+                    var insertValues = new List<object?> { nextPk, 1, 1, jump.NumeroSalto, ToAppleSeconds(jump.Data), jump.Note };
+                    TryAddFirstAvailableField(logEntryColumns, insertColumns, insertValues, jump.DelaySeconds, "ZDELAY", "ZDELAYSECONDS", "ZDELAYINSECONDS");
+                    TryAddFirstAvailableField(logEntryColumns, insertColumns, insertValues, jump.HeadingDegrees, "ZHEADING", "ZOPENINGHEADING", "ZTRACK");
+                    TryAddObjectField(logEntryColumns, insertColumns, insertValues, "ZUNIQUEID", Guid.NewGuid().ToString("D"));
+
+                    var placeholders = string.Join(",", Enumerable.Repeat("?", insertColumns.Count));
+                    await db.ExecuteAsync($"INSERT INTO ZLOGENTRY ({string.Join(",", insertColumns)}) VALUES ({placeholders});", insertValues.ToArray());
+
+                    if (jump.NewPhotoBytes is { Length: > 0 } && await HasTableAsync(db, "ZLOGENTRYIMAGE"))
+                    {
+                        var nextImgPk = await GetNextPrimaryKeyAsync(db, "ZLOGENTRYIMAGE", "Z_PK");
+                        var logEntryImageColumns = await GetTableColumnsAsync(db, "ZLOGENTRYIMAGE");
+                        if (logEntryImageColumns.Contains("ZUNIQUEID"))
+                        {
+                            await db.ExecuteAsync(@"
+                                INSERT INTO ZLOGENTRYIMAGE (Z_PK, Z_ENT, Z_OPT, ZLOGENTRY, ZIMAGE, ZUNIQUEID)
+                                VALUES (?, 1, 1, ?, ?, ?);",
+                                nextImgPk,
+                                nextPk,
+                                jump.NewPhotoBytes,
+                                Guid.NewGuid().ToString("D"));
+                        }
+                        else
+                        {
+                            await db.ExecuteAsync(@"
+                                INSERT INTO ZLOGENTRYIMAGE (Z_PK, Z_ENT, Z_OPT, ZLOGENTRY, ZIMAGE)
+                                VALUES (?, 1, 1, ?, ?);",
+                                nextImgPk,
+                                nextPk,
+                                jump.NewPhotoBytes);
+                        }
+                    }
+
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error inserting jump: {ex.Message}");
+                return false;
+            }
+        }
+
+        public async Task<bool> UpdateJumpAsync(JumpListItem jump)
+        {
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath)) return false;
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                if (await HasTableAsync(db, "Jump"))
+                {
+                    await db.ExecuteAsync(@"UPDATE Jump
+                                            SET ExitName=?, ObjectName=?, JumpDateUtc=?, Latitude=?, Longitude=?, Notes=?
+                                            WHERE Id=?;",
+                        jump.TipoSalto,
+                        jump.Oggetto,
+                        ToUnixSeconds(jump.Data),
+                        ToNullableDouble(jump.Latitude),
+                        ToNullableDouble(jump.Longitude),
+                        jump.Note,
+                        jump.Id);
+                    return true;
+                }
+
+                if (await HasTableAsync(db, "ZLOGENTRY"))
+                {
+                    var columns = await GetTableColumnsAsync(db, "ZLOGENTRY");
+                    var updates = new List<string> { "ZJUMPNUMBER=?", "ZDATE=?", "ZNOTES=?" };
+                    var values = new List<object?> { jump.NumeroSalto, ToAppleSeconds(jump.Data), jump.Note };
+                    TryAddFirstAvailableUpdate(columns, updates, values, jump.DelaySeconds, "ZDELAY", "ZDELAYSECONDS", "ZDELAYINSECONDS");
+                    TryAddFirstAvailableUpdate(columns, updates, values, jump.HeadingDegrees, "ZHEADING", "ZOPENINGHEADING", "ZTRACK");
+                    values.Add(jump.Id);
+
+                    await db.ExecuteAsync($"UPDATE ZLOGENTRY SET {string.Join(",", updates)} WHERE Z_PK=?;", values.ToArray());
+                    return true;
+                }
+
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> DeleteJumpAsync(JumpListItem jump)
+        {
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath)) return false;
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                if (await HasTableAsync(db, "Jump"))
+                {
+                    await db.ExecuteAsync("DELETE FROM Jump WHERE Id=?;", jump.Id);
+                    return true;
+                }
+
+                if (await HasTableAsync(db, "ZLOGENTRY"))
+                {
+                    await db.ExecuteAsync("DELETE FROM ZLOGENTRYIMAGE WHERE ZLOGENTRY=?;", jump.Id);
+                    await db.ExecuteAsync("DELETE FROM ZLOGENTRY WHERE Z_PK=?;", jump.Id);
+                    await db.ExecuteAsync("UPDATE ZLOGENTRY SET ZJUMPNUMBER = ZJUMPNUMBER - 1 WHERE ZJUMPNUMBER > ?;", jump.NumeroSalto);
+                    return true;
+                }
+
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+
+        public async Task<bool> SupportsJumpNumberShiftAsync()
+        {
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath)) return false;
+
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                if (await HasTableAsync(db, "ZLOGENTRY"))
+                    return true;
+
+                if (await HasTableAsync(db, "Jump"))
+                {
+                    var cols = await db.QueryAsync<PragmaColumn>("PRAGMA table_info('Jump');");
+                    return cols.Any(c => string.Equals(c.Name, "JumpNumber", StringComparison.OrdinalIgnoreCase));
+                }
+
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> ShiftJumpNumbersUpFromAsync(int fromNumber, int? excludeId = null)
+        {
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath)) return false;
+
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+
+                if (await HasTableAsync(db, "ZLOGENTRY"))
+                {
+                    if (excludeId.HasValue)
+                    {
+                        await db.ExecuteAsync("UPDATE ZLOGENTRY SET ZJUMPNUMBER = ZJUMPNUMBER + 1 WHERE ZJUMPNUMBER >= ? AND Z_PK <> ?;", fromNumber, excludeId.Value);
+                        await AppendDbLogAsync(dbPath, "NUMBER_SHIFT", "Shift numeri salto", new[] { $"ZLOGENTRY: +1 da {fromNumber} (escluso pk={excludeId.Value})" });
+                    }
+                    else
+                    {
+                        await db.ExecuteAsync("UPDATE ZLOGENTRY SET ZJUMPNUMBER = ZJUMPNUMBER + 1 WHERE ZJUMPNUMBER >= ?;", fromNumber);
+                        await AppendDbLogAsync(dbPath, "NUMBER_SHIFT", "Shift numeri salto", new[] { $"ZLOGENTRY: +1 da {fromNumber}" });
+                    }
+                    return true;
+                }
+
+                if (await HasTableAsync(db, "Jump"))
+                {
+                    var cols = await db.QueryAsync<PragmaColumn>("PRAGMA table_info('Jump');");
+                    if (!cols.Any(c => string.Equals(c.Name, "JumpNumber", StringComparison.OrdinalIgnoreCase)))
+                        return false;
+
+                    if (excludeId.HasValue)
+                    {
+                        await db.ExecuteAsync("UPDATE Jump SET JumpNumber = JumpNumber + 1 WHERE JumpNumber >= ? AND Id <> ?;", fromNumber, excludeId.Value);
+                        await AppendDbLogAsync(dbPath, "NUMBER_SHIFT", "Shift numeri salto", new[] { $"Jump: +1 da {fromNumber} (escluso id={excludeId.Value})" });
+                    }
+                    else
+                    {
+                        await db.ExecuteAsync("UPDATE Jump SET JumpNumber = JumpNumber + 1 WHERE JumpNumber >= ?;", fromNumber);
+                        await AppendDbLogAsync(dbPath, "NUMBER_SHIFT", "Shift numeri salto", new[] { $"Jump: +1 da {fromNumber}" });
+                    }
+                    return true;
+                }
+
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> AddObjectAsync(string name, string? objectType, string? description, string? position, string? heightMeters, byte[]? photoBytes)
+        {
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath) || string.IsNullOrWhiteSpace(name)) return false;
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                if (!await HasTableAsync(db, "ZOBJECT")) return false;
+
+                var nextPk = await GetNextPrimaryKeyAsync(db, "ZOBJECT", "Z_PK");
+                var columns = await GetTableColumnsAsync(db, "ZOBJECT");
+                var pos = ParseLatLon(position);
+                var notes = BuildObjectNotes(description);
+
+                var insertColumns = new List<string> { "Z_PK", "Z_ENT", "Z_OPT", "ZNAME", "ZNOTES" };
+                var values = new List<object?> { nextPk, 1, 1, name.Trim(), notes };
+                TryAddObjectField(columns, insertColumns, values, "ZOBJECTTYPE", objectType?.Trim());
+                TryAddObjectField(columns, insertColumns, values, "ZDESCRIPTION", "ZDESC", description?.Trim());
+                TryAddObjectField(columns, insertColumns, values, "ZLATITUDE", pos?.lat);
+                TryAddObjectField(columns, insertColumns, values, "ZLONGITUDE", pos?.lon);
+                TryAddObjectField(columns, insertColumns, values, "ZHEIGHT", ToNullableDouble(heightMeters));
+                TryAddObjectField(columns, insertColumns, values, "ZHEIGHTUNIT", "m");
+                TryAddObjectField(columns, insertColumns, values, "ZUNIQUEID", Guid.NewGuid().ToString("D"));
+
+                var placeholders = string.Join(",", Enumerable.Repeat("?", insertColumns.Count));
+                await db.ExecuteAsync($"INSERT INTO ZOBJECT ({string.Join(",", insertColumns)}) VALUES ({placeholders});", values.ToArray());
+
+                if (photoBytes is { Length: > 0 } && await HasTableAsync(db, "ZOBJECTIMAGE"))
+                {
+                    var nextImgPk = await GetNextPrimaryKeyAsync(db, "ZOBJECTIMAGE", "Z_PK");
+                    var objectImageColumns = await GetTableColumnsAsync(db, "ZOBJECTIMAGE");
+                    if (objectImageColumns.Contains("ZUNIQUEID"))
+                        await db.ExecuteAsync("INSERT INTO ZOBJECTIMAGE (Z_PK, Z_ENT, Z_OPT, ZOBJECT, ZIMAGE, ZUNIQUEID) VALUES (?,1,1,?,?,?);", nextImgPk, nextPk, photoBytes, Guid.NewGuid().ToString("D"));
+                    else
+                        await db.ExecuteAsync("INSERT INTO ZOBJECTIMAGE (Z_PK, Z_ENT, Z_OPT, ZOBJECT, ZIMAGE) VALUES (?,1,1,?,?);", nextImgPk, nextPk, photoBytes);
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error inserting object: {ex.Message}");
+                return false;
+            }
+        }
+
+        public async Task<bool> AddRigAsync(string name, string? description)
+        {
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath) || string.IsNullOrWhiteSpace(name)) return false;
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                if (!await HasTableAsync(db, "ZRIG")) return false;
+
+                var nextPk = await GetNextPrimaryKeyAsync(db, "ZRIG", "Z_PK");
+                var rigColumns = await GetTableColumnsAsync(db, "ZRIG");
+                if (rigColumns.Contains("ZUNIQUEID"))
+                    await db.ExecuteAsync("INSERT INTO ZRIG (Z_PK, Z_ENT, Z_OPT, ZNAME, ZNOTES, ZUNIQUEID) VALUES (?,1,1,?,?,?);", nextPk, name.Trim(), description?.Trim(), Guid.NewGuid().ToString("D"));
+                else
+                    await db.ExecuteAsync("INSERT INTO ZRIG (Z_PK, Z_ENT, Z_OPT, ZNAME, ZNOTES) VALUES (?,1,1,?,?);", nextPk, name.Trim(), description?.Trim());
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error inserting rig: {ex.Message}");
+                return false;
+            }
+        }
+
+        public async Task<bool> AddJumpTypeAsync(string name, string? notes)
+        {
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath) || string.IsNullOrWhiteSpace(name)) return false;
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                if (!await HasTableAsync(db, "ZJUMPTYPE")) return false;
+
+                var existing = await db.QueryAsync<ObjectNameRow>("SELECT ZNAME AS Name FROM ZJUMPTYPE WHERE LOWER(TRIM(ZNAME)) = LOWER(TRIM(?)) LIMIT 1;", name);
+                if (existing.Count > 0) return true;
+
+                var nextPk = await GetNextPrimaryKeyAsync(db, "ZJUMPTYPE", "Z_PK");
+                var jumpTypeColumns = await GetTableColumnsAsync(db, "ZJUMPTYPE");
+                if (jumpTypeColumns.Contains("ZUNIQUEID"))
+                    await db.ExecuteAsync("INSERT INTO ZJUMPTYPE (Z_PK, Z_ENT, Z_OPT, ZNAME, ZNOTES, ZUNIQUEID) VALUES (?,1,1,?,?,?);", nextPk, name.Trim(), notes?.Trim(), Guid.NewGuid().ToString("D"));
+                else
+                    await db.ExecuteAsync("INSERT INTO ZJUMPTYPE (Z_PK, Z_ENT, Z_OPT, ZNAME, ZNOTES) VALUES (?,1,1,?,?);", nextPk, name.Trim(), notes?.Trim());
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error inserting jump type: {ex.Message}");
+                return false;
+            }
+        }
+
+        public async Task<bool> UpdateObjectAsync(int id, string name, string? objectType, string? description, string? position, string? heightMeters, byte[]? photoBytes)
+        {
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath) || string.IsNullOrWhiteSpace(name)) return false;
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                if (!await HasTableAsync(db, "ZOBJECT")) return false;
+
+                var columns = await GetTableColumnsAsync(db, "ZOBJECT");
+                var pos = ParseLatLon(position);
+                var notes = BuildObjectNotes(description);
+
+                var updates = new List<string> { "ZNAME=?", "ZNOTES=?" };
+                var values = new List<object?> { name.Trim(), notes };
+                TryAddObjectUpdate(columns, updates, values, "ZOBJECTTYPE", objectType?.Trim());
+                TryAddObjectUpdate(columns, updates, values, "ZDESCRIPTION", "ZDESC", description?.Trim());
+                TryAddObjectUpdate(columns, updates, values, "ZLATITUDE", pos?.lat);
+                TryAddObjectUpdate(columns, updates, values, "ZLONGITUDE", pos?.lon);
+                TryAddObjectUpdate(columns, updates, values, "ZHEIGHT", ToNullableDouble(heightMeters));
+                TryAddObjectUpdate(columns, updates, values, "ZHEIGHTUNIT", "m");
+                values.Add(id);
+
+                await db.ExecuteAsync($"UPDATE ZOBJECT SET {string.Join(",", updates)} WHERE Z_PK=?;", values.ToArray());
+
+                if (photoBytes is { Length: > 0 } && await HasTableAsync(db, "ZOBJECTIMAGE"))
+                {
+                    var exists = await db.QueryAsync<ScalarInt>("SELECT COUNT(*) AS Value FROM ZOBJECTIMAGE WHERE ZOBJECT=?;", id);
+                    if ((exists.FirstOrDefault()?.Value ?? 0) > 0)
+                        await db.ExecuteAsync("UPDATE ZOBJECTIMAGE SET ZIMAGE=? WHERE ZOBJECT=?;", photoBytes, id);
+                    else
+                    {
+                        var nextImgPk = await GetNextPrimaryKeyAsync(db, "ZOBJECTIMAGE", "Z_PK");
+                        var objectImageColumns = await GetTableColumnsAsync(db, "ZOBJECTIMAGE");
+                        if (objectImageColumns.Contains("ZUNIQUEID"))
+                            await db.ExecuteAsync("INSERT INTO ZOBJECTIMAGE (Z_PK, Z_ENT, Z_OPT, ZOBJECT, ZIMAGE, ZUNIQUEID) VALUES (?,1,1,?,?,?);", nextImgPk, id, photoBytes, Guid.NewGuid().ToString("D"));
+                        else
+                            await db.ExecuteAsync("INSERT INTO ZOBJECTIMAGE (Z_PK, Z_ENT, Z_OPT, ZOBJECT, ZIMAGE) VALUES (?,1,1,?,?);", nextImgPk, id, photoBytes);
+                    }
+                }
+
+                return true;
+            }
+            catch { return false; }
+        }
+
+        public async Task<bool> UpdateRigAsync(int id, string name, string? description)
+        {
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath) || string.IsNullOrWhiteSpace(name)) return false;
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                if (!await HasTableAsync(db, "ZRIG")) return false;
+                await db.ExecuteAsync("UPDATE ZRIG SET ZNAME=?, ZNOTES=? WHERE Z_PK=?;", name.Trim(), description?.Trim(), id);
+                return true;
+            }
+            catch { return false; }
+        }
+
+        public async Task<bool> UpdateJumpTypeAsync(int id, string name, string? notes)
+        {
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath) || string.IsNullOrWhiteSpace(name)) return false;
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                if (!await HasTableAsync(db, "ZJUMPTYPE")) return false;
+                await db.ExecuteAsync("UPDATE ZJUMPTYPE SET ZNAME=?, ZNOTES=? WHERE Z_PK=?;", name.Trim(), notes?.Trim(), id);
+                return true;
+            }
+            catch { return false; }
+        }
+
+        public async Task<int> NormalizeJumpNumbersAsync()
+        {
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath)) return 0;
+
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+
+                if (await HasTableAsync(db, "ZLOGENTRY"))
+                {
+                    var cols = await GetTableColumnsAsync(db, "ZLOGENTRY");
+                    if (!cols.Contains("ZJUMPNUMBER")) return 0;
+
+                    var rows = await db.QueryAsync<NormalizeRow>(@"SELECT Z_PK AS Pk,
+                                                                         IFNULL(ZJUMPNUMBER,0) AS Number,
+                                                                         CAST(ZDATE AS TEXT) AS DateText
+                                                                  FROM ZLOGENTRY
+                                                                  ORDER BY ZJUMPNUMBER ASC, Z_PK ASC;");
+
+                    return await NormalizeSequenceWithDateCheckAsync(
+                        dbPath,
+                        rows,
+                        parseDate: AppleSecondsToDateTime,
+                        applyUpdate: async (pk, number) => await db.ExecuteAsync("UPDATE ZLOGENTRY SET ZJUMPNUMBER=? WHERE Z_PK=?;", number, pk),
+                        sourceLabel: "ZLOGENTRY");
+                }
+
+                if (await HasTableAsync(db, "Jump"))
+                {
+                    var cols = await GetTableColumnsAsync(db, "Jump");
+                    if (!cols.Contains("JumpNumber")) return 0;
+
+                    var rows = await db.QueryAsync<NormalizeRow>(@"SELECT Id AS Pk,
+                                                                         IFNULL(JumpNumber,0) AS Number,
+                                                                         CAST(JumpDateUtc AS TEXT) AS DateText
+                                                                  FROM Jump
+                                                                  ORDER BY JumpNumber ASC, Id ASC;");
+
+                    return await NormalizeSequenceWithDateCheckAsync(
+                        dbPath,
+                        rows,
+                        parseDate: UnixSecondsToDateTime,
+                        applyUpdate: async (pk, number) => await db.ExecuteAsync("UPDATE Jump SET JumpNumber=? WHERE Id=?;", number, pk),
+                        sourceLabel: "Jump");
+                }
+
+                return 0;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        public async Task<(bool CanDelete, string? Reason)> CanDeleteObjectAsync(int id)
+        {
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath)) return (false, "DB non trovato.");
+
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                var objectName = await GetObjectNameByIdAsync(db, id);
+                var refs = 0;
+
+                if (await HasTableAsync(db, "ZLOGENTRY"))
+                {
+                    var cols = await GetTableColumnsAsync(db, "ZLOGENTRY");
+                    if (cols.Contains("ZOBJECT"))
+                    {
+                        refs += (await db.QueryAsync<ScalarInt>("SELECT COUNT(*) AS Value FROM ZLOGENTRY WHERE ZOBJECT=?;", id)).FirstOrDefault()?.Value ?? 0;
+                    }
+                }
+
+                if (!string.IsNullOrWhiteSpace(objectName) && await HasTableAsync(db, "Jump"))
+                {
+                    refs += (await db.QueryAsync<ScalarInt>("SELECT COUNT(*) AS Value FROM Jump WHERE LOWER(TRIM(ObjectName)) = LOWER(TRIM(?));", objectName)).FirstOrDefault()?.Value ?? 0;
+                }
+
+                if (refs > 0)
+                {
+                    await AppendDbLogAsync(dbPath, "REFERENCE_INTEGRITY", "Delete object bloccato", new[] { $"Object id={id} associato a {refs} salto/i" });
+                    return (false, $"Impossibile eliminare: object associato a {refs} salto/i.");
+                }
+
+                return (true, null);
+            }
+            catch
+            {
+                return (false, "Errore durante il controllo delle associazioni object.");
+            }
+        }
+
+        public async Task<(bool CanDelete, string? Reason)> CanDeleteRigAsync(int id)
+        {
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath)) return (false, "DB non trovato.");
+
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                var refs = 0;
+                if (await HasTableAsync(db, "ZLOGENTRY"))
+                {
+                    var cols = await GetTableColumnsAsync(db, "ZLOGENTRY");
+                    if (cols.Contains("ZRIG"))
+                        refs += (await db.QueryAsync<ScalarInt>("SELECT COUNT(*) AS Value FROM ZLOGENTRY WHERE ZRIG=?;", id)).FirstOrDefault()?.Value ?? 0;
+                }
+
+                if (refs > 0)
+                {
+                    await AppendDbLogAsync(dbPath, "REFERENCE_INTEGRITY", "Delete rig bloccato", new[] { $"Rig id={id} associato a {refs} salto/i" });
+                    return (false, $"Impossibile eliminare: rig associato a {refs} salto/i.");
+                }
+
+                return (true, null);
+            }
+            catch
+            {
+                return (false, "Errore durante il controllo delle associazioni rig.");
+            }
+        }
+
+        public async Task<(bool CanDelete, string? Reason)> CanDeleteJumpTypeAsync(int id)
+        {
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath)) return (false, "DB non trovato.");
+
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                var typeName = await GetJumpTypeNameByIdAsync(db, id);
+                var refs = 0;
+
+                if (await HasTableAsync(db, "ZLOGENTRY"))
+                {
+                    var cols = await GetTableColumnsAsync(db, "ZLOGENTRY");
+                    if (cols.Contains("ZJUMPTYPE"))
+                        refs += (await db.QueryAsync<ScalarInt>("SELECT COUNT(*) AS Value FROM ZLOGENTRY WHERE ZJUMPTYPE=?;", id)).FirstOrDefault()?.Value ?? 0;
+                }
+
+                if (!string.IsNullOrWhiteSpace(typeName) && await HasTableAsync(db, "Jump"))
+                    refs += (await db.QueryAsync<ScalarInt>("SELECT COUNT(*) AS Value FROM Jump WHERE LOWER(TRIM(ExitName)) = LOWER(TRIM(?));", typeName)).FirstOrDefault()?.Value ?? 0;
+
+                if (refs > 0)
+                {
+                    await AppendDbLogAsync(dbPath, "REFERENCE_INTEGRITY", "Delete tipo salto bloccato", new[] { $"JumpType id={id} associato a {refs} salto/i" });
+                    return (false, $"Impossibile eliminare: tipo salto associato a {refs} salto/i.");
+                }
+
+                return (true, null);
+            }
+            catch
+            {
+                return (false, "Errore durante il controllo delle associazioni tipo salto.");
+            }
+        }
+
+        public async Task<bool> DeleteObjectAsync(int id)
+        {
+            var check = await CanDeleteObjectAsync(id);
+            if (!check.CanDelete) return false;
+
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath)) return false;
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                if (await HasTableAsync(db, "ZOBJECTIMAGE"))
+                    await db.ExecuteAsync("DELETE FROM ZOBJECTIMAGE WHERE ZOBJECT=?;", id);
+                if (await HasTableAsync(db, "ZOBJECT"))
+                    await db.ExecuteAsync("DELETE FROM ZOBJECT WHERE Z_PK=?;", id);
+                return true;
+            }
+            catch { return false; }
+        }
+
+        public async Task<bool> DeleteRigAsync(int id)
+        {
+            var check = await CanDeleteRigAsync(id);
+            if (!check.CanDelete) return false;
+
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath)) return false;
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                if (await HasTableAsync(db, "ZRIG"))
+                    await db.ExecuteAsync("DELETE FROM ZRIG WHERE Z_PK=?;", id);
+                return true;
+            }
+            catch { return false; }
+        }
+
+        public async Task<bool> DeleteJumpTypeAsync(int id)
+        {
+            var check = await CanDeleteJumpTypeAsync(id);
+            if (!check.CanDelete) return false;
+
+            var dbPath = ResolveDbPath();
+            if (!File.Exists(dbPath)) return false;
+            try
+            {
+                var db = new SQLiteAsyncConnection(new SQLiteConnectionString(dbPath, false));
+                if (await HasTableAsync(db, "ZJUMPTYPE"))
+                    await db.ExecuteAsync("DELETE FROM ZJUMPTYPE WHERE Z_PK=?;", id);
+                return true;
+            }
+            catch { return false; }
+        }
+
+        public async Task<bool> ExportLightweightJsonAsync(string filePath)
+        {
+            try
+            {
+                var data = await GetJumpsAsync();
+                var json = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true });
+                await File.WriteAllTextAsync(filePath, json);
+                await AppendDbLogAsync(ResolveDbPath(), "IMPORT_EXPORT", "Export JSON", new[] { $"Esportati {data.Count} salti in: {filePath}" });
+                return true;
+            }
+            catch (Exception ex)
+            {
+                await AppendDbLogAsync(ResolveDbPath(), "RUNTIME_ERROR", "Export JSON fallito", new[] { ex.Message });
+                return false;
+            }
+        }
+
+        public async Task<bool> ImportLightweightJsonAsync(string filePath)
+        {
+            try
+            {
+                var json = await File.ReadAllTextAsync(filePath);
+                var jumps = JsonSerializer.Deserialize<List<JumpListItem>>(json) ?? new();
+                var ok = true;
+                foreach (var j in jumps)
+                    ok &= await AddJumpAsync(j);
+
+                await AppendDbLogAsync(ResolveDbPath(), "IMPORT_EXPORT", "Import JSON", new[] { $"Importati {jumps.Count} salti da: {filePath}", ok ? "Esito: OK" : "Esito: parziale/errore" });
+                return ok;
+            }
+            catch (Exception ex)
+            {
+                await AppendDbLogAsync(ResolveDbPath(), "RUNTIME_ERROR", "Import JSON fallito", new[] { ex.Message });
+                return false;
+            }
+        }
+
+        public Task<bool> ExportFullDbAsync(string destinationPath)
+        {
+            try
+            {
+                File.Copy(ResolveDbPath(), destinationPath, true);
+                return Task.FromResult(true);
+            }
+            catch { return Task.FromResult(false); }
+        }
+
+        public async Task<bool> ImportFullDbAsync(string sourcePath)
+        {
+            try
+            {
+                var dbPath = ResolveDbPath();
+                File.Copy(sourcePath, dbPath, true);
+                await AppendDbLogAsync(dbPath, "IMPORT_EXPORT", "Import DB", new[] { $"Importato DB da: {sourcePath}" });
+                await NormalizeJumpNumbersAsync();
+                return true;
+            }
+            catch { return false; }
+        }
+
+        private static async Task<HashSet<string>> GetTableColumnsAsync(SQLiteAsyncConnection db, string table)
+            => (await db.QueryAsync<PragmaColumn>($"PRAGMA table_info('{table}');"))
+                .Select(c => c.Name ?? string.Empty)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        private static string BuildColumnExpression(string alias, HashSet<string> columns, params string[] candidates)
+        {
+            var col = candidates.FirstOrDefault(columns.Contains);
+            return col is null ? "NULL" : $"{alias}.{col}";
+        }
+
+        private static string BuildObjectNotes(string? description)
+            => string.IsNullOrWhiteSpace(description) ? string.Empty : description.Trim();
+
+        private static (double lat, double lon)? ParseLatLon(string? position)
+        {
+            if (string.IsNullOrWhiteSpace(position)) return null;
+            var parts = position.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length != 2) return null;
+            if (!double.TryParse(parts[0], NumberStyles.Float, CultureInfo.InvariantCulture, out var lat)) return null;
+            if (!double.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out var lon)) return null;
+            return (lat, lon);
+        }
+
+        private static void PopulateObjectFieldsFromNotes(ObjectCatalogItem row)
+        {
+            if (string.IsNullOrWhiteSpace(row.Description) && !string.IsNullOrWhiteSpace(row.Notes))
+                row.Description = row.Notes;
+
+            if (string.IsNullOrWhiteSpace(row.Position) && !string.IsNullOrWhiteSpace(row.Latitude) && !string.IsNullOrWhiteSpace(row.Longitude))
+                row.Position = $"{row.Latitude}, {row.Longitude}";
+
+            if (!string.IsNullOrWhiteSpace(row.HeightMeters))
+            {
+                var cleaned = row.HeightMeters.Trim();
+                row.HeightMeters = cleaned.Contains(',') ? cleaned.Replace(',', '.') : cleaned;
+            }
+
+            if (string.IsNullOrWhiteSpace(row.HeightUnit))
+                row.HeightUnit = "m";
+        }
+
+        private static void TryAddObjectField(HashSet<string> columns, List<string> insertColumns, List<object?> values, string c1, object? value)
+        {
+            if (!columns.Contains(c1)) return;
+            insertColumns.Add(c1);
+            values.Add(value);
+        }
+
+        private static void TryAddObjectField(HashSet<string> columns, List<string> insertColumns, List<object?> values, string c1, string c2, string c3, string c4, string? value)
+        {
+            var c = new[] { c1, c2, c3, c4 }.FirstOrDefault(columns.Contains);
+            if (c is null) return;
+            insertColumns.Add(c);
+            values.Add(value);
+        }
+
+        private static void TryAddObjectField(HashSet<string> columns, List<string> insertColumns, List<object?> values, string c1, string c2, string c3, string? value)
+        {
+            var c = new[] { c1, c2, c3 }.FirstOrDefault(columns.Contains);
+            if (c is null) return;
+            insertColumns.Add(c);
+            values.Add(value);
+        }
+
+        private static void TryAddObjectField(HashSet<string> columns, List<string> insertColumns, List<object?> values, string c1, string c2, string? value)
+        {
+            var c = new[] { c1, c2 }.FirstOrDefault(columns.Contains);
+            if (c is null) return;
+            insertColumns.Add(c);
+            values.Add(value);
+        }
+
+        private static void TryAddFirstAvailableField(HashSet<string> columns, List<string> insertColumns, List<object?> values, object? value, params string[] candidates)
+        {
+            var c = candidates.FirstOrDefault(columns.Contains);
+            if (c is null) return;
+            insertColumns.Add(c);
+            values.Add(value);
+        }
+
+        private static void TryAddFirstAvailableUpdate(HashSet<string> columns, List<string> updates, List<object?> values, object? value, params string[] candidates)
+        {
+            var c = candidates.FirstOrDefault(columns.Contains);
+            if (c is null) return;
+            updates.Add($"{c}=?");
+            values.Add(value);
+        }
+
+        private static void TryAddObjectUpdate(HashSet<string> columns, List<string> updates, List<object?> values, string c1, object? value)
+        {
+            if (!columns.Contains(c1)) return;
+            updates.Add($"{c1}=?");
+            values.Add(value);
+        }
+
+        private static void TryAddObjectUpdate(HashSet<string> columns, List<string> updates, List<object?> values, string c1, string c2, string c3, string c4, string? value)
+        {
+            var c = new[] { c1, c2, c3, c4 }.FirstOrDefault(columns.Contains);
+            if (c is null) return;
+            updates.Add($"{c}=?");
+            values.Add(value);
+        }
+
+        private static void TryAddObjectUpdate(HashSet<string> columns, List<string> updates, List<object?> values, string c1, string c2, string c3, string? value)
+        {
+            var c = new[] { c1, c2, c3 }.FirstOrDefault(columns.Contains);
+            if (c is null) return;
+            updates.Add($"{c}=?");
+            values.Add(value);
+        }
+
+        private static void TryAddObjectUpdate(HashSet<string> columns, List<string> updates, List<object?> values, string c1, string c2, string? value)
+        {
+            var c = new[] { c1, c2 }.FirstOrDefault(columns.Contains);
+            if (c is null) return;
+            updates.Add($"{c}=?");
+            values.Add(value);
+        }
+
+        private static async Task<string?> GetObjectNameByIdAsync(SQLiteAsyncConnection db, int id)
+            => (await db.QueryAsync<ObjectNameRow>("SELECT ZNAME AS Name FROM ZOBJECT WHERE Z_PK=? LIMIT 1;", id)).FirstOrDefault()?.Name;
+
+        private static async Task<string?> GetJumpTypeNameByIdAsync(SQLiteAsyncConnection db, int id)
+            => (await db.QueryAsync<ObjectNameRow>("SELECT ZNAME AS Name FROM ZJUMPTYPE WHERE Z_PK=? LIMIT 1;", id)).FirstOrDefault()?.Name;
+
+        private static async Task AppendDbLogAsync(string dbPath, string category, string title, IEnumerable<string> lines)
+        {
+            try
+            {
+                var logPath = dbPath + ".log";
+                var header = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] [CAT:{category}] {title}";
+                var content = string.Join(Environment.NewLine, lines.Select(l => $" - {l}"));
+                var block = $"{header}{Environment.NewLine}{content}{Environment.NewLine}";
+                await File.AppendAllTextAsync(logPath, block + Environment.NewLine);
+            }
+            catch
+            {
+                // best-effort log writing
+            }
+        }
+
+        private static async Task<int> NormalizeSequenceWithDateCheckAsync(
+            string dbPath,
+            IReadOnlyList<NormalizeRow> rows,
+            Func<string?, DateTime?> parseDate,
+            Func<int, int, Task> applyUpdate,
+            string sourceLabel)
+        {
+            if (rows.Count == 0)
+                return 0;
+
+            var logs = new List<string>();
+
+            // Human-friendly incongruence report: jump number order should follow jump date order.
+            for (var i = 1; i < rows.Count; i++)
+            {
+                var prevDate = parseDate(rows[i - 1].DateText);
+                var curDate = parseDate(rows[i].DateText);
+                if (prevDate.HasValue && curDate.HasValue && curDate < prevDate)
+                {
+                    logs.Add($"INCONGRUENZA DATA/NUMERO: #{rows[i - 1].Number} ({prevDate:yyyy-MM-dd HH:mm}) precede #{rows[i].Number} ({curDate:yyyy-MM-dd HH:mm}) ma la data è invertita.");
+                }
+            }
+
+            var expected = 1;
+            var changes = 0;
+            foreach (var row in rows)
+            {
+                if (row.Number > expected)
+                {
+                    await applyUpdate(row.Pk, expected);
+                    logs.Add($"{sourceLabel} pk/id={row.Pk}: buco numerico chiuso {row.Number} -> {expected} (shift successivi)");
+                    changes++;
+                }
+                else if (row.Number < expected)
+                {
+                    // Duplicate/out-of-order numbers: do not auto-fix aggressively, only report.
+                    logs.Add($"{sourceLabel} pk/id={row.Pk}: numero {row.Number} inferiore all'atteso {expected} (verifica manuale consigliata)");
+                }
+
+                expected++;
+            }
+
+            if (logs.Count > 0)
+                await AppendDbLogAsync(dbPath, "DATA_CONSISTENCY", "Controllo coerenza numeri salto", logs);
+
+            return changes;
+        }
+
+        private static DateTime? AppleSecondsToDateTime(string? text)
+        {
+            if (string.IsNullOrWhiteSpace(text) || !double.TryParse(text.Trim().Replace(',', '.'), NumberStyles.Float, CultureInfo.InvariantCulture, out var seconds))
+                return null;
+            return new DateTime(2001, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(seconds).ToLocalTime();
+        }
+
+        private static DateTime? UnixSecondsToDateTime(string? text)
+        {
+            if (string.IsNullOrWhiteSpace(text) || !long.TryParse(text, out var seconds))
+                return null;
+            return DateTimeOffset.FromUnixTimeSeconds(seconds).ToLocalTime().DateTime;
+        }
+
         public async Task<IReadOnlyList<string>> GetJumpTypeNamesAsync()
         {
 #if WINDOWS
