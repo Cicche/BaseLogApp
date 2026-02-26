@@ -23,4 +23,7 @@ public partial class SettingsPage : ContentPage
 
     private async void OnOpenDbToolsClicked(object sender, EventArgs e)
         => await Navigation.PushModalAsync(new NavigationPage(new DbToolsPage(_vm)));
+
+    private async void OnOpenDiagnosticClicked(object sender, EventArgs e)
+        => await Navigation.PushAsync(new DiagnosticPage(_vm));
 }
