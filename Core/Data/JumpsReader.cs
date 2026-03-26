@@ -64,6 +64,7 @@ public sealed class JumpsReader : IJumpsReader
     private const string DefaultDbName = "BASELogbook.sqlite";
     private readonly string _legacyFallbackWindowsPath = @"C:\Temp\BASELogbook.sqlite";
     private const string CustomDbPathPreferenceKey = "baselogapp.custom_db_path";
+    private static readonly object DbBootstrapSync = new();
     private string? _customDbPath;
 
     private const int EntJumpType = 3;
@@ -161,11 +162,57 @@ public sealed class JumpsReader : IJumpsReader
         }
 
         var appDataPath = Path.Combine(FileSystem.AppDataDirectory, DefaultDbName);
+        EnsureDefaultDbExists(appDataPath);
+
         if (File.Exists(appDataPath))
             return appDataPath;
         if (File.Exists(_legacyFallbackWindowsPath))
             return _legacyFallbackWindowsPath;
         return appDataPath;
+    }
+
+    private void EnsureDefaultDbExists(string appDataPath)
+    {
+        if (File.Exists(appDataPath))
+            return;
+
+        lock (DbBootstrapSync)
+        {
+            if (File.Exists(appDataPath))
+                return;
+
+            try
+            {
+                var folder = Path.GetDirectoryName(appDataPath);
+                if (!string.IsNullOrWhiteSpace(folder))
+                    Directory.CreateDirectory(folder);
+
+                using var seedStream = FileSystem.OpenAppPackageFileAsync(DefaultDbName).GetAwaiter().GetResult();
+                using var output = File.Create(appDataPath);
+                seedStream.CopyTo(output);
+                var logPath = appDataPath + ".log";
+
+                AppLog.Info(
+                    logPath,
+                    LogCategories.DataConsistency,
+                    nameof(JumpsReader),
+                    nameof(EnsureDefaultDbExists),
+                    "Default DB initialized in AppData.",
+                    details: $"target={appDataPath}");
+            }
+            catch (Exception ex)
+            {
+                var logPath = appDataPath + ".log";
+                AppLog.Error(
+                    logPath,
+                    LogCategories.RuntimeError,
+                    nameof(JumpsReader),
+                    nameof(EnsureDefaultDbExists),
+                    "Unable to initialize default DB in AppData.",
+                    details: $"target={appDataPath}",
+                    ex: ex);
+            }
+        }
     }
 
     public async Task<IReadOnlyList<JumpListItem>> GetJumpsAsync()
