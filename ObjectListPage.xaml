@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:core="clr-namespace:BaseLogApp.Core.Models"
+             x:Class="BaseLogApp.Views.ObjectListPage"
+             Title="Object"
+             BackgroundColor="#0A0F1E">
+    <Grid RowDefinitions="Auto,*" Padding="16,12,16,0">
+        <Border BackgroundColor="#151B2E" StrokeThickness="0" StrokeShape="RoundRectangle 16" Padding="8,2">
+            <SearchBar x:Name="ObjectSearch"
+                       Placeholder="Cerca per nome, tipo, descrizione, note, posizione..."
+                       TextChanged="OnSearchTextChanged" />
+        </Border>
+
+        <CollectionView Grid.Row="1" x:Name="ObjectsView" SelectionMode="Single" SelectionChanged="OnObjectSelected" Margin="0,8,0,0">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="8" />
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="core:ObjectCatalogItem">
+                    <Border BackgroundColor="#151B2E" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="12">
+                        <Grid ColumnDefinitions="56,*,Auto" ColumnSpacing="10">
+                            <Grid WidthRequest="56" HeightRequest="56">
+                                <Image Source="{Binding PhotoSource}" IsVisible="{Binding HasPhoto}" Aspect="AspectFill" />
+                                <Border BackgroundColor="#27314E"
+                                        StrokeThickness="0"
+                                        StrokeShape="RoundRectangle 8">
+                                    <Border.Triggers>
+                                        <DataTrigger TargetType="Border" Binding="{Binding HasPhoto}" Value="True">
+                                            <Setter Property="IsVisible" Value="False" />
+                                        </DataTrigger>
+                                    </Border.Triggers>
+                                    <Label Text="{Binding TypeInitial}" TextColor="#C9D4F3" FontSize="22" FontAttributes="Bold" HorizontalTextAlignment="Center" VerticalTextAlignment="Center"/>
+                                </Border>
+                            </Grid>
+
+                            <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                <Label Text="{Binding Name}" TextColor="White" FontSize="20" FontAttributes="Bold"/>
+                                <Label Text="{Binding ObjectType}" TextColor="#8E99B8" FontSize="14" />
+                            </VerticalStackLayout>
+
+                            <Label Grid.Column="2" Text="{Binding JumpCount, StringFormat='Jumps: {0}'}" TextColor="#C9D4F3" VerticalTextAlignment="Center" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BaseLogApp.Views.ConfigurationPage"
+             Title="Configuration"
+             BackgroundColor="#0A0F1E">
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="14">
+            <Label Text="Deployment Types" TextColor="#8E99B8" FontAttributes="Bold" />
+            <CollectionView x:Name="DeploymentList" SelectionMode="None" HeightRequest="180">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="x:String">
+                        <Label Text="{Binding .}" TextColor="White" Padding="6,8" />
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Label Text="Sliders" TextColor="#8E99B8" FontAttributes="Bold" />
+            <CollectionView x:Name="SliderList" SelectionMode="None" HeightRequest="140">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="x:String">
+                        <Label Text="{Binding .}" TextColor="White" Padding="6,8" />
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Label Text="Pilot Chutes" TextColor="#8E99B8" FontAttributes="Bold" />
+            <CollectionView x:Name="PilotChuteList" SelectionMode="None" HeightRequest="160">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="x:String">
+                        <Label Text="{Binding .}" TextColor="White" Padding="6,8" />
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Label Text="Brake Settings" TextColor="#8E99B8" FontAttributes="Bold" />
+            <CollectionView x:Name="BrakeSettingList" SelectionMode="None" HeightRequest="100">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="x:String">
+                        <Label Text="{Binding .}" TextColor="White" Padding="6,8" />
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

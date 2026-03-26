@@ -1,0 +1,4061 @@
+{
+  "meta": {
+    "format_version": "1.0",
+    "purpose": "Operational rich-model SQLite/CoreData map for Codex implementation against existing BASELogbook DB",
+    "source_db_file": "BASELogbook.sqlite",
+    "generated_at_utc": "2026-02-25T15:50:01.229739+00:00",
+    "db_type": "sqlite",
+    "app_origin_assumption": "iOS Core Data app (BASELogbook)"
+  },
+  "scope": {
+    "user_request": "Consider rich model only, ignore mixed/minimal profile for implementation planning.",
+    "rich_model_definition": "For tables with Z_ENT, keep only rows where Z_ENT equals canonical entity id in Z_PRIMARYKEY for that entity.",
+    "rich_scope_filters": {
+      "ZBRAKESETTING": {
+        "mode": "z_ent_equals",
+        "z_ent": 1
+      },
+      "ZDEPLOYMENTTYPE": {
+        "mode": "z_ent_equals",
+        "z_ent": 2
+      },
+      "ZJUMPTYPE": {
+        "mode": "z_ent_equals",
+        "z_ent": 3
+      },
+      "ZLOGBOOKHISTORY": {
+        "mode": "z_ent_equals",
+        "z_ent": 4
+      },
+      "ZLOGENTRY": {
+        "mode": "z_ent_equals",
+        "z_ent": 5
+      },
+      "ZLOGENTRYIMAGE": {
+        "mode": "z_ent_equals",
+        "z_ent": 6
+      },
+      "ZOBJECT": {
+        "mode": "z_ent_equals",
+        "z_ent": 7
+      },
+      "ZOBJECTIMAGE": {
+        "mode": "z_ent_equals",
+        "z_ent": 8
+      },
+      "ZPILOTCHUTETYPE": {
+        "mode": "z_ent_equals",
+        "z_ent": 9
+      },
+      "ZRIG": {
+        "mode": "z_ent_equals",
+        "z_ent": 10
+      },
+      "ZRIGCOMPONENT": {
+        "mode": "z_ent_equals",
+        "z_ent": 11
+      },
+      "ZSIGNATURE": {
+        "mode": "z_ent_equals",
+        "z_ent": 12
+      },
+      "ZSLIDERTYPE": {
+        "mode": "z_ent_equals",
+        "z_ent": 13
+      },
+      "Z_5RIGS": {
+        "mode": "all_rows"
+      },
+      "Z_METADATA": {
+        "mode": "all_rows"
+      },
+      "Z_MODELCACHE": {
+        "mode": "all_rows"
+      },
+      "Z_PRIMARYKEY": {
+        "mode": "all_rows",
+        "reason": "No Z_PRIMARYKEY mapping found"
+      }
+    }
+  },
+  "core_data_entity_registry": [
+    {
+      "Z_ENT": 1,
+      "Z_NAME": "BrakeSetting",
+      "Z_SUPER": 0,
+      "Z_MAX": 2
+    },
+    {
+      "Z_ENT": 2,
+      "Z_NAME": "DeploymentType",
+      "Z_SUPER": 0,
+      "Z_MAX": 15
+    },
+    {
+      "Z_ENT": 3,
+      "Z_NAME": "JumpType",
+      "Z_SUPER": 0,
+      "Z_MAX": 6
+    },
+    {
+      "Z_ENT": 4,
+      "Z_NAME": "LogbookHistory",
+      "Z_SUPER": 0,
+      "Z_MAX": 1
+    },
+    {
+      "Z_ENT": 5,
+      "Z_NAME": "LogEntry",
+      "Z_SUPER": 0,
+      "Z_MAX": 390
+    },
+    {
+      "Z_ENT": 6,
+      "Z_NAME": "LogEntryImage",
+      "Z_SUPER": 0,
+      "Z_MAX": 1
+    },
+    {
+      "Z_ENT": 7,
+      "Z_NAME": "Object",
+      "Z_SUPER": 0,
+      "Z_MAX": 91
+    },
+    {
+      "Z_ENT": 8,
+      "Z_NAME": "ObjectImage",
+      "Z_SUPER": 0,
+      "Z_MAX": 89
+    },
+    {
+      "Z_ENT": 9,
+      "Z_NAME": "PilotChuteType",
+      "Z_SUPER": 0,
+      "Z_MAX": 7
+    },
+    {
+      "Z_ENT": 10,
+      "Z_NAME": "Rig",
+      "Z_SUPER": 0,
+      "Z_MAX": 6
+    },
+    {
+      "Z_ENT": 11,
+      "Z_NAME": "RigComponent",
+      "Z_SUPER": 0,
+      "Z_MAX": 2
+    },
+    {
+      "Z_ENT": 12,
+      "Z_NAME": "Signature",
+      "Z_SUPER": 0,
+      "Z_MAX": 0
+    },
+    {
+      "Z_ENT": 13,
+      "Z_NAME": "SliderType",
+      "Z_SUPER": 0,
+      "Z_MAX": 6
+    }
+  ],
+  "schema": {
+    "tables": [
+      {
+        "name": "ZBRAKESETTING",
+        "columns": [
+          {
+            "name": "Z_PK",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": 1
+          },
+          {
+            "name": "Z_ENT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "Z_OPT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZISACTIVE",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZISDEFAULT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZLASTMODIFIEDUTC",
+            "type": "TIMESTAMP",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZNAME",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZNOTES",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZUNIQUEID",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          }
+        ],
+        "row_count": 2,
+        "z_ent_distribution": [
+          {
+            "Z_ENT": 1,
+            "count": 2
+          }
+        ]
+      },
+      {
+        "name": "ZDEPLOYMENTTYPE",
+        "columns": [
+          {
+            "name": "Z_PK",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": 1
+          },
+          {
+            "name": "Z_ENT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "Z_OPT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZISACTIVE",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZISDEFAULT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZLASTMODIFIEDUTC",
+            "type": "TIMESTAMP",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZNAME",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZNOTES",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZUNIQUEID",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          }
+        ],
+        "row_count": 15,
+        "z_ent_distribution": [
+          {
+            "Z_ENT": 2,
+            "count": 15
+          }
+        ]
+      },
+      {
+        "name": "ZJUMPTYPE",
+        "columns": [
+          {
+            "name": "Z_PK",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": 1
+          },
+          {
+            "name": "Z_ENT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "Z_OPT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZISACTIVE",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZISDEFAULT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZPREVIOUSJUMPCOUNT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZLASTMODIFIEDUTC",
+            "type": "TIMESTAMP",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZNAME",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZNOTES",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZUNIQUEID",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          }
+        ],
+        "row_count": 8,
+        "z_ent_distribution": [
+          {
+            "Z_ENT": 3,
+            "count": 6
+          },
+          {
+            "Z_ENT": 1,
+            "count": 2
+          }
+        ]
+      },
+      {
+        "name": "ZLOGBOOKHISTORY",
+        "columns": [
+          {
+            "name": "Z_PK",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": 1
+          },
+          {
+            "name": "Z_ENT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "Z_OPT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZFREEFALLTIME",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          }
+        ],
+        "row_count": 1,
+        "z_ent_distribution": [
+          {
+            "Z_ENT": 4,
+            "count": 1
+          }
+        ]
+      },
+      {
+        "name": "ZLOGENTRY",
+        "columns": [
+          {
+            "name": "Z_PK",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": 1
+          },
+          {
+            "name": "Z_ENT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "Z_OPT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZDELAY",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZEXITWINDSPEED",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZGROUNDWINDSPEED",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZJUMPNUMBER",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZOPENINGDIRECTION",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZBRAKESETTING",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZDEPLOYMENTTYPE",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZJUMPTYPE",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZOBJECT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZPILOTCHUTETYPE",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZSIGNATURE",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZSLIDERTYPE",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZDATE",
+            "type": "TIMESTAMP",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZLASTMODIFIEDUTC",
+            "type": "TIMESTAMP",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZLASTSIGNATUREUTC",
+            "type": "TIMESTAMP",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZEXITWINDDIRECTION",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZEXITWINDSPEEDUNIT",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZGROUNDWINDDIRECTION",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZGROUNDWINDSPEEDUNIT",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZNOTES",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZUNIQUEID",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          }
+        ],
+        "row_count": 531,
+        "z_ent_distribution": [
+          {
+            "Z_ENT": 5,
+            "count": 388
+          },
+          {
+            "Z_ENT": 1,
+            "count": 143
+          }
+        ]
+      },
+      {
+        "name": "ZLOGENTRYIMAGE",
+        "columns": [
+          {
+            "name": "Z_PK",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": 1
+          },
+          {
+            "name": "Z_ENT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "Z_OPT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZLOGENTRY",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZMD5",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZIMAGE",
+            "type": "BLOB",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          }
+        ],
+        "row_count": 2,
+        "z_ent_distribution": [
+          {
+            "Z_ENT": 1,
+            "count": 1
+          },
+          {
+            "Z_ENT": 6,
+            "count": 1
+          }
+        ]
+      },
+      {
+        "name": "ZOBJECT",
+        "columns": [
+          {
+            "name": "Z_PK",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": 1
+          },
+          {
+            "name": "Z_ENT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "Z_OPT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZHEIGHT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZISACTIVE",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZISDEFAULT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZPREVIOUSJUMPCOUNT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZLASTMODIFIEDUTC",
+            "type": "TIMESTAMP",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZLATITUDE",
+            "type": "DECIMAL",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZLONGITUDE",
+            "type": "DECIMAL",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZHEIGHTUNIT",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZNAME",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZNOTES",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZOBJECTTYPE",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZREGION",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZUNIQUEID",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          }
+        ],
+        "row_count": 106,
+        "z_ent_distribution": [
+          {
+            "Z_ENT": 7,
+            "count": 91
+          },
+          {
+            "Z_ENT": 1,
+            "count": 15
+          }
+        ]
+      },
+      {
+        "name": "ZOBJECTIMAGE",
+        "columns": [
+          {
+            "name": "Z_PK",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": 1
+          },
+          {
+            "name": "Z_ENT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "Z_OPT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZOBJECT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZMD5",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZIMAGE",
+            "type": "BLOB",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          }
+        ],
+        "row_count": 91,
+        "z_ent_distribution": [
+          {
+            "Z_ENT": 8,
+            "count": 88
+          },
+          {
+            "Z_ENT": 1,
+            "count": 3
+          }
+        ]
+      },
+      {
+        "name": "ZPILOTCHUTETYPE",
+        "columns": [
+          {
+            "name": "Z_PK",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": 1
+          },
+          {
+            "name": "Z_ENT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "Z_OPT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZISACTIVE",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZISDEFAULT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZLASTMODIFIEDUTC",
+            "type": "TIMESTAMP",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZNAME",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZNOTES",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZUNIQUEID",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          }
+        ],
+        "row_count": 7,
+        "z_ent_distribution": [
+          {
+            "Z_ENT": 9,
+            "count": 7
+          }
+        ]
+      },
+      {
+        "name": "ZRIG",
+        "columns": [
+          {
+            "name": "Z_PK",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": 1
+          },
+          {
+            "name": "Z_ENT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "Z_OPT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZISACTIVE",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZISARCHIVED",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZISDEFAULT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZPREVIOUSJUMPCOUNT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZLASTMODIFIEDUTC",
+            "type": "TIMESTAMP",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZNAME",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZNOTES",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZUNIQUEID",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          }
+        ],
+        "row_count": 5,
+        "z_ent_distribution": [
+          {
+            "Z_ENT": 10,
+            "count": 5
+          }
+        ]
+      },
+      {
+        "name": "ZRIGCOMPONENT",
+        "columns": [
+          {
+            "name": "Z_PK",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": 1
+          },
+          {
+            "name": "Z_ENT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "Z_OPT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZRIG",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZNAME",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZNOTES",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZSERIALNUMBER",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          }
+        ],
+        "row_count": 2,
+        "z_ent_distribution": [
+          {
+            "Z_ENT": 11,
+            "count": 2
+          }
+        ]
+      },
+      {
+        "name": "ZSIGNATURE",
+        "columns": [
+          {
+            "name": "Z_PK",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": 1
+          },
+          {
+            "name": "Z_ENT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "Z_OPT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZIMAGE",
+            "type": "BLOB",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          }
+        ],
+        "row_count": 0,
+        "z_ent_distribution": []
+      },
+      {
+        "name": "ZSLIDERTYPE",
+        "columns": [
+          {
+            "name": "Z_PK",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": 1
+          },
+          {
+            "name": "Z_ENT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "Z_OPT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZISACTIVE",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZISDEFAULT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZLASTMODIFIEDUTC",
+            "type": "TIMESTAMP",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZNAME",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZNOTES",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "ZUNIQUEID",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          }
+        ],
+        "row_count": 6,
+        "z_ent_distribution": [
+          {
+            "Z_ENT": 13,
+            "count": 6
+          }
+        ]
+      },
+      {
+        "name": "Z_5RIGS",
+        "columns": [
+          {
+            "name": "Z_5LOGENTRIES",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": 1
+          },
+          {
+            "name": "Z_10RIGS",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": 2
+          }
+        ],
+        "row_count": 388,
+        "z_ent_distribution": null
+      },
+      {
+        "name": "Z_METADATA",
+        "columns": [
+          {
+            "name": "Z_VERSION",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": 1
+          },
+          {
+            "name": "Z_UUID",
+            "type": "VARCHAR(255)",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "Z_PLIST",
+            "type": "BLOB",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          }
+        ],
+        "row_count": 1,
+        "z_ent_distribution": null
+      },
+      {
+        "name": "Z_MODELCACHE",
+        "columns": [
+          {
+            "name": "Z_CONTENT",
+            "type": "BLOB",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          }
+        ],
+        "row_count": 1,
+        "z_ent_distribution": null
+      },
+      {
+        "name": "Z_PRIMARYKEY",
+        "columns": [
+          {
+            "name": "Z_ENT",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": 1
+          },
+          {
+            "name": "Z_NAME",
+            "type": "VARCHAR",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "Z_SUPER",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          },
+          {
+            "name": "Z_MAX",
+            "type": "INTEGER",
+            "notnull": false,
+            "default": null,
+            "pk_order": null
+          }
+        ],
+        "row_count": 13,
+        "z_ent_distribution": [
+          {
+            "Z_ENT": 1,
+            "count": 1
+          },
+          {
+            "Z_ENT": 2,
+            "count": 1
+          },
+          {
+            "Z_ENT": 3,
+            "count": 1
+          },
+          {
+            "Z_ENT": 4,
+            "count": 1
+          },
+          {
+            "Z_ENT": 5,
+            "count": 1
+          },
+          {
+            "Z_ENT": 6,
+            "count": 1
+          },
+          {
+            "Z_ENT": 7,
+            "count": 1
+          },
+          {
+            "Z_ENT": 8,
+            "count": 1
+          },
+          {
+            "Z_ENT": 9,
+            "count": 1
+          },
+          {
+            "Z_ENT": 10,
+            "count": 1
+          },
+          {
+            "Z_ENT": 11,
+            "count": 1
+          },
+          {
+            "Z_ENT": 12,
+            "count": 1
+          },
+          {
+            "Z_ENT": 13,
+            "count": 1
+          }
+        ]
+      }
+    ],
+    "indexes": [
+      {
+        "name": "ZLOGENTRYIMAGE_ZLOGENTRY_INDEX",
+        "tbl_name": "ZLOGENTRYIMAGE",
+        "sql": "CREATE INDEX ZLOGENTRYIMAGE_ZLOGENTRY_INDEX ON ZLOGENTRYIMAGE (ZLOGENTRY)"
+      },
+      {
+        "name": "ZLOGENTRY_ZBRAKESETTING_INDEX",
+        "tbl_name": "ZLOGENTRY",
+        "sql": "CREATE INDEX ZLOGENTRY_ZBRAKESETTING_INDEX ON ZLOGENTRY (ZBRAKESETTING)"
+      },
+      {
+        "name": "ZLOGENTRY_ZDEPLOYMENTTYPE_INDEX",
+        "tbl_name": "ZLOGENTRY",
+        "sql": "CREATE INDEX ZLOGENTRY_ZDEPLOYMENTTYPE_INDEX ON ZLOGENTRY (ZDEPLOYMENTTYPE)"
+      },
+      {
+        "name": "ZLOGENTRY_ZJUMPTYPE_INDEX",
+        "tbl_name": "ZLOGENTRY",
+        "sql": "CREATE INDEX ZLOGENTRY_ZJUMPTYPE_INDEX ON ZLOGENTRY (ZJUMPTYPE)"
+      },
+      {
+        "name": "ZLOGENTRY_ZOBJECT_INDEX",
+        "tbl_name": "ZLOGENTRY",
+        "sql": "CREATE INDEX ZLOGENTRY_ZOBJECT_INDEX ON ZLOGENTRY (ZOBJECT)"
+      },
+      {
+        "name": "ZLOGENTRY_ZPILOTCHUTETYPE_INDEX",
+        "tbl_name": "ZLOGENTRY",
+        "sql": "CREATE INDEX ZLOGENTRY_ZPILOTCHUTETYPE_INDEX ON ZLOGENTRY (ZPILOTCHUTETYPE)"
+      },
+      {
+        "name": "ZLOGENTRY_ZSIGNATURE_INDEX",
+        "tbl_name": "ZLOGENTRY",
+        "sql": "CREATE INDEX ZLOGENTRY_ZSIGNATURE_INDEX ON ZLOGENTRY (ZSIGNATURE)"
+      },
+      {
+        "name": "ZLOGENTRY_ZSLIDERTYPE_INDEX",
+        "tbl_name": "ZLOGENTRY",
+        "sql": "CREATE INDEX ZLOGENTRY_ZSLIDERTYPE_INDEX ON ZLOGENTRY (ZSLIDERTYPE)"
+      },
+      {
+        "name": "ZOBJECTIMAGE_ZOBJECT_INDEX",
+        "tbl_name": "ZOBJECTIMAGE",
+        "sql": "CREATE INDEX ZOBJECTIMAGE_ZOBJECT_INDEX ON ZOBJECTIMAGE (ZOBJECT)"
+      },
+      {
+        "name": "ZRIGCOMPONENT_ZRIG_INDEX",
+        "tbl_name": "ZRIGCOMPONENT",
+        "sql": "CREATE INDEX ZRIGCOMPONENT_ZRIG_INDEX ON ZRIGCOMPONENT (ZRIG)"
+      },
+      {
+        "name": "Z_5RIGS_Z_10RIGS_INDEX",
+        "tbl_name": "Z_5RIGS",
+        "sql": "CREATE INDEX Z_5RIGS_Z_10RIGS_INDEX ON Z_5RIGS (Z_10RIGS, Z_5LOGENTRIES)"
+      }
+    ],
+    "views": [],
+    "triggers": []
+  },
+  "observed_profiles": {
+    "zlogentry_by_z_ent": [
+      {
+        "Z_ENT": 5,
+        "count": 388,
+        "min_jumpnumber": 1,
+        "max_jumpnumber": 388,
+        "min_zdate": 449233200,
+        "max_zdate": 616845600,
+        "min_zdate_iso_utc": "2015-03-28T11:00:00+00:00",
+        "max_zdate_iso_utc": "2020-07-19T10:00:00+00:00"
+      },
+      {
+        "Z_ENT": 1,
+        "count": 143,
+        "min_jumpnumber": 389,
+        "max_jumpnumber": 531,
+        "min_zdate": 642247200,
+        "max_zdate": 793706760,
+        "min_zdate_iso_utc": "2021-05-09T10:00:00+00:00",
+        "max_zdate_iso_utc": "2026-02-25T10:06:00+00:00"
+      }
+    ],
+    "note": "DB may contain mixed save styles; implementation should target rich model only."
+  },
+  "rich_model_observations": {
+    "rich_logentry_count": 388,
+    "rich_jumpnumber_stats": {
+      "count_nonnull": 388,
+      "distinct_count": 388,
+      "min": 1,
+      "max": 388,
+      "is_unique": true,
+      "is_contiguous": true
+    },
+    "zlogentry_field_population": {
+      "Z_PK": {
+        "nonnull_count": 388,
+        "null_count": 0,
+        "nonnull_ratio": 1.0
+      },
+      "Z_ENT": {
+        "nonnull_count": 388,
+        "null_count": 0,
+        "nonnull_ratio": 1.0
+      },
+      "Z_OPT": {
+        "nonnull_count": 388,
+        "null_count": 0,
+        "nonnull_ratio": 1.0
+      },
+      "ZDELAY": {
+        "nonnull_count": 388,
+        "null_count": 0,
+        "nonnull_ratio": 1.0
+      },
+      "ZEXITWINDSPEED": {
+        "nonnull_count": 388,
+        "null_count": 0,
+        "nonnull_ratio": 1.0
+      },
+      "ZGROUNDWINDSPEED": {
+        "nonnull_count": 388,
+        "null_count": 0,
+        "nonnull_ratio": 1.0
+      },
+      "ZJUMPNUMBER": {
+        "nonnull_count": 388,
+        "null_count": 0,
+        "nonnull_ratio": 1.0
+      },
+      "ZOPENINGDIRECTION": {
+        "nonnull_count": 388,
+        "null_count": 0,
+        "nonnull_ratio": 1.0
+      },
+      "ZBRAKESETTING": {
+        "nonnull_count": 0,
+        "null_count": 388,
+        "nonnull_ratio": 0.0
+      },
+      "ZDEPLOYMENTTYPE": {
+        "nonnull_count": 388,
+        "null_count": 0,
+        "nonnull_ratio": 1.0
+      },
+      "ZJUMPTYPE": {
+        "nonnull_count": 383,
+        "null_count": 5,
+        "nonnull_ratio": 0.987113
+      },
+      "ZOBJECT": {
+        "nonnull_count": 388,
+        "null_count": 0,
+        "nonnull_ratio": 1.0
+      },
+      "ZPILOTCHUTETYPE": {
+        "nonnull_count": 388,
+        "null_count": 0,
+        "nonnull_ratio": 1.0
+      },
+      "ZSIGNATURE": {
+        "nonnull_count": 0,
+        "null_count": 388,
+        "nonnull_ratio": 0.0
+      },
+      "ZSLIDERTYPE": {
+        "nonnull_count": 388,
+        "null_count": 0,
+        "nonnull_ratio": 1.0
+      },
+      "ZDATE": {
+        "nonnull_count": 388,
+        "null_count": 0,
+        "nonnull_ratio": 1.0
+      },
+      "ZLASTMODIFIEDUTC": {
+        "nonnull_count": 388,
+        "null_count": 0,
+        "nonnull_ratio": 1.0
+      },
+      "ZLASTSIGNATUREUTC": {
+        "nonnull_count": 0,
+        "null_count": 388,
+        "nonnull_ratio": 0.0
+      },
+      "ZEXITWINDDIRECTION": {
+        "nonnull_count": 0,
+        "null_count": 388,
+        "nonnull_ratio": 0.0
+      },
+      "ZEXITWINDSPEEDUNIT": {
+        "nonnull_count": 0,
+        "null_count": 388,
+        "nonnull_ratio": 0.0
+      },
+      "ZGROUNDWINDDIRECTION": {
+        "nonnull_count": 0,
+        "null_count": 388,
+        "nonnull_ratio": 0.0
+      },
+      "ZGROUNDWINDSPEEDUNIT": {
+        "nonnull_count": 0,
+        "null_count": 388,
+        "nonnull_ratio": 0.0
+      },
+      "ZNOTES": {
+        "nonnull_count": 388,
+        "null_count": 0,
+        "nonnull_ratio": 1.0
+      },
+      "ZUNIQUEID": {
+        "nonnull_count": 388,
+        "null_count": 0,
+        "nonnull_ratio": 1.0
+      }
+    },
+    "join_table_z_5rigs": {
+      "total_rows": 388,
+      "rows_linked_to_rich_logentry": 388,
+      "rows_orphan_logentry": 0,
+      "rows_linked_to_existing_rig": 46,
+      "rows_orphan_rig": 342,
+      "rig_links_per_jump_distribution": {
+        "1": 388
+      }
+    },
+    "images": {
+      "rich_logentry_images_meta": [
+        {
+          "Z_PK": 1,
+          "Z_ENT": 6,
+          "ZLOGENTRY": 374,
+          "ZMD5": "1387eac0dde39454949fe03b739fa1da",
+          "ZIMAGE_BYTES": 897416
+        }
+      ],
+      "rich_object_images_meta_count": 88,
+      "sample_object_images_meta_first10": [
+        {
+          "Z_PK": 1,
+          "Z_ENT": 8,
+          "ZOBJECT": 2,
+          "ZMD5": "20181a72c268f4446d889678a04dd398",
+          "ZIMAGE_BYTES": 645862
+        },
+        {
+          "Z_PK": 2,
+          "Z_ENT": 8,
+          "ZOBJECT": 3,
+          "ZMD5": "40116b9f006b8c14bf48eb65216699ed",
+          "ZIMAGE_BYTES": 727541
+        },
+        {
+          "Z_PK": 3,
+          "Z_ENT": 8,
+          "ZOBJECT": 4,
+          "ZMD5": "d795c1286a4495438adb6958fcd2b2ca",
+          "ZIMAGE_BYTES": 895496
+        },
+        {
+          "Z_PK": 4,
+          "Z_ENT": 8,
+          "ZOBJECT": 5,
+          "ZMD5": "5b9d3504887151a5ce98836620066edb",
+          "ZIMAGE_BYTES": 787093
+        },
+        {
+          "Z_PK": 5,
+          "Z_ENT": 8,
+          "ZOBJECT": 6,
+          "ZMD5": "594ec2d9610ff95cd836cc72688993f9",
+          "ZIMAGE_BYTES": 683491
+        },
+        {
+          "Z_PK": 6,
+          "Z_ENT": 8,
+          "ZOBJECT": 7,
+          "ZMD5": "82f1135b8c4e0e2b1d2949b0ddf6fbe3",
+          "ZIMAGE_BYTES": 777140
+        },
+        {
+          "Z_PK": 7,
+          "Z_ENT": 8,
+          "ZOBJECT": 8,
+          "ZMD5": "09ff174f10a4d49ebddda340f52415e9",
+          "ZIMAGE_BYTES": 638334
+        },
+        {
+          "Z_PK": 8,
+          "Z_ENT": 8,
+          "ZOBJECT": 9,
+          "ZMD5": "4472e0b2a0e7ed3f1098d6386e951abf",
+          "ZIMAGE_BYTES": 669659
+        },
+        {
+          "Z_PK": 9,
+          "Z_ENT": 8,
+          "ZOBJECT": 10,
+          "ZMD5": "cc29100b8f3a3ce5bf46fb2c354b1dd4",
+          "ZIMAGE_BYTES": 854552
+        },
+        {
+          "Z_PK": 10,
+          "Z_ENT": 8,
+          "ZOBJECT": 11,
+          "ZMD5": "65ab74fda84e5749c19c02fdadac695f",
+          "ZIMAGE_BYTES": 605410
+        }
+      ]
+    }
+  },
+  "relationships_validated": [
+    {
+      "label": "Rich jump -> ZBRAKESETTING",
+      "from_table": "ZLOGENTRY",
+      "from_column": "ZBRAKESETTING",
+      "to_table": "ZBRAKESETTING",
+      "to_column": "Z_PK",
+      "child_filter": "(c.Z_ENT = 5) AND (c.ZBRAKESETTING IS NOT NULL)",
+      "parent_filter": "(p.Z_ENT = 1)",
+      "nonnull_child_values_rows": 0,
+      "matched_rows": 0,
+      "orphan_rows": 0,
+      "match_ratio": null
+    },
+    {
+      "label": "Rich jump -> ZDEPLOYMENTTYPE",
+      "from_table": "ZLOGENTRY",
+      "from_column": "ZDEPLOYMENTTYPE",
+      "to_table": "ZDEPLOYMENTTYPE",
+      "to_column": "Z_PK",
+      "child_filter": "(c.Z_ENT = 5) AND (c.ZDEPLOYMENTTYPE IS NOT NULL)",
+      "parent_filter": "(p.Z_ENT = 2)",
+      "nonnull_child_values_rows": 388,
+      "matched_rows": 388,
+      "orphan_rows": 0,
+      "match_ratio": 1.0
+    },
+    {
+      "label": "Rich jump -> ZJUMPTYPE",
+      "from_table": "ZLOGENTRY",
+      "from_column": "ZJUMPTYPE",
+      "to_table": "ZJUMPTYPE",
+      "to_column": "Z_PK",
+      "child_filter": "(c.Z_ENT = 5) AND (c.ZJUMPTYPE IS NOT NULL)",
+      "parent_filter": "(p.Z_ENT = 3)",
+      "nonnull_child_values_rows": 383,
+      "matched_rows": 383,
+      "orphan_rows": 0,
+      "match_ratio": 1.0
+    },
+    {
+      "label": "Rich jump -> ZOBJECT",
+      "from_table": "ZLOGENTRY",
+      "from_column": "ZOBJECT",
+      "to_table": "ZOBJECT",
+      "to_column": "Z_PK",
+      "child_filter": "(c.Z_ENT = 5) AND (c.ZOBJECT IS NOT NULL)",
+      "parent_filter": "(p.Z_ENT = 7)",
+      "nonnull_child_values_rows": 388,
+      "matched_rows": 388,
+      "orphan_rows": 0,
+      "match_ratio": 1.0
+    },
+    {
+      "label": "Rich jump -> ZPILOTCHUTETYPE",
+      "from_table": "ZLOGENTRY",
+      "from_column": "ZPILOTCHUTETYPE",
+      "to_table": "ZPILOTCHUTETYPE",
+      "to_column": "Z_PK",
+      "child_filter": "(c.Z_ENT = 5) AND (c.ZPILOTCHUTETYPE IS NOT NULL)",
+      "parent_filter": "(p.Z_ENT = 9)",
+      "nonnull_child_values_rows": 388,
+      "matched_rows": 388,
+      "orphan_rows": 0,
+      "match_ratio": 1.0
+    },
+    {
+      "label": "Rich jump -> ZSIGNATURE",
+      "from_table": "ZLOGENTRY",
+      "from_column": "ZSIGNATURE",
+      "to_table": "ZSIGNATURE",
+      "to_column": "Z_PK",
+      "child_filter": "(c.Z_ENT = 5) AND (c.ZSIGNATURE IS NOT NULL)",
+      "parent_filter": "(p.Z_ENT = 12)",
+      "nonnull_child_values_rows": 0,
+      "matched_rows": 0,
+      "orphan_rows": 0,
+      "match_ratio": null
+    },
+    {
+      "label": "Rich jump -> ZSLIDERTYPE",
+      "from_table": "ZLOGENTRY",
+      "from_column": "ZSLIDERTYPE",
+      "to_table": "ZSLIDERTYPE",
+      "to_column": "Z_PK",
+      "child_filter": "(c.Z_ENT = 5) AND (c.ZSLIDERTYPE IS NOT NULL)",
+      "parent_filter": "(p.Z_ENT = 13)",
+      "nonnull_child_values_rows": 388,
+      "matched_rows": 388,
+      "orphan_rows": 0,
+      "match_ratio": 1.0
+    },
+    {
+      "label": "Rich logentry image -> rich jump",
+      "from_table": "ZLOGENTRYIMAGE",
+      "from_column": "ZLOGENTRY",
+      "to_table": "ZLOGENTRY",
+      "to_column": "Z_PK",
+      "child_filter": "(c.Z_ENT = 6) AND (c.ZLOGENTRY IS NOT NULL)",
+      "parent_filter": "(p.Z_ENT = 5)",
+      "nonnull_child_values_rows": 1,
+      "matched_rows": 1,
+      "orphan_rows": 0,
+      "match_ratio": 1.0
+    },
+    {
+      "label": "Rich object image -> rich object",
+      "from_table": "ZOBJECTIMAGE",
+      "from_column": "ZOBJECT",
+      "to_table": "ZOBJECT",
+      "to_column": "Z_PK",
+      "child_filter": "(c.Z_ENT = 8) AND (c.ZOBJECT IS NOT NULL)",
+      "parent_filter": "(p.Z_ENT = 7)",
+      "nonnull_child_values_rows": 88,
+      "matched_rows": 88,
+      "orphan_rows": 0,
+      "match_ratio": 1.0
+    },
+    {
+      "label": "Rig component -> rig",
+      "from_table": "ZRIGCOMPONENT",
+      "from_column": "ZRIG",
+      "to_table": "ZRIG",
+      "to_column": "Z_PK",
+      "child_filter": "(c.Z_ENT = 11) AND (c.ZRIG IS NOT NULL)",
+      "parent_filter": "(p.Z_ENT = 10)",
+      "nonnull_child_values_rows": 2,
+      "matched_rows": 1,
+      "orphan_rows": 1,
+      "match_ratio": 0.5
+    },
+    {
+      "label": "Z_5RIGS.Z_5LOGENTRIES -> ZLOGENTRY.Z_PK (rich jumps)",
+      "from_table": "Z_5RIGS",
+      "from_column": "Z_5LOGENTRIES",
+      "to_table": "ZLOGENTRY",
+      "to_column": "Z_PK",
+      "nonnull_child_values_rows": 388,
+      "matched_rows": 388,
+      "orphan_rows": 0,
+      "match_ratio": 1.0
+    },
+    {
+      "label": "Z_5RIGS.Z_10RIGS -> ZRIG.Z_PK (rich rigs)",
+      "from_table": "Z_5RIGS",
+      "from_column": "Z_10RIGS",
+      "to_table": "ZRIG",
+      "to_column": "Z_PK",
+      "nonnull_child_values_rows": 388,
+      "matched_rows": 46,
+      "orphan_rows": 342,
+      "match_ratio": 0.118557
+    }
+  ],
+  "lookup_data_exports": {
+    "ZBRAKESETTING": [
+      {
+        "Z_PK": 1,
+        "Z_ENT": 1,
+        "ZISACTIVE": 0,
+        "ZISDEFAULT": 0,
+        "ZNAME": "Shallow",
+        "ZNOTES": null,
+        "ZUNIQUEID": "94621A1D-037B-487D-A092-8DD68FDD3229"
+      },
+      {
+        "Z_PK": 2,
+        "Z_ENT": 1,
+        "ZISACTIVE": 0,
+        "ZISDEFAULT": 0,
+        "ZNAME": "Deep",
+        "ZNOTES": "",
+        "ZUNIQUEID": "69C660B4-7F19-4A9E-9BFE-F7E6EA6404E3"
+      }
+    ],
+    "ZDEPLOYMENTTYPE": [
+      {
+        "Z_PK": 1,
+        "Z_ENT": 2,
+        "ZISACTIVE": 0,
+        "ZISDEFAULT": 0,
+        "ZNAME": "PC - leg pouch",
+        "ZNOTES": null,
+        "ZUNIQUEID": "869CC021-47D8-4479-AB93-A62E881D55DB"
+      },
+      {
+        "Z_PK": 2,
+        "Z_ENT": 2,
+        "ZISACTIVE": 0,
+        "ZISDEFAULT": 0,
+        "ZNAME": "Tard-over",
+        "ZNOTES": null,
+        "ZUNIQUEID": "18CED24A-5516-4B41-B8A8-313747D83DF0"
+      },
+      {
+        "Z_PK": 3,
+        "Z_ENT": 2,
+        "ZISACTIVE": 0,
+        "ZISDEFAULT": 0,
+        "ZNAME": "Direct-bag",
+        "ZNOTES": null,
+        "ZUNIQUEID": "FC0179DF-EB1C-46F2-8DD5-E65D40E1C9D6"
+      },
+      {
+        "Z_PK": 4,
+        "Z_ENT": 2,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 1,
+        "ZNAME": "PC - hand-held",
+        "ZNOTES": "",
+        "ZUNIQUEID": "F0F963E1-8D74-4D3F-88C4-875A772015B6"
+      },
+      {
+        "Z_PK": 5,
+        "Z_ENT": 2,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZNAME": "PC - assist",
+        "ZNOTES": null,
+        "ZUNIQUEID": "56C561A5-AD06-4BAC-AE40-42E8E26F1DCB"
+      },
+      {
+        "Z_PK": 6,
+        "Z_ENT": 2,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZNAME": "PC - static line",
+        "ZNOTES": null,
+        "ZUNIQUEID": "C970196C-1BED-4EA4-8485-6A93795A9306"
+      },
+      {
+        "Z_PK": 7,
+        "Z_ENT": 2,
+        "ZISACTIVE": 0,
+        "ZISDEFAULT": 0,
+        "ZNAME": "Tard",
+        "ZNOTES": null,
+        "ZUNIQUEID": "3A2F751F-5559-49CB-B503-B3C0EB5C3FC1"
+      },
+      {
+        "Z_PK": 8,
+        "Z_ENT": 2,
+        "ZISACTIVE": 0,
+        "ZISDEFAULT": 0,
+        "ZNAME": "Rollover",
+        "ZNOTES": null,
+        "ZUNIQUEID": "C7BBE7BA-16BB-43D7-999A-E81DDC2A557A"
+      },
+      {
+        "Z_PK": 9,
+        "Z_ENT": 2,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZNAME": "PC - stowed",
+        "ZNOTES": null,
+        "ZUNIQUEID": "30D63228-712C-4E8F-8C7C-8C3BFA52D909"
+      },
+      {
+        "Z_PK": 10,
+        "Z_ENT": 2,
+        "ZISACTIVE": 0,
+        "ZISDEFAULT": 0,
+        "ZNAME": "Kite-under",
+        "ZNOTES": null,
+        "ZUNIQUEID": "FA541818-0116-4C76-B730-9509F4D11EC8"
+      },
+      {
+        "Z_PK": 11,
+        "Z_ENT": 2,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZNAME": "Tard",
+        "ZNOTES": "",
+        "ZUNIQUEID": "53CA6C32-F016-485C-9C51-EAD9B5EFAC1A"
+      },
+      {
+        "Z_PK": 12,
+        "Z_ENT": 2,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZNAME": "Mc Conkie",
+        "ZNOTES": "",
+        "ZUNIQUEID": "5B6C8B4A-A391-4590-8191-3CC2A57F6307"
+      },
+      {
+        "Z_PK": 13,
+        "Z_ENT": 2,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZNAME": "Daisy Chain",
+        "ZNOTES": "",
+        "ZUNIQUEID": "B2174012-C770-4188-811D-6BC939584AAF"
+      },
+      {
+        "Z_PK": 14,
+        "Z_ENT": 2,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZNAME": "Pca",
+        "ZNOTES": "",
+        "ZUNIQUEID": "5EB12FD3-481D-4CED-BD7A-132841035DA9"
+      },
+      {
+        "Z_PK": 15,
+        "Z_ENT": 2,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZNAME": "Tard Over",
+        "ZNOTES": "",
+        "ZUNIQUEID": "3D9E44A8-B86E-4DC8-B29B-B6EAC1024688"
+      }
+    ],
+    "ZJUMPTYPE": [
+      {
+        "Z_PK": 1,
+        "Z_ENT": 3,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 1,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZNAME": "Sub-terminal",
+        "ZNOTES": "",
+        "ZUNIQUEID": "14E6CE26-6DD7-4367-8937-0B24FE88AD29"
+      },
+      {
+        "Z_PK": 2,
+        "Z_ENT": 3,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZNAME": "Terminal",
+        "ZNOTES": null,
+        "ZUNIQUEID": "D94E9C16-F327-49DB-B9E3-225FC9764CCD"
+      },
+      {
+        "Z_PK": 3,
+        "Z_ENT": 3,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZNAME": "Track Suit",
+        "ZNOTES": "",
+        "ZUNIQUEID": "70B3E2CA-A190-47B1-9569-FE193E22F06F"
+      },
+      {
+        "Z_PK": 4,
+        "Z_ENT": 3,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZNAME": "Tracking",
+        "ZNOTES": null,
+        "ZUNIQUEID": "19995865-06A1-47C9-8650-014CF4F857B6"
+      },
+      {
+        "Z_PK": 5,
+        "Z_ENT": 3,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZNAME": "Wingsuit",
+        "ZNOTES": null,
+        "ZUNIQUEID": "0D93A27F-E81F-4300-BF7C-BB4B0200DD53"
+      },
+      {
+        "Z_PK": 6,
+        "Z_ENT": 3,
+        "ZISACTIVE": 0,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZNAME": "Freefly",
+        "ZNOTES": null,
+        "ZUNIQUEID": "AB42BDAD-60F1-4D96-A4CA-09FF27E427C7"
+      }
+    ],
+    "ZPILOTCHUTETYPE": [
+      {
+        "Z_PK": 1,
+        "Z_ENT": 9,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZNAME": "46",
+        "ZNOTES": "",
+        "ZUNIQUEID": "75DF82E5-87D3-48C2-BC2F-0113CC04C418"
+      },
+      {
+        "Z_PK": 2,
+        "Z_ENT": 9,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZNAME": "36",
+        "ZNOTES": "",
+        "ZUNIQUEID": "D279E998-0059-4239-BFE1-9DE887A1D12F"
+      },
+      {
+        "Z_PK": 3,
+        "Z_ENT": 9,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZNAME": "42",
+        "ZNOTES": "",
+        "ZUNIQUEID": "C103AC16-2B94-4F9A-A3BE-3010CA296B9D"
+      },
+      {
+        "Z_PK": 4,
+        "Z_ENT": 9,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZNAME": "None",
+        "ZNOTES": "",
+        "ZUNIQUEID": "A29971B7-B839-4B3F-A57C-B4F2136029C1"
+      },
+      {
+        "Z_PK": 5,
+        "Z_ENT": 9,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZNAME": "48",
+        "ZNOTES": "",
+        "ZUNIQUEID": "D65FFF95-96BA-45E8-92BC-F85D13317F52"
+      },
+      {
+        "Z_PK": 6,
+        "Z_ENT": 9,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 1,
+        "ZNAME": "46 Snatch",
+        "ZNOTES": "",
+        "ZUNIQUEID": "4BA443F1-B971-4AF7-B68C-30FC9EF346F1"
+      },
+      {
+        "Z_PK": 7,
+        "Z_ENT": 9,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZNAME": "38",
+        "ZNOTES": "",
+        "ZUNIQUEID": "7A93897A-FD04-48F8-9BF3-23665127450D"
+      }
+    ],
+    "ZSLIDERTYPE": [
+      {
+        "Z_PK": 1,
+        "Z_ENT": 13,
+        "ZISACTIVE": 0,
+        "ZISDEFAULT": 0,
+        "ZNAME": "Sail",
+        "ZNOTES": null,
+        "ZUNIQUEID": "78D9EACA-875A-48AF-99AF-96A818CC097D"
+      },
+      {
+        "Z_PK": 2,
+        "Z_ENT": 13,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 1,
+        "ZNAME": "None",
+        "ZNOTES": "",
+        "ZUNIQUEID": "26892959-CC8B-443B-B7CA-2926F0A93E31"
+      },
+      {
+        "Z_PK": 3,
+        "Z_ENT": 13,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZNAME": "Down",
+        "ZNOTES": "",
+        "ZUNIQUEID": "BBD885A2-EC54-4C1B-8262-AD825254F350"
+      },
+      {
+        "Z_PK": 4,
+        "Z_ENT": 13,
+        "ZISACTIVE": 0,
+        "ZISDEFAULT": 0,
+        "ZNAME": "Large Mesh",
+        "ZNOTES": null,
+        "ZUNIQUEID": "722E09E3-89BD-4713-A546-E253903C3990"
+      },
+      {
+        "Z_PK": 5,
+        "Z_ENT": 13,
+        "ZISACTIVE": 0,
+        "ZISDEFAULT": 0,
+        "ZNAME": "Fine Mesh",
+        "ZNOTES": null,
+        "ZUNIQUEID": "ECD6401F-5FD7-42CB-9D8C-9CA522EE33B3"
+      },
+      {
+        "Z_PK": 6,
+        "Z_ENT": 13,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZNAME": "Up",
+        "ZNOTES": "",
+        "ZUNIQUEID": "402E17BF-416E-421B-94D4-0F67912C9922"
+      }
+    ],
+    "ZRIG": [
+      {
+        "Z_PK": 2,
+        "Z_ENT": 10,
+        "ZISACTIVE": 1,
+        "ZISARCHIVED": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 456778955.334135,
+        "ZNAME": "Maury's Rig",
+        "ZNOTES": "",
+        "ZUNIQUEID": "888A7B89-0884-477E-A8C4-9945B66B251D",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2015-06-23T19:02:35.334135+00:00"
+      },
+      {
+        "Z_PK": 3,
+        "Z_ENT": 10,
+        "ZISACTIVE": 0,
+        "ZISARCHIVED": 0,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 456069219.75957,
+        "ZNAME": "",
+        "ZNOTES": "",
+        "ZUNIQUEID": "C4B6FA8F-FE04-48AB-A393-21533DE25D95",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2015-06-15T13:53:39.759570+00:00"
+      },
+      {
+        "Z_PK": 4,
+        "Z_ENT": 10,
+        "ZISACTIVE": 1,
+        "ZISARCHIVED": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 550297403.455712,
+        "ZNAME": "Baglioni Osp 245",
+        "ZNOTES": "",
+        "ZUNIQUEID": "F1C0FBA2-4034-4C02-9667-BD24AED2E120",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2018-06-10T04:23:23.455712+00:00"
+      },
+      {
+        "Z_PK": 5,
+        "Z_ENT": 10,
+        "ZISACTIVE": 1,
+        "ZISARCHIVED": 0,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 546600694.149994,
+        "ZNAME": "Crux Outlow",
+        "ZNOTES": "",
+        "ZUNIQUEID": "6549393D-12DF-44F9-969A-110F54AD0F01",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2018-04-28T09:31:34.149994+00:00"
+      },
+      {
+        "Z_PK": 6,
+        "Z_ENT": 10,
+        "ZISACTIVE": 1,
+        "ZISARCHIVED": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 550297397.956133,
+        "ZNAME": "Cris - Ayduke",
+        "ZNOTES": "",
+        "ZUNIQUEID": "2B63739B-B56C-49B5-AA0A-86D54E8EDF10",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2018-06-10T04:23:17.956133+00:00"
+      }
+    ],
+    "ZRIGCOMPONENT": [
+      {
+        "Z_PK": 1,
+        "Z_ENT": 11,
+        "ZRIG": 1,
+        "ZNAME": "",
+        "ZNOTES": "",
+        "ZSERIALNUMBER": ""
+      },
+      {
+        "Z_PK": 2,
+        "Z_ENT": 11,
+        "ZRIG": 2,
+        "ZNAME": "",
+        "ZNOTES": "",
+        "ZSERIALNUMBER": ""
+      }
+    ],
+    "ZOBJECT_rich_selected_fields": [
+      {
+        "Z_PK": 1,
+        "Z_ENT": 7,
+        "ZISACTIVE": 0,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 456053016.038513,
+        "ZLATITUDE": 0,
+        "ZLONGITUDE": 0,
+        "ZHEIGHT": 0,
+        "ZHEIGHTUNIT": "Feet",
+        "ZNAME": "",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Other",
+        "ZREGION": "",
+        "ZUNIQUEID": "87C11AC6-91A9-40CE-B7EF-233BD8A48F53",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2015-06-15T09:23:36.038513+00:00"
+      },
+      {
+        "Z_PK": 2,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 470346005.375295,
+        "ZLATITUDE": 45.12144,
+        "ZLONGITUDE": 13.801129,
+        "ZHEIGHT": 120,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Limska Draga",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Span",
+        "ZREGION": "Croazia",
+        "ZUNIQUEID": "32F62583-A5D6-4112-B436-4A3AA27E5448",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2015-11-27T19:40:05.375295+00:00"
+      },
+      {
+        "Z_PK": 3,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 456071251.070032,
+        "ZLATITUDE": 45.997808,
+        "ZLONGITUDE": 10.90776,
+        "ZHEIGHT": 800,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Brento",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Earth",
+        "ZREGION": "Arco",
+        "ZUNIQUEID": "997FE620-E23C-4C0C-8219-71B4F9D90DCC",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2015-06-15T14:27:31.070032+00:00"
+      },
+      {
+        "Z_PK": 4,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 456071243.266465,
+        "ZLATITUDE": 44.420039,
+        "ZLONGITUDE": 10.412887,
+        "ZHEIGHT": 100,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Pietra Bismantova",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Earth",
+        "ZREGION": "Castelnovo Ne Monti",
+        "ZUNIQUEID": "3CDD38D1-0F52-47D4-8F28-935EB6D1B096",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2015-06-15T14:27:23.266465+00:00"
+      },
+      {
+        "Z_PK": 5,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 456071324.040518,
+        "ZLATITUDE": 44.104494,
+        "ZLONGITUDE": 9.737792,
+        "ZHEIGHT": 60,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Ponte Riomaggiore",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Span",
+        "ZREGION": "Riomaggiore",
+        "ZUNIQUEID": "2069C643-43F8-4E3C-ABD8-F9CE9F30CB17",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2015-06-15T14:28:44.040518+00:00"
+      },
+      {
+        "Z_PK": 6,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 467593167.261166,
+        "ZLATITUDE": 41.703641,
+        "ZLONGITUDE": 12.580938,
+        "ZHEIGHT": 180,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Santa Palomba",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Antenna",
+        "ZREGION": "Roma",
+        "ZUNIQUEID": "C6B33067-0C35-49F9-BA2E-D6A821C484CC",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2015-10-26T22:59:27.261166+00:00"
+      },
+      {
+        "Z_PK": 7,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 456071778.466993,
+        "ZLATITUDE": 42.244636,
+        "ZLONGITUDE": 13.169077,
+        "ZHEIGHT": 105,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Ponte Rieti",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Span",
+        "ZREGION": "Rieti",
+        "ZUNIQUEID": "2179C594-5517-4684-B20A-C1276E1C1EBE",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2015-06-15T14:36:18.466993+00:00"
+      },
+      {
+        "Z_PK": 8,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 468485491.846044,
+        "ZLATITUDE": 45.068662,
+        "ZLONGITUDE": 9.723024,
+        "ZHEIGHT": 70,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Traliccio 70m",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Antenna",
+        "ZREGION": "San Rocco Al Porto",
+        "ZUNIQUEID": "F92055F6-3B31-4C5D-BCA2-BB0788DA48E1",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2015-11-06T06:51:31.846044+00:00"
+      },
+      {
+        "Z_PK": 9,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 504020569.648621,
+        "ZLATITUDE": 45.068662,
+        "ZLONGITUDE": 9.723024,
+        "ZHEIGHT": 96,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Traliccio 96",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Antenna",
+        "ZREGION": "San Rocco Al Porto",
+        "ZUNIQUEID": "AE5A9A92-6137-4D77-A5BB-FE7B16FFB4DA",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2016-12-21T13:42:49.648621+00:00"
+      },
+      {
+        "Z_PK": 10,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 551569855.82534,
+        "ZLATITUDE": 45.028531,
+        "ZLONGITUDE": 10.094068,
+        "ZHEIGHT": 126,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Stagno Lombardo",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Antenna",
+        "ZREGION": "Cremona",
+        "ZUNIQUEID": "B4D2FB7E-8D25-4D27-9D5E-5FB7EAD63F95",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2018-06-24T21:50:55.825340+00:00"
+      },
+      {
+        "Z_PK": 11,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 468647247.16367,
+        "ZLATITUDE": 43.600274,
+        "ZLONGITUDE": 10.389708,
+        "ZHEIGHT": 70,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Torre Gru",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Antenna",
+        "ZREGION": "Livorno",
+        "ZUNIQUEID": "1950C282-7EDE-4B97-8710-750E9A82D866",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2015-11-08T03:47:27.163670+00:00"
+      },
+      {
+        "Z_PK": 12,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 472487059.530149,
+        "ZLATITUDE": 42.498301,
+        "ZLONGITUDE": 11.85999,
+        "ZHEIGHT": 80,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Pala Elolica 18",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Other",
+        "ZREGION": "Pionsano",
+        "ZUNIQUEID": "309369C4-CA58-484A-A2F2-4AAF74E80233",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2015-12-22T14:24:19.530149+00:00"
+      },
+      {
+        "Z_PK": 13,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 475458545.276766,
+        "ZLATITUDE": 41.6808898,
+        "ZLONGITUDE": 12.5066417,
+        "ZHEIGHT": 64,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "B Pomezia",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Building",
+        "ZREGION": "Pomezia64",
+        "ZUNIQUEID": "73588EBD-701B-41B0-86AB-763163E1AAA1",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2016-01-25T23:49:05.276766+00:00"
+      },
+      {
+        "Z_PK": 14,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 475509103.782244,
+        "ZLATITUDE": 45.062941,
+        "ZLONGITUDE": 9.711585,
+        "ZHEIGHT": 80,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Stand Alone",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Antenna",
+        "ZREGION": "Porto San Rocco",
+        "ZUNIQUEID": "0212431A-0676-459E-A650-DE4F0596BE86",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2016-01-26T13:51:43.782244+00:00"
+      },
+      {
+        "Z_PK": 15,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 475850765.970315,
+        "ZLATITUDE": 45.524543,
+        "ZLONGITUDE": 10.214603,
+        "ZHEIGHT": 75,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Matitone",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Building",
+        "ZREGION": "Brescia",
+        "ZUNIQUEID": "81AA9BDC-B691-496F-90F3-7D7D337FACD9",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2016-01-30T12:46:05.970315+00:00"
+      },
+      {
+        "Z_PK": 16,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 477824813.63376,
+        "ZLATITUDE": 42.503833,
+        "ZLONGITUDE": 11.856131,
+        "ZHEIGHT": 80,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Pala 16",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Other",
+        "ZREGION": "Piansano",
+        "ZUNIQUEID": "C6DDFF63-A092-40C4-AF3A-A45AC513CB76",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2016-02-22T09:06:53.633760+00:00"
+      },
+      {
+        "Z_PK": 17,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 477994152.210899,
+        "ZLATITUDE": 43.255101,
+        "ZLONGITUDE": 11.384755,
+        "ZHEIGHT": 78,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Silos",
+        "ZNOTES": "Saltabile da sotto, 72m",
+        "ZOBJECTTYPE": "Other",
+        "ZREGION": "Siena Isola D'Arbia",
+        "ZUNIQUEID": "47366477-24A3-4AA5-BB4D-00DF20BDFA5B",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2016-02-24T08:09:12.210899+00:00"
+      },
+      {
+        "Z_PK": 18,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 478746211.841292,
+        "ZLATITUDE": 43.655332,
+        "ZLONGITUDE": 10.613049,
+        "ZHEIGHT": 98,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Pala Enercon",
+        "ZNOTES": "Scala esposta\nExit in discesa",
+        "ZOBJECTTYPE": "Other",
+        "ZREGION": "Pontedera",
+        "ZUNIQUEID": "3306B94F-7003-494F-AF89-01149F3DE2E1",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2016-03-04T01:03:31.841292+00:00"
+      },
+      {
+        "Z_PK": 19,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 479642764.028229,
+        "ZLATITUDE": 44.573401,
+        "ZLONGITUDE": 7.775914,
+        "ZHEIGHT": 70,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Ponte Fossano",
+        "ZNOTES": "Possibilità di farlo dalla piattaforma, ci si arriva camminando in autostrada, 3/4 minuti. Buona la corsia di emergenza. 70m permette pilotino in mano.\nDa sotto l'altro ponte camminando sulle travi, non sembra troppo rischioso ma diventa lungo arrivarci e penso da far statico",
+        "ZOBJECTTYPE": "Span",
+        "ZREGION": "Fossano",
+        "ZUNIQUEID": "C47692E9-3DB7-45C0-91D9-9773503A53AE",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2016-03-14T10:06:04.028229+00:00"
+      },
+      {
+        "Z_PK": 20,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 557917750.68886,
+        "ZLATITUDE": 42.538917,
+        "ZLONGITUDE": 12.514113,
+        "ZHEIGHT": 105,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Narni Scalo",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Other",
+        "ZREGION": "Narni",
+        "ZUNIQUEID": "A9E850AA-362C-42A4-ACC7-A6DEECFD604A",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2018-09-06T09:09:10.688860+00:00"
+      },
+      {
+        "Z_PK": 21,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 488383382.775833,
+        "ZLATITUDE": 0,
+        "ZLONGITUDE": 0,
+        "ZHEIGHT": 220,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "B Torino",
+        "ZNOTES": "Saltabile da 200m",
+        "ZOBJECTTYPE": "Building",
+        "ZREGION": "Torino",
+        "ZUNIQUEID": "F0AEEFB4-FF95-442D-8F43-BD502E68D5CB",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2016-06-23T14:03:02.775833+00:00"
+      },
+      {
+        "Z_PK": 22,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 486193509.538622,
+        "ZLATITUDE": 44.388085,
+        "ZLONGITUDE": 9.761518,
+        "ZHEIGHT": 80,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Pala Zeri 2",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Other",
+        "ZREGION": "Zeri",
+        "ZUNIQUEID": "1E37B8AE-1070-40EC-AA23-E1031FA3F0D9",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2016-05-29T05:45:09.538622+00:00"
+      },
+      {
+        "Z_PK": 23,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 481654517.799376,
+        "ZLATITUDE": 0,
+        "ZLONGITUDE": 0,
+        "ZHEIGHT": 140,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Rio Verde",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Span",
+        "ZREGION": "Pontremoli",
+        "ZUNIQUEID": "A57E422D-B80C-4314-BC4B-056E6262C562",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2016-04-06T16:55:17.799376+00:00"
+      },
+      {
+        "Z_PK": 24,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 482106778.234869,
+        "ZLATITUDE": 0,
+        "ZLONGITUDE": 0,
+        "ZHEIGHT": 55,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Torre Gru Strutt",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Other",
+        "ZREGION": "Guasticce",
+        "ZUNIQUEID": "677A82B1-6880-4F98-8B0E-ABDC486BDFDD",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2016-04-11T22:32:58.234869+00:00"
+      },
+      {
+        "Z_PK": 25,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 482106867.74787,
+        "ZLATITUDE": 0,
+        "ZLONGITUDE": 0,
+        "ZHEIGHT": 52,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Torre Fiat",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Building",
+        "ZREGION": "Marina Di Massa",
+        "ZUNIQUEID": "D90A283C-70B8-49E4-9414-71816BAE5FD6",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2016-04-11T22:34:27.747870+00:00"
+      },
+      {
+        "Z_PK": 26,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 483025240.384586,
+        "ZLATITUDE": 0,
+        "ZLONGITUDE": 0,
+        "ZHEIGHT": 86,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Rocca Prebalza Sud",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Span",
+        "ZREGION": "Rocca Prebalza",
+        "ZUNIQUEID": "BA48D034-80D7-43B9-8EDD-15170EBEC437",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2016-04-22T13:40:40.384586+00:00"
+      },
+      {
+        "Z_PK": 27,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 483025771.653233,
+        "ZLATITUDE": 0,
+        "ZLONGITUDE": 0,
+        "ZHEIGHT": 80,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Traliccio Arrampicata",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Antenna",
+        "ZREGION": "San Rocco Al Porto",
+        "ZUNIQUEID": "686C3344-A536-4193-92AD-47211BC92A23",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2016-04-22T13:49:31.653233+00:00"
+      },
+      {
+        "Z_PK": 28,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 484327403.845636,
+        "ZLATITUDE": 44.426616,
+        "ZLONGITUDE": 12.238973,
+        "ZHEIGHT": 150,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Torre Spurgo",
+        "ZNOTES": "Tiranti\nSaltata da terzultimo terrazzino in static",
+        "ZOBJECTTYPE": "Antenna",
+        "ZREGION": "Ravenna",
+        "ZUNIQUEID": "F8B361CC-4816-4A81-A167-5A55789E50B1",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2016-05-07T15:23:23.845636+00:00"
+      },
+      {
+        "Z_PK": 29,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 484902134.984351,
+        "ZLATITUDE": 42.49884,
+        "ZLONGITUDE": 11.82408,
+        "ZHEIGHT": 76,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Pala 25",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Other",
+        "ZREGION": "Piansano",
+        "ZUNIQUEID": "8CED7AC7-B727-4D0E-9C2C-333D24B2ADC7",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2016-05-14T07:02:14.984351+00:00"
+      },
+      {
+        "Z_PK": 30,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 484409400.71725,
+        "ZLATITUDE": 42.502077,
+        "ZLONGITUDE": 11.823072,
+        "ZHEIGHT": 78,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Pala 24",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Other",
+        "ZREGION": "Piansano",
+        "ZUNIQUEID": "39B6605E-584B-45F0-8382-3EC2D569E957",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2016-05-08T14:10:00.717250+00:00"
+      },
+      {
+        "Z_PK": 31,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 484559252.869285,
+        "ZLATITUDE": 42.503809,
+        "ZLONGITUDE": 11.828047,
+        "ZHEIGHT": 78,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Pala 26",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Other",
+        "ZREGION": "Piansano",
+        "ZUNIQUEID": "09D82811-0533-4790-968A-E3C5A2186B0F",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2016-05-10T07:47:32.869285+00:00"
+      },
+      {
+        "Z_PK": 32,
+        "Z_ENT": 7,
+        "ZISACTIVE": 0,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 487178679.175188,
+        "ZLATITUDE": 42.955176,
+        "ZLONGITUDE": 10.613248,
+        "ZHEIGHT": 100,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "A",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Antenna",
+        "ZREGION": "",
+        "ZUNIQUEID": "FA3970C0-5DFF-4528-89E0-EFF5498B0B59",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2016-06-09T15:24:39.175188+00:00"
+      },
+      {
+        "Z_PK": 33,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 485294842.29545,
+        "ZLATITUDE": 44.913899,
+        "ZLONGITUDE": 10.61273,
+        "ZHEIGHT": 100,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Traliccio 84",
+        "ZNOTES": "Saltabile da 84m in static che spancia",
+        "ZOBJECTTYPE": "Antenna",
+        "ZREGION": "Gualtieri",
+        "ZUNIQUEID": "53F71E92-12D4-4C7D-A6E7-5034C4CEA640",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2016-05-18T20:07:22.295450+00:00"
+      },
+      {
+        "Z_PK": 34,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 486193480.536449,
+        "ZLATITUDE": 44.388085,
+        "ZLONGITUDE": 9.761518,
+        "ZHEIGHT": 80,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Pala Zeri 3",
+        "ZNOTES": "Terza pala da sinistra\nNon va l'ascensore",
+        "ZOBJECTTYPE": "Other",
+        "ZREGION": "Zeri",
+        "ZUNIQUEID": "A0446AD6-E0C2-40CE-96FD-21F2DE7F7C31",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2016-05-29T05:44:40.536449+00:00"
+      },
+      {
+        "Z_PK": 35,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 496220067.421296,
+        "ZLATITUDE": 46.051215,
+        "ZLONGITUDE": 10.949209,
+        "ZHEIGHT": 545,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Pisetta",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Earth",
+        "ZREGION": "Brento",
+        "ZUNIQUEID": "27861075-6BB9-4F1C-9F47-6AEC54BE0EB7",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2016-09-22T06:54:27.421296+00:00"
+      },
+      {
+        "Z_PK": 36,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 496564674.591853,
+        "ZLATITUDE": 44.0416,
+        "ZLONGITUDE": 10.66705,
+        "ZHEIGHT": 84,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Casoli",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Earth",
+        "ZREGION": "Bagni Di Lucca",
+        "ZUNIQUEID": "49868B7E-F6C3-4B9E-B0C0-7B4774329B42",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2016-09-26T06:37:54.591853+00:00"
+      },
+      {
+        "Z_PK": 37,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 500250106.832085,
+        "ZLATITUDE": 43.549375,
+        "ZLONGITUDE": 10.488332,
+        "ZHEIGHT": 60,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Antenna",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Antenna",
+        "ZREGION": "Collesalvetti",
+        "ZUNIQUEID": "FAB80C86-3F54-4660-95D3-75CFC633869B",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2016-11-07T22:21:46.832085+00:00"
+      },
+      {
+        "Z_PK": 38,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 504020424.709082,
+        "ZLATITUDE": 45.058682,
+        "ZLONGITUDE": 9.725976,
+        "ZHEIGHT": 70,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Traliccio Gemella 70m",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Antenna",
+        "ZREGION": "Piacenza",
+        "ZUNIQUEID": "8E645AB7-E757-4196-AC5D-6C85943371FF",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2016-12-21T13:40:24.709082+00:00"
+      },
+      {
+        "Z_PK": 39,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 506894344.268072,
+        "ZLATITUDE": 45.33383,
+        "ZLONGITUDE": 9.43349,
+        "ZHEIGHT": 250,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Montanaso",
+        "ZNOTES": "Si salta dal terrazzo a 240m",
+        "ZOBJECTTYPE": "Other",
+        "ZREGION": "Lodi250",
+        "ZUNIQUEID": "CFD385DC-50CD-49CC-B9C3-3BD7F305A75D",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2017-01-23T19:59:04.268072+00:00"
+      },
+      {
+        "Z_PK": 40,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 506894313.991269,
+        "ZLATITUDE": 45.08565,
+        "ZLONGITUDE": 8.96585,
+        "ZHEIGHT": 103,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Ghiaie",
+        "ZNOTES": "Exit a V",
+        "ZOBJECTTYPE": "Antenna",
+        "ZREGION": "Cor",
+        "ZUNIQUEID": "24F7ABCC-79F3-4C1D-94EF-8ACCD53B8530",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2017-01-23T19:58:33.991269+00:00"
+      },
+      {
+        "Z_PK": 41,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 507468471.567993,
+        "ZLATITUDE": 43.933219,
+        "ZLONGITUDE": 10.9179,
+        "ZHEIGHT": 42,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Campanile San Zeno",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Building",
+        "ZREGION": "Pistoia",
+        "ZUNIQUEID": "D3368A30-E9F8-4D3B-9375-2F9A0F7D44B4",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2017-01-30T11:27:51.567993+00:00"
+      },
+      {
+        "Z_PK": 42,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 511166344.932944,
+        "ZLATITUDE": 42.35592,
+        "ZLONGITUDE": 11.53635,
+        "ZHEIGHT": 220,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Montalto Cimi",
+        "ZNOTES": "Grate aperte da qualcuno con smeriglio.\nDomenica sembra non esserci sorveglianza",
+        "ZOBJECTTYPE": "Other",
+        "ZREGION": "Montalto Di Castro",
+        "ZUNIQUEID": "FD25A2AB-F0C3-4919-8B42-BF5FDA921EB5",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2017-03-14T06:39:04.932944+00:00"
+      },
+      {
+        "Z_PK": 43,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 512700132.49772,
+        "ZLATITUDE": 42.356806,
+        "ZLONGITUDE": 11.538561,
+        "ZHEIGHT": 84,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Caldaia Montalto",
+        "ZNOTES": "Salvabile da 79m",
+        "ZOBJECTTYPE": "Other",
+        "ZREGION": "Montalto Di Castro",
+        "ZUNIQUEID": "DF385CF7-4840-4756-B604-EECB144F919E",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2017-04-01T00:42:12.497720+00:00"
+      },
+      {
+        "Z_PK": 44,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 519509107.643427,
+        "ZLATITUDE": 42.997006,
+        "ZLONGITUDE": 12.200385,
+        "ZHEIGHT": 69,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Torre Hammon Pietrafitta",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Other",
+        "ZREGION": "Pietrafitta",
+        "ZUNIQUEID": "0774AC24-5904-4F52-9819-03D6C2226CFE",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2017-06-18T20:05:07.643427+00:00"
+      },
+      {
+        "Z_PK": 45,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 519509389.740702,
+        "ZLATITUDE": 46.03511,
+        "ZLONGITUDE": 10.93662,
+        "ZHEIGHT": 900,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Pilastro",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Earth",
+        "ZREGION": "Dro",
+        "ZUNIQUEID": "E5A4402A-C2D9-4A6A-800B-DE78AABC41A7",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2017-06-18T20:09:49.740702+00:00"
+      },
+      {
+        "Z_PK": 46,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 515700019.483344,
+        "ZLATITUDE": 42.954374,
+        "ZLONGITUDE": 10.61295,
+        "ZHEIGHT": 100,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Antenna Mare",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Antenna",
+        "ZREGION": "Piombino",
+        "ZUNIQUEID": "66CA40A1-4531-4E0D-8DEE-872B8F8E7D3A",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2017-05-05T18:00:19.483344+00:00"
+      },
+      {
+        "Z_PK": 47,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 519099010.645699,
+        "ZLATITUDE": 44.16698,
+        "ZLONGITUDE": 12.21645,
+        "ZHEIGHT": 50,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Gru Pieve Sestina",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Antenna",
+        "ZREGION": "Cesena",
+        "ZUNIQUEID": "CFFBDFC0-1CF0-4650-8562-F7EE10607CF0",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2017-06-14T02:10:10.645699+00:00"
+      },
+      {
+        "Z_PK": 48,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 557877524.244179,
+        "ZLATITUDE": 44.959763,
+        "ZLONGITUDE": 12.389755,
+        "ZHEIGHT": 48,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Traliccio Porto Tolle",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Antenna",
+        "ZREGION": "Porto Tolle",
+        "ZUNIQUEID": "4E630CCD-0A16-4186-B0CA-DA1DCE9A1BAB",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2018-09-05T21:58:44.244179+00:00"
+      },
+      {
+        "Z_PK": 49,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 520220071.476572,
+        "ZLATITUDE": 43.861101,
+        "ZLONGITUDE": 10.986584,
+        "ZHEIGHT": 43,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Water Tower",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Other",
+        "ZREGION": "Quarrata",
+        "ZUNIQUEID": "B268C38D-88A9-4F4F-BEC9-E73D244E9B70",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2017-06-27T01:34:31.476572+00:00"
+      },
+      {
+        "Z_PK": 50,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 521799542.965673,
+        "ZLATITUDE": 46.563157,
+        "ZLONGITUDE": 8.963382,
+        "ZHEIGHT": 167,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Diga Luzzone",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Other",
+        "ZREGION": "Luzzone",
+        "ZUNIQUEID": "8DE33C81-160D-4780-B9C1-C5183A148468",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2017-07-15T08:19:02.965673+00:00"
+      },
+      {
+        "Z_PK": 51,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 522346274.05277,
+        "ZLATITUDE": 42.95632,
+        "ZLONGITUDE": 10.60292,
+        "ZHEIGHT": 193,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Cimi2 piombino",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Other",
+        "ZREGION": "Piombino",
+        "ZUNIQUEID": "FD535F5D-1A24-4F2A-A716-6B905CC509A8",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2017-07-21T16:11:14.052770+00:00"
+      },
+      {
+        "Z_PK": 52,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 543370852.666251,
+        "ZLATITUDE": 44.043596,
+        "ZLONGITUDE": 10.085178,
+        "ZHEIGHT": 62,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Cimi Massa",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Other",
+        "ZREGION": "Massa",
+        "ZUNIQUEID": "600928C1-6809-407F-AFCF-B96A51A2F4C1",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2018-03-22T00:20:52.666251+00:00"
+      },
+      {
+        "Z_PK": 53,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 546600905.420642,
+        "ZLATITUDE": 42.553457,
+        "ZLONGITUDE": 12.701516,
+        "ZHEIGHT": 66,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Ponte Marmore",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Other",
+        "ZREGION": "",
+        "ZUNIQUEID": "5483D42D-5AA2-4586-8CB2-123D1780388C",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2018-04-28T09:35:05.420642+00:00"
+      },
+      {
+        "Z_PK": 54,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 550172388.215918,
+        "ZLATITUDE": 44.918015,
+        "ZLONGITUDE": 10.539925,
+        "ZHEIGHT": 110,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Viadana",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Other",
+        "ZREGION": "Viadana",
+        "ZUNIQUEID": "BB8C1A11-7DD9-483E-BB1F-617502CD7AB9",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2018-06-08T17:39:48.215918+00:00"
+      },
+      {
+        "Z_PK": 55,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 557327000.141209,
+        "ZLATITUDE": 45.041151,
+        "ZLONGITUDE": 10.841238,
+        "ZHEIGHT": 80,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Pegognaga sud",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Antenna",
+        "ZREGION": "Pegognaga",
+        "ZUNIQUEID": "FF053504-8EC6-4258-BE9A-F5C5BAB50D5B",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2018-08-30T13:03:20.141209+00:00"
+      },
+      {
+        "Z_PK": 56,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 557937996.068553,
+        "ZLATITUDE": 44.914504,
+        "ZLONGITUDE": 11.567093,
+        "ZHEIGHT": 65,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Traliccio Occhiobello Sud",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Antenna",
+        "ZREGION": "Occhiobello",
+        "ZUNIQUEID": "9B9505F7-F1D7-4848-9239-45E05E77C4D8",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2018-09-06T14:46:36.068553+00:00"
+      },
+      {
+        "Z_PK": 57,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 557938157.331597,
+        "ZLATITUDE": 44.827232,
+        "ZLONGITUDE": 11.578105,
+        "ZHEIGHT": 130,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Antenna Ferrara",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Antenna",
+        "ZREGION": "Ferrara",
+        "ZUNIQUEID": "32BEBB26-1694-4BB2-9C8C-DB3926C794D6",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2018-09-06T14:49:17.331597+00:00"
+      },
+      {
+        "Z_PK": 58,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 558065449.113635,
+        "ZLATITUDE": 45.508355,
+        "ZLONGITUDE": 9.104288,
+        "ZHEIGHT": 59,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "B Mil",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Building",
+        "ZREGION": "Milano ovest",
+        "ZUNIQUEID": "C3F426C1-C4FE-4AF4-A260-5E0D5487623A",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2018-09-08T02:10:49.113635+00:00"
+      },
+      {
+        "Z_PK": 59,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 558065489.045276,
+        "ZLATITUDE": 45.508321,
+        "ZLONGITUDE": 9.104859,
+        "ZHEIGHT": 70,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Gru B Milano",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Other",
+        "ZREGION": "Milano Ovest",
+        "ZUNIQUEID": "F9E865CE-4C4D-47B9-875E-6433B97057C4",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2018-09-08T02:11:29.045276+00:00"
+      },
+      {
+        "Z_PK": 60,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 558861416.74324,
+        "ZLATITUDE": 0,
+        "ZLONGITUDE": 0,
+        "ZHEIGHT": 84,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Cimi Piacenza",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Other",
+        "ZREGION": "Piacenza",
+        "ZUNIQUEID": "B6C95D08-26A3-41BB-9312-1434C8F7555C",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2018-09-17T07:16:56.743240+00:00"
+      },
+      {
+        "Z_PK": 61,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 558861659.029059,
+        "ZLATITUDE": 0,
+        "ZLONGITUDE": 0,
+        "ZHEIGHT": 80,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Traliccio Cremona",
+        "ZNOTES": "Saltato con Fra da 65m ",
+        "ZOBJECTTYPE": "Antenna",
+        "ZREGION": "Pescaroli",
+        "ZUNIQUEID": "1B8D4309-D816-4FAA-A497-A1E5312BADA6",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2018-09-17T07:20:59.029059+00:00"
+      },
+      {
+        "Z_PK": 62,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 559165607.998925,
+        "ZLATITUDE": 46.068847,
+        "ZLONGITUDE": 11.11236,
+        "ZHEIGHT": 60,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Cimi Trento",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Other",
+        "ZREGION": "Trento",
+        "ZUNIQUEID": "C9C8FFDC-DC36-4A5F-AE5F-7AA45DE84A25",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2018-09-20T19:46:47.998925+00:00"
+      },
+      {
+        "Z_PK": 63,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 559165632.045165,
+        "ZLATITUDE": 45.934329,
+        "ZLONGITUDE": 10.901093,
+        "ZHEIGHT": 105,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Moletta",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Earth",
+        "ZREGION": "Dro",
+        "ZUNIQUEID": "9E066D75-DB87-49AC-8B0C-C21B446C695C",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2018-09-20T19:47:12.045165+00:00"
+      },
+      {
+        "Z_PK": 64,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 560761401.639321,
+        "ZLATITUDE": 38.242604,
+        "ZLONGITUDE": 15.683541,
+        "ZHEIGHT": 224,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Pilone Santa Trada",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Antenna",
+        "ZREGION": "Santa Trada",
+        "ZUNIQUEID": "8816F680-0E84-4D90-9B06-6B1F94748C09",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2018-10-09T07:03:21.639321+00:00"
+      },
+      {
+        "Z_PK": 65,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 578790388.415718,
+        "ZLATITUDE": 42.89705,
+        "ZLONGITUDE": 12.53838,
+        "ZHEIGHT": 120,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Cimi Bastardo",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Other",
+        "ZREGION": "Bastardo",
+        "ZUNIQUEID": "8ABC8F30-D25C-4844-8820-5C1F02895E8C",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2019-05-05T23:06:28.415718+00:00"
+      },
+      {
+        "Z_PK": 66,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 564542045.802183,
+        "ZLATITUDE": 43.658372,
+        "ZLONGITUDE": 11.837842,
+        "ZHEIGHT": 85,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Altoforno Colacendrassina",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Other",
+        "ZREGION": "Rassina",
+        "ZUNIQUEID": "56741109-CC80-4120-8488-CA769E5D846F",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2018-11-22T01:14:05.802183+00:00"
+      },
+      {
+        "Z_PK": 67,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 565458229.963719,
+        "ZLATITUDE": 43.706849,
+        "ZLONGITUDE": 10.506368,
+        "ZHEIGHT": 48,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Torre Upezzinghi",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Earth",
+        "ZREGION": "Caprona",
+        "ZUNIQUEID": "4E83F3C5-CC50-4373-804B-0A40CB369498",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2018-12-02T15:43:49.963719+00:00"
+      },
+      {
+        "Z_PK": 68,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 578790933.885483,
+        "ZLATITUDE": 43.65075,
+        "ZLONGITUDE": 10.59026,
+        "ZHEIGHT": 98,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Pala Pontedera 2",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Other",
+        "ZREGION": "Pontedera",
+        "ZUNIQUEID": "81E02C8E-942C-4479-ACB3-A554D3B676FF",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2019-05-05T23:15:33.885483+00:00"
+      },
+      {
+        "Z_PK": 69,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 574384002.194182,
+        "ZLATITUDE": 45.388948,
+        "ZLONGITUDE": 11.926477,
+        "ZHEIGHT": 70,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "B Padova",
+        "ZNOTES": "Si salta da 45m",
+        "ZOBJECTTYPE": "Building",
+        "ZREGION": "Padov",
+        "ZUNIQUEID": "BEF6CC5F-E92D-4927-9BDC-4E6F9F1FD604",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2019-03-15T23:06:42.194182+00:00"
+      },
+      {
+        "Z_PK": 70,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 574394829.353313,
+        "ZLATITUDE": 45.396591,
+        "ZLONGITUDE": 11.899062,
+        "ZHEIGHT": 120,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Antenna Padova",
+        "ZNOTES": "Si salta da 100m",
+        "ZOBJECTTYPE": "Antenna",
+        "ZREGION": "Padova",
+        "ZUNIQUEID": "42FB4F9E-9001-4115-A8E2-90A055FE2034",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2019-03-16T02:07:09.353313+00:00"
+      },
+      {
+        "Z_PK": 71,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 574410960.77765,
+        "ZLATITUDE": 44.834485,
+        "ZLONGITUDE": 11.572679,
+        "ZHEIGHT": 42,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Silos Ferrara",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Other",
+        "ZREGION": "Ferrara",
+        "ZUNIQUEID": "A8DDA2B0-F02C-4DF8-86AD-885C01018239",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2019-03-16T06:36:00.777650+00:00"
+      },
+      {
+        "Z_PK": 72,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 577060946.669142,
+        "ZLATITUDE": 45.021149,
+        "ZLONGITUDE": 10.087097,
+        "ZHEIGHT": 130,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Polesine Gemella",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Antenna",
+        "ZREGION": "Polesine Parmense",
+        "ZUNIQUEID": "8A28B80C-5E1D-483C-BFEB-CEE88776ED0E",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2019-04-15T22:42:26.669142+00:00"
+      },
+      {
+        "Z_PK": 73,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 577076454.953312,
+        "ZLATITUDE": 44.693108,
+        "ZLONGITUDE": 10.727301,
+        "ZHEIGHT": 70,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Antenna Reggio",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Antenna",
+        "ZREGION": "Reggio Emilia",
+        "ZUNIQUEID": "03CBD5D9-8FE7-4522-8357-35B5A2509245",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2019-04-16T03:00:54.953312+00:00"
+      },
+      {
+        "Z_PK": 74,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 577140139.955155,
+        "ZLATITUDE": 45.510961,
+        "ZLONGITUDE": 9.125965,
+        "ZHEIGHT": 74,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Barcelò Hotel",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Building",
+        "ZREGION": "Milano Stephenson",
+        "ZUNIQUEID": "2F3BF4AD-4168-491B-AB92-24BA34F20D5C",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2019-04-16T20:42:19.955155+00:00"
+      },
+      {
+        "Z_PK": 75,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 578276743.513656,
+        "ZLATITUDE": 43.694383,
+        "ZLONGITUDE": 10.382314,
+        "ZHEIGHT": 38,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Ikea Pisa",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Other",
+        "ZREGION": "Pisa",
+        "ZUNIQUEID": "1E605F19-6DAF-4EB8-9D02-AC7AEFF15B8F",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2019-04-30T00:25:43.513656+00:00"
+      },
+      {
+        "Z_PK": 76,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 578649167.08252,
+        "ZLATITUDE": 44.030555,
+        "ZLONGITUDE": 11.220771,
+        "ZHEIGHT": 86,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Viadotto Aglio",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Span",
+        "ZREGION": "Aglio",
+        "ZUNIQUEID": "9EDC0EFD-078C-4ECD-BA33-47F9E96C4D8C",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2019-05-04T07:52:47.082520+00:00"
+      },
+      {
+        "Z_PK": 77,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 581022331.194709,
+        "ZLATITUDE": 43.80149,
+        "ZLONGITUDE": 11.24377,
+        "ZHEIGHT": 56,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Gru Casa Studenti",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Other",
+        "ZREGION": "Firenze",
+        "ZUNIQUEID": "80E8B96C-D6E8-4CFF-B2F0-E877C0A1366A",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2019-05-31T19:05:31.194709+00:00"
+      },
+      {
+        "Z_PK": 78,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 582039893.94957,
+        "ZLATITUDE": 0,
+        "ZLONGITUDE": 0,
+        "ZHEIGHT": 62,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Frame Snam",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Other",
+        "ZREGION": "La Spezia",
+        "ZUNIQUEID": "61443A8F-A2B9-4B3E-AF1C-8A3E63494F04",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2019-06-12T13:44:53.949570+00:00"
+      },
+      {
+        "Z_PK": 79,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 582186006.913432,
+        "ZLATITUDE": 0,
+        "ZLONGITUDE": 0,
+        "ZHEIGHT": 75,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Parete Vignanotica",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Earth",
+        "ZREGION": "Vignanotica",
+        "ZUNIQUEID": "80D529F9-B53C-4777-8241-8E5E38A1A530",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2019-06-14T06:20:06.913432+00:00"
+      },
+      {
+        "Z_PK": 80,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 582536328.770656,
+        "ZLATITUDE": 44.041874,
+        "ZLONGITUDE": 9.963361,
+        "ZHEIGHT": 252,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Punta Corvo",
+        "ZNOTES": "32m rockdrop",
+        "ZOBJECTTYPE": "Earth",
+        "ZREGION": "Montemarcello",
+        "ZUNIQUEID": "9C99521A-1C8E-4048-8585-B5EC55854055",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2019-06-18T07:38:48.770656+00:00"
+      },
+      {
+        "Z_PK": 81,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 585709966.493126,
+        "ZLATITUDE": 44.272201,
+        "ZLONGITUDE": 8.430214,
+        "ZHEIGHT": 200,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Cimi Vado",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Other",
+        "ZREGION": "Vado Ligure",
+        "ZUNIQUEID": "92482D97-746B-4B49-9FBB-02F827C608F7",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2019-07-25T01:12:46.493126+00:00"
+      },
+      {
+        "Z_PK": 82,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 585782956.975597,
+        "ZLATITUDE": 0,
+        "ZLONGITUDE": 0,
+        "ZHEIGHT": 78,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Pala Zeri 4",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Other",
+        "ZREGION": "Zum Zeri",
+        "ZUNIQUEID": "C32867CD-C6A4-4803-A039-EA209797B0A4",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2019-07-25T21:29:16.975597+00:00"
+      },
+      {
+        "Z_PK": 83,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 587104180.892362,
+        "ZLATITUDE": 43.485308,
+        "ZLONGITUDE": 10.599766,
+        "ZHEIGHT": 88,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Pala 6 Santa Luce",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Other",
+        "ZREGION": "Santa Luce",
+        "ZUNIQUEID": "9B0B0EA7-2ACD-484A-8107-DF1427F34923",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2019-08-10T04:29:40.892362+00:00"
+      },
+      {
+        "Z_PK": 84,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 589425083.600992,
+        "ZLATITUDE": 42.598824,
+        "ZLONGITUDE": -114.455304,
+        "ZHEIGHT": 140,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Perrine Bridge",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Span",
+        "ZREGION": "Idaho",
+        "ZUNIQUEID": "FA7BEC37-BCBA-44FF-B664-82ABE059B6EB",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2019-09-06T01:11:23.600992+00:00"
+      },
+      {
+        "Z_PK": 85,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 589751267.724655,
+        "ZLATITUDE": 38.510044,
+        "ZLONGITUDE": -109.600502,
+        "ZHEIGHT": 95,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Moab Echo",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Earth",
+        "ZREGION": "Moab",
+        "ZUNIQUEID": "16B7D35E-93D1-4BC3-8F06-2AC6B280837E",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2019-09-09T19:47:47.724655+00:00"
+      },
+      {
+        "Z_PK": 86,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 589751285.146611,
+        "ZLATITUDE": 38.510044,
+        "ZLONGITUDE": -109.600502,
+        "ZHEIGHT": 140,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Moab Tombstone",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Earth",
+        "ZREGION": "Moab",
+        "ZUNIQUEID": "7C94BB6E-1F37-405A-B408-671CF284F7DC",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2019-09-09T19:48:05.146611+00:00"
+      },
+      {
+        "Z_PK": 87,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 590119908.116924,
+        "ZLATITUDE": 38.603447,
+        "ZLONGITUDE": -109.559703,
+        "ZHEIGHT": 85,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Moab G Spot",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Earth",
+        "ZREGION": "Moab",
+        "ZUNIQUEID": "FA532FFB-0543-4AF9-AA8B-0FAA0757AADF",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2019-09-14T02:11:48.116924+00:00"
+      },
+      {
+        "Z_PK": 88,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 589987361.638574,
+        "ZLATITUDE": 38.572343,
+        "ZLONGITUDE": -109.672211,
+        "ZHEIGHT": 120,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Moab Olimpic Torch",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Earth",
+        "ZREGION": "Moab",
+        "ZUNIQUEID": "1A5FEC17-800A-4214-BAB6-3318EEC9CD54",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2019-09-12T13:22:41.638574+00:00"
+      },
+      {
+        "Z_PK": 89,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 590120011.435989,
+        "ZLATITUDE": 38.575139,
+        "ZLONGITUDE": -109.652312,
+        "ZHEIGHT": 75,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Moab One Dash",
+        "ZNOTES": "Appoggiata all’inizio",
+        "ZOBJECTTYPE": "Earth",
+        "ZREGION": "Moab",
+        "ZUNIQUEID": "1E25E94D-6EEC-4384-BD72-D8FDA7707D04",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2019-09-14T02:13:31.435989+00:00"
+      },
+      {
+        "Z_PK": 90,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 590120025.52614,
+        "ZLATITUDE": 0,
+        "ZLONGITUDE": 0,
+        "ZHEIGHT": 200,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Moab Super Gargeous",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Earth",
+        "ZREGION": "Moab",
+        "ZUNIQUEID": "9CEF4AE0-E243-490D-8E9B-2012510D6499",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2019-09-14T02:13:45.526140+00:00"
+      },
+      {
+        "Z_PK": 91,
+        "Z_ENT": 7,
+        "ZISACTIVE": 1,
+        "ZISDEFAULT": 0,
+        "ZPREVIOUSJUMPCOUNT": 0,
+        "ZLASTMODIFIEDUTC": 590177802.62604,
+        "ZLATITUDE": 38.605116,
+        "ZLONGITUDE": -109.528515,
+        "ZHEIGHT": 75,
+        "ZHEIGHTUNIT": "Meters",
+        "ZNAME": "Moab Rooster Vision",
+        "ZNOTES": "",
+        "ZOBJECTTYPE": "Earth",
+        "ZREGION": "Moab",
+        "ZUNIQUEID": "2F3B7C50-2927-4220-8F21-AB660D300E9B",
+        "ZLASTMODIFIEDUTC_ISO_UTC": "2019-09-14T18:16:42.626040+00:00"
+      }
+    ]
+  },
+  "field_semantics": {
+    "core_data_meta": {
+      "Z_PK": "Primary key per table row (managed by Core Data style allocator via Z_PRIMARYKEY.Z_MAX).",
+      "Z_ENT": "Core Data entity id. Use rich model expected entity id per table.",
+      "Z_OPT": "Core Data optimistic locking/version field; commonly starts at 1 and increments on update."
+    },
+    "timestamps": {
+      "storage_format": "Apple Cocoa reference date seconds since 2001-01-01T00:00:00Z (REAL/NUMERIC values in SQLite).",
+      "fields_detected": [
+        "ZLOGENTRY.ZDATE",
+        "ZLOGENTRY.ZLASTMODIFIEDUTC",
+        "ZOBJECT.ZLASTMODIFIEDUTC",
+        "ZRIG.ZLASTMODIFIEDUTC",
+        "lookup tables ZLASTMODIFIEDUTC"
+      ],
+      "write_guidance": [
+        "Convert app DateTime to Cocoa seconds (UTC).",
+        "For jump date-only UX, preserve existing convention (historically often midday local converted to UTC) to avoid date shifting across time zones."
+      ]
+    }
+  },
+  "write_contract": {
+    "goal": "Continue using the same SQLite DB with a new app while preserving historical rich-model entries.",
+    "rich_model_only_policy": {
+      "description": "When reading/writing app data, use rows whose Z_ENT matches the canonical entity id in Z_PRIMARYKEY for each table.",
+      "expected_entity_by_table": {
+        "ZBRAKESETTING": 1,
+        "ZDEPLOYMENTTYPE": 2,
+        "ZJUMPTYPE": 3,
+        "ZLOGBOOKHISTORY": 4,
+        "ZLOGENTRY": 5,
+        "ZLOGENTRYIMAGE": 6,
+        "ZOBJECT": 7,
+        "ZOBJECTIMAGE": 8,
+        "ZPILOTCHUTETYPE": 9,
+        "ZRIG": 10,
+        "ZRIGCOMPONENT": 11,
+        "ZSIGNATURE": 12,
+        "ZSLIDERTYPE": 13
+      }
+    },
+    "insert_rules": [
+      "Always wrap inserts/updates affecting Z_PK rows in a transaction.",
+      "Allocate Z_PK through Z_PRIMARYKEY.Z_MAX for the target entity before insert.",
+      "Set Z_ENT to canonical entity id; set Z_OPT to 1 on insert (increment on update).",
+      "Store timestamps in Cocoa epoch seconds.",
+      "Use LEFT JOIN in reads for optional/orphan relationships (especially rig links).",
+      "Do not assume every rich jump has photos/signature/brake setting."
+    ],
+    "update_rules": [
+      "Update ZLOGENTRY row by Z_PK and canonical Z_ENT filter.",
+      "Increment Z_OPT when modifying a row (Core Data optimistic lock style).",
+      "Refresh ZLASTMODIFIEDUTC on edit.",
+      "Replace rig links in Z_5RIGS transactionally if UI edits rig selection."
+    ],
+    "delete_rules_recommended": [
+      "Soft-delete is not modeled for ZLOGENTRY in schema. If implementing hard delete, also cleanup ZLOGENTRYIMAGE and Z_5RIGS rows in app transaction.",
+      "Do NOT rely on SQLite cascade (no FK constraints/triggers in DB)."
+    ]
+  },
+  "sql_queries_ready": {
+    "list_rich_jumps_summary": "SELECT\n  le.Z_PK,\n  le.ZJUMPNUMBER,\n  le.ZDATE,\n  le.ZNOTES,\n  obj.ZNAME AS ObjectName,\n  obj.ZOBJECTTYPE AS ObjectType,\n  obj.ZREGION AS ObjectRegion,\n  jt.ZNAME AS JumpType,\n  dt.ZNAME AS DeploymentType,\n  pc.ZNAME AS PilotChuteType,\n  st.ZNAME AS SliderType,\n  r.ZNAME AS RigName,\n  (SELECT COUNT(*) FROM ZLOGENTRYIMAGE li\n     WHERE li.Z_ENT = 6\n       AND li.ZLOGENTRY = le.Z_PK) AS ImageCount\nFROM ZLOGENTRY le\nLEFT JOIN ZOBJECT obj\n       ON obj.Z_PK = le.ZOBJECT\n      AND obj.Z_ENT = 7\nLEFT JOIN ZJUMPTYPE jt\n       ON jt.Z_PK = le.ZJUMPTYPE\n      AND jt.Z_ENT = 3\nLEFT JOIN ZDEPLOYMENTTYPE dt\n       ON dt.Z_PK = le.ZDEPLOYMENTTYPE\n      AND dt.Z_ENT = 2\nLEFT JOIN ZPILOTCHUTETYPE pc\n       ON pc.Z_PK = le.ZPILOTCHUTETYPE\n      AND pc.Z_ENT = 9\nLEFT JOIN ZSLIDERTYPE st\n       ON st.Z_PK = le.ZSLIDERTYPE\n      AND st.Z_ENT = 13\nLEFT JOIN Z_5RIGS j5\n       ON j5.Z_5LOGENTRIES = le.Z_PK\nLEFT JOIN ZRIG r\n       ON r.Z_PK = j5.Z_10RIGS\n      AND r.Z_ENT = 10\nWHERE le.Z_ENT = 5\nORDER BY le.ZJUMPNUMBER DESC;",
+    "get_rich_jump_detail_by_pk": "SELECT\n  le.*,\n  obj.ZNAME AS ObjectName,\n  obj.ZOBJECTTYPE AS ObjectType,\n  obj.ZREGION AS ObjectRegion,\n  obj.ZLATITUDE,\n  obj.ZLONGITUDE,\n  obj.ZHEIGHT,\n  obj.ZHEIGHTUNIT,\n  jt.ZNAME AS JumpType,\n  dt.ZNAME AS DeploymentType,\n  pc.ZNAME AS PilotChuteType,\n  st.ZNAME AS SliderType,\n  bs.ZNAME AS BrakeSetting\nFROM ZLOGENTRY le\nLEFT JOIN ZOBJECT obj ON obj.Z_PK = le.ZOBJECT AND obj.Z_ENT = 7\nLEFT JOIN ZJUMPTYPE jt ON jt.Z_PK = le.ZJUMPTYPE AND jt.Z_ENT = 3\nLEFT JOIN ZDEPLOYMENTTYPE dt ON dt.Z_PK = le.ZDEPLOYMENTTYPE AND dt.Z_ENT = 2\nLEFT JOIN ZPILOTCHUTETYPE pc ON pc.Z_PK = le.ZPILOTCHUTETYPE AND pc.Z_ENT = 9\nLEFT JOIN ZSLIDERTYPE st ON st.Z_PK = le.ZSLIDERTYPE AND st.Z_ENT = 13\nLEFT JOIN ZBRAKESETTING bs ON bs.Z_PK = le.ZBRAKESETTING AND bs.Z_ENT = 1\nWHERE le.Z_ENT = 5\n  AND le.Z_PK = :jumpPk;",
+    "get_rich_jump_rigs_by_jump_pk": "SELECT\n  j5.Z_5LOGENTRIES AS JumpPk,\n  j5.Z_10RIGS AS RigPk,\n  r.ZNAME,\n  r.ZISARCHIVED,\n  r.ZUNIQUEID\nFROM Z_5RIGS j5\nLEFT JOIN ZRIG r\n       ON r.Z_PK = j5.Z_10RIGS\n      AND r.Z_ENT = 10\nWHERE j5.Z_5LOGENTRIES = :jumpPk\nORDER BY r.ZNAME COLLATE NOCASE, RigPk;",
+    "get_rich_jump_images_meta_by_jump_pk": "SELECT\n  li.Z_PK,\n  li.ZLOGENTRY,\n  li.ZMD5,\n  length(li.ZIMAGE) AS ImageBytes\nFROM ZLOGENTRYIMAGE li\nWHERE li.Z_ENT = 6\n  AND li.ZLOGENTRY = :jumpPk\nORDER BY li.Z_PK;",
+    "coredata_allocate_pk_transaction_pattern": "-- PSEUDO SQL PATTERN (run inside a transaction from app code)\nBEGIN IMMEDIATE TRANSACTION;\n\n-- 1) Read current max for entity\nSELECT Z_MAX FROM Z_PRIMARYKEY WHERE Z_ENT = :entityId;\n\n-- 2) nextPk = Z_MAX + 1 (or 1 if NULL / row missing, but row should exist)\n-- 3) Update allocator\nUPDATE Z_PRIMARYKEY\n   SET Z_MAX = :nextPk\n WHERE Z_ENT = :entityId;\n\n-- 4) Insert row using Z_PK = :nextPk, Z_ENT = :entityId, Z_OPT = 1\n--    (plus business fields)\n\nCOMMIT;",
+    "insert_rich_jump_template": "-- Execute inside the same transaction used for Z_PRIMARYKEY allocation for entity 5\nINSERT INTO ZLOGENTRY (\n    Z_PK, Z_ENT, Z_OPT,\n    ZDELAY, ZEXITWINDSPEED, ZGROUNDWINDSPEED, ZJUMPNUMBER, ZOPENINGDIRECTION,\n    ZBRAKESETTING, ZDEPLOYMENTTYPE, ZJUMPTYPE, ZOBJECT, ZPILOTCHUTETYPE, ZSIGNATURE, ZSLIDERTYPE,\n    ZDATE, ZLASTMODIFIEDUTC, ZLASTSIGNATUREUTC,\n    ZEXITWINDDIRECTION, ZEXITWINDSPEEDUNIT, ZGROUNDWINDDIRECTION, ZGROUNDWINDSPEEDUNIT,\n    ZNOTES, ZUNIQUEID\n) VALUES (\n    :Z_PK, 5, :Z_OPT,\n    :ZDELAY, :ZEXITWINDSPEED, :ZGROUNDWINDSPEED, :ZJUMPNUMBER, :ZOPENINGDIRECTION,\n    :ZBRAKESETTING, :ZDEPLOYMENTTYPE, :ZJUMPTYPE, :ZOBJECT, :ZPILOTCHUTETYPE, :ZSIGNATURE, :ZSLIDERTYPE,\n    :ZDATE, :ZLASTMODIFIEDUTC, :ZLASTSIGNATUREUTC,\n    :ZEXITWINDDIRECTION, :ZEXITWINDSPEEDUNIT, :ZGROUNDWINDDIRECTION, :ZGROUNDWINDSPEEDUNIT,\n    :ZNOTES, :ZUNIQUEID\n);",
+    "upsert_rig_links_for_jump_pattern": "-- Simple replace strategy (transactional)\nDELETE FROM Z_5RIGS WHERE Z_5LOGENTRIES = :jumpPk;\n-- repeat for each selected rig:\nINSERT INTO Z_5RIGS (Z_5LOGENTRIES, Z_10RIGS) VALUES (:jumpPk, :rigPk);"
+  },
+  "domain_model_suggestion": {
+    "JumpEntryRich": {
+      "source_table": "ZLOGENTRY",
+      "identity": [
+        "Z_PK",
+        "ZUNIQUEID",
+        "ZJUMPNUMBER"
+      ],
+      "fields": [
+        "ZDATE",
+        "ZDELAY",
+        "ZEXITWINDSPEED",
+        "ZGROUNDWINDSPEED",
+        "ZOPENINGDIRECTION",
+        "ZNOTES",
+        "ZLASTMODIFIEDUTC",
+        "ZDEPLOYMENTTYPE",
+        "ZJUMPTYPE",
+        "ZOBJECT",
+        "ZPILOTCHUTETYPE",
+        "ZSLIDERTYPE",
+        "ZBRAKESETTING",
+        "ZSIGNATURE"
+      ],
+      "child_collections": [
+        "ZLOGENTRYIMAGE via ZLOGENTRY",
+        "ZRIG via Z_5RIGS",
+        "optional signature blob via ZSIGNATURE"
+      ]
+    },
+    "Object": {
+      "source_table": "ZOBJECT",
+      "identity": [
+        "Z_PK",
+        "ZUNIQUEID"
+      ],
+      "images": "ZOBJECTIMAGE via ZOBJECT"
+    },
+    "Rig": {
+      "source_table": "ZRIG",
+      "identity": [
+        "Z_PK",
+        "ZUNIQUEID"
+      ],
+      "components": "ZRIGCOMPONENT via ZRIG"
+    },
+    "LookupTables": [
+      "ZDEPLOYMENTTYPE",
+      "ZJUMPTYPE",
+      "ZPILOTCHUTETYPE",
+      "ZSLIDERTYPE",
+      "ZBRAKESETTING"
+    ]
+  },
+  "anomalies_and_compat_notes": {
+    "orphan_relations_summary": {
+      "z5rigs_links_total": 388,
+      "z5rigs_orphan_logentry_rows": 0,
+      "z5rigs_orphan_rig_rows": 342
+    },
+    "known_observation": "Historic rig links may point to deleted rigs. Read with LEFT JOIN and tolerate null rig metadata."
+  },
+  "todo_lists": {
+    "for_user": [
+      "Confermare quali schermate/funzioni della nuova app sono priorità MVP (lista, dettaglio, inserimento, modifica, foto, statistiche).",
+      "Decidere policy su rig orfani: mostrarli come 'rig eliminato' oppure pulizia separata.",
+      "Lavorare sempre su copia backup del DB durante i test di scrittura.",
+      "Confermare se la data salto va trattata come solo data (senza ora) nell'interfaccia.",
+      "Fornire a Codex il file JSON operativo e il prompt allegato come source of truth."
+    ],
+    "for_codex": [
+      "Implementare adapter/schema constants con filtri Z_ENT canonici (rich model only).",
+      "Implementare conversione timestamp Cocoa <-> DateTime e testarla.",
+      "Implementare allocatore PK via Z_PRIMARYKEY in transazione (per ogni entità inseribile).",
+      "Implementare repository read con LEFT JOIN e gestione rig orfani.",
+      "Implementare create/update jump ricco (ZLOGENTRY) + link rig (Z_5RIGS).",
+      "Implementare lettura/scrittura immagini salto (ZLOGENTRYIMAGE) se feature prevista.",
+      "Implementare validazioni input (lookup IDs esistenti, range sensati) senza rompere storico.",
+      "Produrre gap report iniziale per funzioni mancanti rispetto al contratto dati di questo JSON.",
+      "Aggiungere test regressione su DB copia (nessuna corruzione, contatori PK coerenti)."
+    ]
+  },
+  "gap_report_template_for_codex": {
+    "instruction": "Codex should produce this before coding large changes.",
+    "sections": [
+      "Current data layer coverage",
+      "Domain model coverage",
+      "Timestamp conversion coverage",
+      "Z_PRIMARYKEY allocator coverage",
+      "Read queries coverage",
+      "Insert/update transaction coverage",
+      "Rig link handling coverage",
+      "Images handling coverage",
+      "Validation/error handling coverage",
+      "Tests and backup safety coverage"
+    ],
+    "required_per_item_fields": [
+      "status",
+      "files_involved",
+      "current_behavior",
+      "required_behavior",
+      "risk",
+      "implementation_steps"
+    ]
+  }
+}

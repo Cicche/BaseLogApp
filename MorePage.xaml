@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BaseLogApp.Views.MorePage"
+             Title="More"
+             BackgroundColor="#0A0F1E">
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="12">
+            <Border BackgroundColor="#151B2E" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="14">
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                    <Label Text="GEAR" FontSize="14" TextColor="#8E99B8" VerticalTextAlignment="Center" />
+                    <Label Grid.Column="1" Text="Gear" TextColor="White" FontSize="18" VerticalTextAlignment="Center" />
+                    <Label Grid.Column="2" Text=">" TextColor="#8E99B8" FontSize="24" VerticalTextAlignment="Center" />
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnGearTapped" />
+                    </Grid.GestureRecognizers>
+                </Grid>
+            </Border>
+
+            <Border BackgroundColor="#151B2E" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="14">
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                    <Label Text="JMP" FontSize="14" TextColor="#8E99B8" VerticalTextAlignment="Center" />
+                    <Label Grid.Column="1" Text="Tipo salto" TextColor="White" FontSize="18" VerticalTextAlignment="Center" />
+                    <Label Grid.Column="2" Text=">" TextColor="#8E99B8" FontSize="24" VerticalTextAlignment="Center" />
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnJumpTypeTapped" />
+                    </Grid.GestureRecognizers>
+                </Grid>
+            </Border>
+
+            <Border BackgroundColor="#151B2E" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="14">
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                    <Label Text="CFG" FontSize="14" TextColor="#8E99B8" VerticalTextAlignment="Center" />
+                    <Label Grid.Column="1" Text="Configuration" TextColor="White" FontSize="18" VerticalTextAlignment="Center" />
+                    <Label Grid.Column="2" Text=">" TextColor="#8E99B8" FontSize="24" VerticalTextAlignment="Center" />
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnConfigurationTapped" />
+                    </Grid.GestureRecognizers>
+                </Grid>
+            </Border>
+
+            <Border BackgroundColor="#151B2E" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="14">
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                    <Label Text="LOG" FontSize="14" TextColor="#8E99B8" VerticalTextAlignment="Center" />
+                    <Label Grid.Column="1" Text="Diagnostic" TextColor="White" FontSize="18" VerticalTextAlignment="Center" />
+                    <Label Grid.Column="2" Text=">" TextColor="#8E99B8" FontSize="24" VerticalTextAlignment="Center" />
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnDiagnosticTapped" />
+                    </Grid.GestureRecognizers>
+                </Grid>
+            </Border>
+
+            <Border BackgroundColor="#151B2E" StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="14">
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                    <Label Text="DB" FontSize="14" TextColor="#8E99B8" VerticalTextAlignment="Center" />
+                    <Label Grid.Column="1" Text="Import / Export" TextColor="White" FontSize="18" VerticalTextAlignment="Center" />
+                    <Label Grid.Column="2" Text=">" TextColor="#8E99B8" FontSize="24" VerticalTextAlignment="Center" />
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnDbToolsTapped" />
+                    </Grid.GestureRecognizers>
+                </Grid>
+            </Border>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

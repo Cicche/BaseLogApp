@@ -1,0 +1,63 @@
+You are working on a new app that must remain compatible with an existing SQLite database used by the old iOS app "BASELogbook".
+
+Use the attached JSON file `BASELogbook_rich_model_operational_for_codex.json` as the SOURCE OF TRUTH for:
+- schema
+- rich-model table/entity filters
+- validated relationships
+- Core Data PK allocation rules via Z_PRIMARYKEY
+- SQL query patterns
+- compatibility constraints
+
+IMPORTANT OPERATING RULES
+1) Rich model only
+   - For any table with Z_ENT, ONLY read/write rows where Z_ENT matches the canonical entity id from Z_PRIMARYKEY (see JSON: scope.rich_scope_filters / core_data_entity_registry).
+   - Ignore mixed/minimal profile rows for new feature implementation.
+
+2) Preserve DB compatibility
+   - Work directly on the existing SQLite DB format.
+   - Do NOT redesign schema unless explicitly asked.
+   - Use LEFT JOIN for optional/orphan relations (especially rig links through Z_5RIGS).
+
+3) PK allocation (Core Data style)
+   - For every INSERT into tables that use Z_PK, allocate the next PK by updating Z_PRIMARYKEY.Z_MAX in the SAME transaction.
+   - Set Z_ENT correctly and initialize Z_OPT on insert.
+   - Increment Z_OPT on updates when appropriate.
+
+4) Timestamps
+   - ZDATE / ZLASTMODIFIEDUTC and similar fields use Apple Cocoa epoch seconds (2001-01-01 UTC), not Unix epoch.
+   - Preserve date semantics used by the existing data.
+
+FIRST TASK (MANDATORY BEFORE CODING)
+Produce a GAP REPORT against the current codebase and against the JSON contract.
+Output two sections:
+A) "Checklist for user" (plain-language missing features / risks / decisions)
+B) "Checklist for Codex" (technical missing pieces)
+
+For EACH gap item include:
+- status (missing / partial / wrong / ok)
+- files_involved
+- current_behavior
+- required_behavior
+- risk
+- step_by_step_implementation_plan
+
+THEN IMPLEMENT STEP-BY-STEP IN SMALL, SAFE COMMITS
+
+Implementation order (recommended)
+1. Schema adapter/constants with rich Z_ENT filters
+2. Cocoa timestamp conversion utilities + tests
+3. Core Data PK allocator using Z_PRIMARYKEY + transaction helper
+4. Read repositories (list/detail jump) using LEFT JOINs
+5. Create rich jump transaction (ZLOGENTRY)
+6. Update rich jump transaction
+7. Rig links via Z_5RIGS (replace strategy)
+8. Images support (ZLOGENTRYIMAGE) if UI requires it
+9. Validation / regression tests on DB copy
+10. Optional cleanup/report for orphan rig links (non-destructive by default)
+
+When writing SQL or repositories:
+- Reuse/align with JSON section `sql_queries_ready`
+- Reuse entity ids from `write_contract.rich_model_only_policy.expected_entity_by_table`
+- Treat `relationships_validated` as verified hints from real data
+
+If the existing codebase misses anything needed to preserve compatibility, list it explicitly before implementing.

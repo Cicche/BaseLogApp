@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:views="clr-namespace:BaseLogApp.Views"
+             x:Class="BaseLogApp.Views.DiagnosticPage"
+             Title="Diagnostic"
+             BackgroundColor="#0A0F1E">
+    <Grid RowDefinitions="Auto,Auto,Auto,*" Padding="16" RowSpacing="10">
+        <Label x:Name="LogPathLabel" TextColor="#8E99B8" FontSize="12" />
+
+        <Grid Grid.Row="1" ColumnDefinitions="Auto,Auto,*" ColumnSpacing="8">
+            <Button Text="Aggiorna" Clicked="OnRefreshClicked" BackgroundColor="#27314E" TextColor="White" />
+            <Button Grid.Column="1" Text="Pulisci log" Clicked="OnClearClicked" BackgroundColor="#C62828" TextColor="White" />
+        </Grid>
+
+        <Border Grid.Row="2" BackgroundColor="#151B2E" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="8,2">
+            <Picker x:Name="CategoryPicker" Title="Categoria" SelectedIndexChanged="OnCategoryChanged" TextColor="White" />
+        </Border>
+
+        <CollectionView Grid.Row="3"
+                        x:Name="LogEntriesView"
+                        SelectionMode="None">
+            <CollectionView.EmptyView>
+                <Label Text="Nessun evento per il filtro selezionato."
+                       TextColor="#8E99B8"
+                       Margin="0,20,0,0"
+                       HorizontalTextAlignment="Center" />
+            </CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="views:DiagnosticLogItem">
+                    <Border Margin="0,0,0,10"
+                            BackgroundColor="#151B2E"
+                            Stroke="{Binding BorderColor}"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 10"
+                            Padding="10">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnLogItemTapped" />
+                        </Border.GestureRecognizers>
+                        <VerticalStackLayout Spacing="6">
+                            <Grid ColumnDefinitions="Auto,Auto,*" ColumnSpacing="8">
+                                <Border BackgroundColor="{Binding LevelBackground}" StrokeThickness="0" Padding="8,3" StrokeShape="RoundRectangle 6">
+                                    <Label Text="{Binding Level}" TextColor="White" FontSize="11" FontAttributes="Bold" />
+                                </Border>
+                                <Border Grid.Column="1" BackgroundColor="{Binding CategoryBackground}" StrokeThickness="0" Padding="8,3" StrokeShape="RoundRectangle 6">
+                                    <Label Text="{Binding Category}" TextColor="#0A0F1E" FontSize="11" FontAttributes="Bold" />
+                                </Border>
+                                <Label Grid.Column="2"
+                                       Text="{Binding TimestampText}"
+                                       TextColor="#8E99B8"
+                                       FontSize="12"
+                                       HorizontalTextAlignment="End"
+                                       VerticalTextAlignment="Center" />
+                            </Grid>
+
+                            <Label Text="{Binding OperationText}" TextColor="#B9C6EA" FontSize="12" FontAttributes="Bold" />
+                            <Label Text="{Binding Message}" TextColor="White" FontSize="13" />
+                            <Label Text="{Binding ExpandHint}" TextColor="#8E99B8" FontSize="11" />
+                            <Label Text="{Binding Details}" IsVisible="{Binding ShowDetails}" TextColor="#9FB0DB" FontSize="12" />
+                            <Label Text="{Binding ExceptionText}" IsVisible="{Binding ShowException}" TextColor="#FFB4AB" FontSize="12" />
+                        </VerticalStackLayout>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+    </Grid>
+</ContentPage>

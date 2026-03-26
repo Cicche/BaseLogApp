@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BaseLogApp.Views.NewJumpPage"
+             Title="Nuovo salto"
+             BackgroundColor="#0A0F1E">
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="12">
+            <Label Text="Aggiungi / modifica salto" FontAttributes="Bold" FontSize="22" TextColor="White"/>
+            <Entry x:Name="NumberEntry" Placeholder="Numero salto" Keyboard="Numeric" />
+            <Grid x:Name="DateTimeGrid" ColumnDefinitions="*,Auto" RowDefinitions="Auto" ColumnSpacing="8" RowSpacing="8">
+                <DatePicker x:Name="DatePicker" HorizontalOptions="FillAndExpand" />
+                <TimePicker x:Name="TimePicker"
+                            Grid.Column="1"
+                            Format="HH:mm"
+                            WidthRequest="130"
+                            HorizontalOptions="End" />
+            </Grid>
+
+            <Label Text="Object" TextColor="#8E99B8" />
+            <Entry x:Name="ObjectEntry" Placeholder="Oggetto" TextChanged="OnObjectTextChanged" />
+            <CollectionView x:Name="ObjectSuggestionsView"
+                            IsVisible="False"
+                            SelectionMode="Single"
+                            SelectionChanged="OnObjectSuggestionSelected"
+                            HeightRequest="140"
+                            BackgroundColor="#151B2E">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="x:String">
+                        <Label Text="{Binding .}" TextColor="White" Padding="10,8"/>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Label Text="Tipo salto" TextColor="#8E99B8" />
+            <Entry x:Name="TypeEntry" Placeholder="Tipo salto" TextChanged="OnJumpTypeTextChanged" />
+            <CollectionView x:Name="JumpTypeSuggestionsView"
+                            IsVisible="False"
+                            SelectionMode="Single"
+                            SelectionChanged="OnJumpTypeSuggestionSelected"
+                            HeightRequest="140"
+                            BackgroundColor="#151B2E">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="x:String">
+                        <Label Text="{Binding .}" TextColor="White" Padding="10,8"/>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                <Button Text="Seleziona rig" Clicked="OnPickRigClicked" />
+                <Label x:Name="RigValueLabel" Grid.Column="1" Text="Rig: -" TextColor="#8E99B8" VerticalTextAlignment="Center" />
+            </Grid>
+
+            <Editor x:Name="NotesEditor" Placeholder="Note" AutoSize="TextChanges" HeightRequest="100" />
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                <Entry x:Name="DelayEntry" Placeholder="Delay (s)" Keyboard="Numeric" />
+                <VerticalStackLayout Grid.Column="1" Spacing="6">
+                    <Label Text="Apertura (gradi)" TextColor="#8E99B8" FontSize="12" />
+                    <Entry x:Name="OpeningEntry" Placeholder="0-9999" Keyboard="Numeric" MaxLength="4" TextChanged="OnOpeningTextChanged" />
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                        <Button x:Name="LeftDirectionButton"
+                                Text="SX"
+                                Clicked="OnLeftDirectionClicked"
+                                BackgroundColor="#27314E"
+                                TextColor="White" />
+                        <Button x:Name="RightDirectionButton"
+                                Grid.Column="1"
+                                Text="DX"
+                                Clicked="OnRightDirectionClicked"
+                                BackgroundColor="#27314E"
+                                TextColor="White" />
+                    </Grid>
+                    <Label x:Name="OpeningPreviewLabel" Text="Apertura: -" TextColor="#8E99B8" FontSize="12" HorizontalTextAlignment="End" />
+                </VerticalStackLayout>
+            </Grid>
+
+            <Button Text="Mappa" Clicked="OnOpenMapClicked" />
+
+            <Button Text="Seleziona foto" Clicked="OnPickPhotoClicked" />
+            <Label x:Name="PhotoPathLabel" TextColor="#8E99B8" FontSize="12" />
+            <Image x:Name="JumpPhotoPreview" HeightRequest="160" Aspect="AspectFill" IsVisible="False" />
+            <Button x:Name="RemovePhotoButton"
+                    Text="Rimuovi foto salto"
+                    IsVisible="False"
+                    Clicked="OnRemovePhotoClicked"
+                    BackgroundColor="#27314E"
+                    TextColor="White" />
+
+            <Button x:Name="DeleteButton" Text="Elimina salto" IsVisible="False" Clicked="OnDeleteClicked" BackgroundColor="#C62828" TextColor="White" />
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12" Margin="0,12,0,0">
+                <Button Grid.Column="0" Text="Annulla" Clicked="OnCancelClicked" BackgroundColor="#27314E" TextColor="White"/>
+                <Button Grid.Column="1" Text="Salva" Clicked="OnSaveClicked" BackgroundColor="#2D8CFF" TextColor="White"/>
+            </Grid>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

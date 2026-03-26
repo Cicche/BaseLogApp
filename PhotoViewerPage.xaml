@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BaseLogApp.Views.PhotoViewerPage"
+             Title="Foto"
+             BackgroundColor="Black">
+    <Grid RowDefinitions="*,Auto" Padding="8">
+        <Image x:Name="PreviewImage" Aspect="AspectFit" />
+        <HorizontalStackLayout Grid.Row="1" Spacing="8" HorizontalOptions="Center" Margin="0,8,0,8">
+            <Button Text="Salva" Clicked="OnSaveClicked" BackgroundColor="#2D8CFF" TextColor="White" />
+            <Button Text="Copia percorso" Clicked="OnCopyClicked" BackgroundColor="#27314E" TextColor="White" />
+            <Button Text="Chiudi" Clicked="OnCloseClicked" BackgroundColor="#C62828" TextColor="White" />
+        </HorizontalStackLayout>
+    </Grid>
+</ContentPage>
