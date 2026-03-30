@@ -65,7 +65,9 @@ public sealed class JumpsReader : IJumpsReader
     private readonly string _legacyFallbackWindowsPath = @"C:\Temp\BASELogbook.sqlite";
     private const string CustomDbPathPreferenceKey = "baselogapp.custom_db_path";
     private static readonly object DbBootstrapSync = new();
+    private static readonly string[] RequiredLegacyTables = ["ZLOGENTRY", "ZOBJECT", "ZRIG", "ZJUMPTYPE", "Z_PRIMARYKEY"];
     private string? _customDbPath;
+    private bool _runtimeStorageChecked;
 
     private const int EntJumpType = 3;
     private const int EntLogEntry = 5;
@@ -157,12 +159,19 @@ public sealed class JumpsReader : IJumpsReader
 
         if (!string.IsNullOrWhiteSpace(_customDbPath) && !File.Exists(_customDbPath))
         {
+            AppLog.Warn(
+                AppLog.DefaultLogPath,
+                LogCategories.DataConsistency,
+                nameof(JumpsReader),
+                nameof(ResolveDbPath),
+                "Custom DB path missing. Fallback to default app data DB.",
+                details: $"customPath={_customDbPath}");
             _customDbPath = null;
             Preferences.Default.Remove(CustomDbPathPreferenceKey);
         }
 
         var appDataPath = Path.Combine(FileSystem.AppDataDirectory, DefaultDbName);
-        EnsureDefaultDbExists(appDataPath);
+        EnsureRuntimeStorageAndBootstrap(appDataPath);
 
         if (File.Exists(appDataPath))
             return appDataPath;
@@ -171,33 +180,83 @@ public sealed class JumpsReader : IJumpsReader
         return appDataPath;
     }
 
-    private void EnsureDefaultDbExists(string appDataPath)
+    private void EnsureRuntimeStorageAndBootstrap(string appDataPath)
     {
-        if (File.Exists(appDataPath))
-            return;
-
         lock (DbBootstrapSync)
         {
-            if (File.Exists(appDataPath))
+            if (_runtimeStorageChecked)
                 return;
+            _runtimeStorageChecked = true;
 
             try
             {
                 var folder = Path.GetDirectoryName(appDataPath);
-                if (!string.IsNullOrWhiteSpace(folder))
-                    Directory.CreateDirectory(folder);
-
-                using var seedStream = FileSystem.OpenAppPackageFileAsync(DefaultDbName).GetAwaiter().GetResult();
-                using var output = File.Create(appDataPath);
-                seedStream.CopyTo(output);
                 var logPath = appDataPath + ".log";
+                if (string.IsNullOrWhiteSpace(folder))
+                {
+                    AppLog.Error(
+                        logPath,
+                        LogCategories.RuntimeError,
+                        nameof(JumpsReader),
+                        nameof(EnsureRuntimeStorageAndBootstrap),
+                        "Invalid app data folder path.",
+                        details: $"appDataPath={appDataPath}");
+                    return;
+                }
+
+                Directory.CreateDirectory(folder);
+                var canWrite = CanWriteToFolder(folder);
+                var appDataExists = File.Exists(appDataPath);
+                var appDataValid = appDataExists && HasRequiredTables(appDataPath);
+                var fallbackExists = File.Exists(_legacyFallbackWindowsPath);
+                var fallbackValid = fallbackExists && HasRequiredTables(_legacyFallbackWindowsPath);
 
                 AppLog.Info(
                     logPath,
                     LogCategories.DataConsistency,
                     nameof(JumpsReader),
-                    nameof(EnsureDefaultDbExists),
-                    "Default DB initialized in AppData.",
+                    nameof(EnsureRuntimeStorageAndBootstrap),
+                    "Runtime storage check completed.",
+                    details: $"appDataPath={appDataPath};appDataExists={appDataExists};appDataValid={appDataValid};folderWritable={canWrite};fallbackExists={fallbackExists};fallbackValid={fallbackValid}");
+
+                if (appDataExists)
+                    return;
+
+                if (!canWrite)
+                {
+                    AppLog.Error(
+                        logPath,
+                        LogCategories.RuntimeError,
+                        nameof(JumpsReader),
+                        nameof(EnsureRuntimeStorageAndBootstrap),
+                        "AppData folder is not writable. Bootstrap skipped.",
+                        details: $"folder={folder}");
+                    return;
+                }
+
+                if (fallbackValid)
+                {
+                    File.Copy(_legacyFallbackWindowsPath, appDataPath, overwrite: false);
+                    AppLog.Info(
+                        logPath,
+                        LogCategories.DataConsistency,
+                        nameof(JumpsReader),
+                        nameof(EnsureRuntimeStorageAndBootstrap),
+                        "Default DB bootstrapped from legacy fallback DB.",
+                        details: $"source={_legacyFallbackWindowsPath};target={appDataPath}");
+                    return;
+                }
+
+                using var seedStream = FileSystem.OpenAppPackageFileAsync(DefaultDbName).GetAwaiter().GetResult();
+                using var output = File.Create(appDataPath);
+                seedStream.CopyTo(output);
+
+                AppLog.Info(
+                    logPath,
+                    LogCategories.DataConsistency,
+                    nameof(JumpsReader),
+                    nameof(EnsureRuntimeStorageAndBootstrap),
+                    "Default DB bootstrapped from packaged seed DB.",
                     details: $"target={appDataPath}");
             }
             catch (Exception ex)
@@ -207,11 +266,51 @@ public sealed class JumpsReader : IJumpsReader
                     logPath,
                     LogCategories.RuntimeError,
                     nameof(JumpsReader),
-                    nameof(EnsureDefaultDbExists),
+                    nameof(EnsureRuntimeStorageAndBootstrap),
                     "Unable to initialize default DB in AppData.",
                     details: $"target={appDataPath}",
                     ex: ex);
             }
+        }
+    }
+
+    private static bool CanWriteToFolder(string folderPath)
+    {
+        try
+        {
+            var probePath = Path.Combine(folderPath, ".write_probe_" + Guid.NewGuid().ToString("N") + ".tmp");
+            File.WriteAllText(probePath, "ok");
+            File.Delete(probePath);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static bool HasRequiredTables(string dbPath)
+    {
+        try
+        {
+            if (!File.Exists(dbPath))
+                return false;
+
+            using var db = new SQLiteConnection(new SQLiteConnectionString(dbPath, storeDateTimeAsTicks: false));
+            foreach (var table in RequiredLegacyTables)
+            {
+                var exists = db.ExecuteScalar<int>(
+                    "SELECT COUNT(1) FROM sqlite_master WHERE type='table' AND name=?;",
+                    table);
+                if (exists <= 0)
+                    return false;
+            }
+
+            return true;
+        }
+        catch
+        {
+            return false;
         }
     }
 
